@@ -8,7 +8,7 @@
     public class IcsClientTests : TestsBase
     {
         [TestMethod]
-        public void GuestLogin()
+        public void IcsGuestLogin()
         {
             IcsClient client = new IcsClient("freechess.org", 5000, "fics% ", "\n\r");
             int messagesReceived = 0;

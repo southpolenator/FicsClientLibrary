@@ -9,7 +9,7 @@
     public class TelnetTests : TestsBase
     {
         [TestMethod]
-        public void GuestLogin()
+        public void TelnetGuestLogin()
         {
             TelnetClient client = new TelnetClient("freechess.org", 5000, "fics% ");
 
