@@ -9,6 +9,9 @@
     using Windows.Networking.Sockets;
     using Windows.Storage.Streams;
 
+    /// <summary>
+    /// Telnet client that communicates with server over socket connection.
+    /// </summary>
     public class TelnetClient
     {
         /// <summary>
