@@ -8,6 +8,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,96 +17,137 @@
     {
         public delegate void GameStateChangeDelegate(GameState gameState);
 
-        internal abstract class AFicsServerVariables : IFicsServerVariables
+        internal class AFicsServerVariablesBase
         {
-            public abstract int Time { get; set; }
-            public abstract int Increment { get; set; }
-            public abstract bool Rated { get; set; }
-            public abstract bool Open { get; set; }
-            public abstract bool Private { get; set; }
-            public abstract bool Shout { get; set; }
-            public abstract bool Pin { get; set; }
-            public abstract int Style { get; set; }
-            public abstract bool JPrivate { get; set; }
-            public abstract bool CShout { get; set; }
-            public abstract bool NotifiedBy { get; set; }
-            public abstract bool Flip { get; set; }
-            public abstract bool Kibitz { get; set; }
-            public abstract bool AvailableInfo { get; set; }
-            public abstract bool Highlight { get; set; }
-            public abstract bool Automail { get; set; }
-            public abstract int KibLevel { get; set; }
-            public abstract int AvailableMin { get; set; }
-            public abstract bool MoveBell { get; set; }
-            public abstract bool Pgn { get; set; }
-            public abstract bool Tell { get; set; }
-            public abstract bool CTell { get; set; }
-            public abstract int AvailableMax { get; set; }
-            public abstract int Width { get; set; }
-            public abstract bool BugOpen { get; set; }
-            public abstract bool Gin { get; set; }
-            public abstract int Height { get; set; }
-            public abstract bool MailMess { get; set; }
-            public abstract bool Seek { get; set; }
-            public abstract bool ShowPromptTime { get; set; }
-            public abstract bool Tourney { get; set; }
-            public abstract bool MessageReply { get; set; }
-            public abstract bool ChannelsOff { get; set; }
-            public abstract bool ShowOwnSeek { get; set; }
-            public abstract bool ShowProvisionalRatings { get; set; }
-            public abstract bool Silence { get; set; }
-            public abstract bool AutoFlag { get; set; }
-            public abstract bool Unobserve { get; set; }
-            public abstract bool Echo { get; set; }
-            public abstract bool Examine { get; set; }
-            public abstract int MinMoveTime { get; set; }
-            public abstract int Tolerance { get; set; }
-            public abstract bool NoEscape { get; set; }
-            public abstract bool NoTakeBack { get; set; }
-            public abstract string TZone { get; set; }
-            public abstract string Language { get; set; }
-            public abstract string Prompt { get; set; }
-            public abstract string Formula { get; set; }
-            public abstract string Interface { get; set; }
+            private FicsClient client;
+            private ServerVariablesBase variables;
+            private FicsCommand command;
+
+            public AFicsServerVariablesBase(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+            {
+                this.client = client;
+                this.variables = variables;
+                this.command = command;
+            }
+
+            protected dynamic GetValue([CallerMemberName]string propertyName = null)
+            {
+                variables.WaitInitalization();
+                return variables.GetType().GetProperty(propertyName).GetValue(variables);
+            }
+
+            protected void SetValue(object value, [CallerMemberName]string propertyName = null)
+            {
+                variables.WaitInitalization();
+
+                var property = variables.GetType().GetInterfaces()[0].GetProperty(propertyName);
+                string variableName = property.GetSingleAttribute<ServerVariableNameAttribute>().Name;
+
+                client.Send(command, variableName, value).Wait();
+                property.SetValue(variables, value);
+            }
         }
 
-        internal abstract class AFicsServerInterfaceVariables : IFicsServerInterfaceVariables
+        internal class AFicsServerVariables : AFicsServerVariablesBase, IFicsServerVariables
         {
-            public abstract bool CompressMove { get; set; }
-            public abstract bool DefaultPrompt { get; set; }
-            public abstract bool Lock { get; set; }
-            public abstract bool PreciseTimes { get; set; }
-            public abstract bool SeekRemove { get; set; }
-            public abstract int StartPosition { get; set; }
-            public abstract bool SendCommandsAsBlock { get; set; }
-            public abstract bool DetailedGameInfo { get; set; }
-            public abstract bool PendingInfo { get; set; }
-            public abstract bool Graph { get; set; }
-            public abstract bool SeekInfo { get; set; }
-            public abstract bool ExtAscii { get; set; }
-            public abstract bool ShowServer { get; set; }
-            public abstract bool NoHighlight { get; set; }
-            public abstract bool Vthighlight { get; set; }
-            public abstract bool Pin { get; set; }
-            public abstract bool PingInfo { get; set; }
-            public abstract bool BoardInfo { get; set; }
-            public abstract bool ExtUserInfo { get; set; }
-            public abstract bool AudioChat { get; set; }
-            public abstract bool SeekCa { get; set; }
-            public abstract bool ShowOwnSeek { get; set; }
-            public abstract bool PreMove { get; set; }
-            public abstract bool SmartMove { get; set; }
-            public abstract bool MoveCase { get; set; }
-            public abstract bool NoWrap { get; set; }
-            public abstract bool AllResults { get; set; }
-            public abstract bool SingleBoard { get; set; }
-            public abstract bool Suicide { get; set; }
-            public abstract bool CrazyHouse { get; set; }
-            public abstract bool Losers { get; set; }
-            public abstract bool WildCastle { get; set; }
-            public abstract bool FischerRandom { get; set; }
-            public abstract bool Atomic { get; set; }
-            public abstract bool Xml { get; set; }
+            public AFicsServerVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+                : base(client, variables, command)
+            {
+            }
+
+            public int Time { get { return GetValue(); } set { SetValue(value); } }
+            public int Increment { get { return GetValue(); } set { SetValue(value); } }
+            public bool Rated { get { return GetValue(); } set { SetValue(value); } }
+            public bool Open { get { return GetValue(); } set { SetValue(value); } }
+            public bool Private { get { return GetValue(); } set { SetValue(value); } }
+            public bool Shout { get { return GetValue(); } set { SetValue(value); } }
+            public bool Pin { get { return GetValue(); } set { SetValue(value); } }
+            public int Style { get { return GetValue(); } set { SetValue(value); } }
+            public bool JPrivate { get { return GetValue(); } set { SetValue(value); } }
+            public bool CShout { get { return GetValue(); } set { SetValue(value); } }
+            public bool NotifiedBy { get { return GetValue(); } set { SetValue(value); } }
+            public bool Flip { get { return GetValue(); } set { SetValue(value); } }
+            public bool Kibitz { get { return GetValue(); } set { SetValue(value); } }
+            public bool AvailableInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool Highlight { get { return GetValue(); } set { SetValue(value); } }
+            public bool Automail { get { return GetValue(); } set { SetValue(value); } }
+            public int KibLevel { get { return GetValue(); } set { SetValue(value); } }
+            public int AvailableMin { get { return GetValue(); } set { SetValue(value); } }
+            public bool MoveBell { get { return GetValue(); } set { SetValue(value); } }
+            public bool Pgn { get { return GetValue(); } set { SetValue(value); } }
+            public bool Tell { get { return GetValue(); } set { SetValue(value); } }
+            public bool CTell { get { return GetValue(); } set { SetValue(value); } }
+            public int AvailableMax { get { return GetValue(); } set { SetValue(value); } }
+            public int Width { get { return GetValue(); } set { SetValue(value); } }
+            public bool BugOpen { get { return GetValue(); } set { SetValue(value); } }
+            public bool Gin { get { return GetValue(); } set { SetValue(value); } }
+            public int Height { get { return GetValue(); } set { SetValue(value); } }
+            public bool MailMess { get { return GetValue(); } set { SetValue(value); } }
+            public bool Seek { get { return GetValue(); } set { SetValue(value); } }
+            public bool ShowPromptTime { get { return GetValue(); } set { SetValue(value); } }
+            public bool Tourney { get { return GetValue(); } set { SetValue(value); } }
+            public bool MessageReply { get { return GetValue(); } set { SetValue(value); } }
+            public bool ChannelsOff { get { return GetValue(); } set { SetValue(value); } }
+            public bool ShowOwnSeek { get { return GetValue(); } set { SetValue(value); } }
+            public bool ShowProvisionalRatings { get { return GetValue(); } set { SetValue(value); } }
+            public bool Silence { get { return GetValue(); } set { SetValue(value); } }
+            public bool AutoFlag { get { return GetValue(); } set { SetValue(value); } }
+            public bool Unobserve { get { return GetValue(); } set { SetValue(value); } }
+            public bool Echo { get { return GetValue(); } set { SetValue(value); } }
+            public bool Examine { get { return GetValue(); } set { SetValue(value); } }
+            public int MinMoveTime { get { return GetValue(); } set { SetValue(value); } }
+            public int Tolerance { get { return GetValue(); } set { SetValue(value); } }
+            public bool NoEscape { get { return GetValue(); } set { SetValue(value); } }
+            public bool NoTakeBack { get { return GetValue(); } set { SetValue(value); } }
+            public string TZone { get { return GetValue(); } set { SetValue(value); } }
+            public string Language { get { return GetValue(); } set { SetValue(value); } }
+            public string Prompt { get { return GetValue(); } set { SetValue(value); } }
+            public string Formula { get { return GetValue(); } set { SetValue(value); } }
+            public string Interface { get { return GetValue(); } set { SetValue(value); } }
+        }
+
+        internal class AFicsServerInterfaceVariables : AFicsServerVariablesBase, IFicsServerInterfaceVariables
+        {
+            public AFicsServerInterfaceVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+                : base(client, variables, command)
+            {
+            }
+
+            public bool CompressMove { get { return GetValue(); } set { SetValue(value); } }
+            public bool DefaultPrompt { get { return GetValue(); } set { SetValue(value); } }
+            public bool Lock { get { return GetValue(); } set { SetValue(value); } }
+            public bool PreciseTimes { get { return GetValue(); } set { SetValue(value); } }
+            public bool SeekRemove { get { return GetValue(); } set { SetValue(value); } }
+            public int StartPosition { get { return GetValue(); } set { SetValue(value); } }
+            public bool SendCommandsAsBlock { get { return GetValue(); } set { SetValue(value); } }
+            public bool DetailedGameInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool PendingInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool Graph { get { return GetValue(); } set { SetValue(value); } }
+            public bool SeekInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool ExtAscii { get { return GetValue(); } set { SetValue(value); } }
+            public bool ShowServer { get { return GetValue(); } set { SetValue(value); } }
+            public bool NoHighlight { get { return GetValue(); } set { SetValue(value); } }
+            public bool Vthighlight { get { return GetValue(); } set { SetValue(value); } }
+            public bool Pin { get { return GetValue(); } set { SetValue(value); } }
+            public bool PingInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool BoardInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool ExtUserInfo { get { return GetValue(); } set { SetValue(value); } }
+            public bool AudioChat { get { return GetValue(); } set { SetValue(value); } }
+            public bool SeekCa { get { return GetValue(); } set { SetValue(value); } }
+            public bool ShowOwnSeek { get { return GetValue(); } set { SetValue(value); } }
+            public bool PreMove { get { return GetValue(); } set { SetValue(value); } }
+            public bool SmartMove { get { return GetValue(); } set { SetValue(value); } }
+            public bool MoveCase { get { return GetValue(); } set { SetValue(value); } }
+            public bool NoWrap { get { return GetValue(); } set { SetValue(value); } }
+            public bool AllResults { get { return GetValue(); } set { SetValue(value); } }
+            public bool SingleBoard { get { return GetValue(); } set { SetValue(value); } }
+            public bool Suicide { get { return GetValue(); } set { SetValue(value); } }
+            public bool CrazyHouse { get { return GetValue(); } set { SetValue(value); } }
+            public bool Losers { get { return GetValue(); } set { SetValue(value); } }
+            public bool WildCastle { get { return GetValue(); } set { SetValue(value); } }
+            public bool FischerRandom { get { return GetValue(); } set { SetValue(value); } }
+            public bool Atomic { get { return GetValue(); } set { SetValue(value); } }
+            public bool Xml { get { return GetValue(); } set { SetValue(value); } }
         }
 
         private class CommandState
@@ -176,105 +218,14 @@
         public FicsClient(string server = DefaultServer, int port = DefaultServerPort, string prompt = DefaultPrompt, string newLine = DefaultNewLine)
             : base(server, port, prompt, newLine)
         {
-            ServerVariables = GenerateInterface<AFicsServerVariables>(variables, FicsCommand.SetServerVariable);
-            ServerInterfaceVariables = GenerateInterface<AFicsServerInterfaceVariables>(ivariables, FicsCommand.SetServerInterfaceVariable);
+            ServerVariables = new AFicsServerVariables(this, variables, FicsCommand.SetServerVariable);
+            ServerInterfaceVariables = new AFicsServerInterfaceVariables(this, ivariables, FicsCommand.SetServerInterfaceVariable);
 
             // Create standard server personal lists
             CensoredList = GetServerList(ServerList.CensoredList, isPublic: false);
             WontPlayList = GetServerList(ServerList.WontPlayList, isPublic: false);
             ListeningChannelsList = GetServerList(ServerList.ListeningChannelsList, isPublic: false);
         }
-
-        #region Auto-generated interfaces for getting/settings server variables
-        private static object assemblyGenerationLock = new object();
-        private static ModuleBuilder moduleBuilder;
-        private static Dictionary<string, Type> generatedTypes = new Dictionary<string, Type>();
-
-        private TAbstractClass GenerateInterface<TAbstractClass>(ServerVariablesBase variables, FicsCommand command)
-        {
-            lock (assemblyGenerationLock)
-            {
-                if (moduleBuilder == null)
-                {
-                    var assemblyName = new AssemblyName("FicsClientGeneratedAssembly");
-                    var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-
-                    moduleBuilder = assemblyBuilder.DefineDynamicModule("FicsClientGeneratedModule");
-                }
-
-                Type classType = typeof(TAbstractClass);
-                string typeName = classType.Name + "_Generated";
-                Type type = null;
-                PropertyInfo[] classProperties = classType.GetInterfaces()[0].GetProperties();
-
-                if (!generatedTypes.TryGetValue(typeName, out type))
-                {
-                    var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public | TypeAttributes.Class, classType);
-
-                    foreach (var property in classProperties)
-                    {
-                        var actionType = Type.GetType("System.Action`1").MakeGenericType(property.PropertyType);
-                        var functionType = Type.GetType("System.Func`1").MakeGenericType(property.PropertyType);
-                        var setPropertyField = typeBuilder.DefineField("__set_" + property.Name, actionType, FieldAttributes.Public);
-                        var getPropertyField = typeBuilder.DefineField("__get_" + property.Name, functionType, FieldAttributes.Public);
-
-                        MethodBuilder methodBuilder = typeBuilder.DefineMethod("get_" + property.Name, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Virtual, property.PropertyType, new Type[0]);
-                        typeBuilder.DefineMethodOverride(methodBuilder, property.GetMethod);
-                        var ilg = methodBuilder.GetILGenerator();
-                        ilg.Emit(OpCodes.Ldarg_0);
-                        ilg.Emit(OpCodes.Ldfld, getPropertyField);
-                        ilg.Emit(OpCodes.Callvirt, functionType.GetMethod("Invoke"));
-                        ilg.Emit(OpCodes.Ret);
-
-                        methodBuilder = typeBuilder.DefineMethod("set_" + property.Name, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Virtual, null, new Type[1] { property.PropertyType });
-                        typeBuilder.DefineMethodOverride(methodBuilder, property.SetMethod);
-                        ilg = methodBuilder.GetILGenerator();
-                        ilg.Emit(OpCodes.Ldarg_0);
-                        ilg.Emit(OpCodes.Ldfld, setPropertyField);
-                        ilg.Emit(OpCodes.Ldarg_1);
-                        ilg.Emit(OpCodes.Callvirt, actionType.GetMethod("Invoke", new Type[] { property.PropertyType }));
-                        ilg.Emit(OpCodes.Nop);
-                        ilg.Emit(OpCodes.Ret);
-                    }
-
-                    type = typeBuilder.CreateType();
-                    generatedTypes.Add(typeName, type);
-                }
-
-                object obj = Activator.CreateInstance(type);
-
-                foreach (var property in classProperties)
-                {
-                    Func<object> getFunction = () =>
-                        {
-                            variables.WaitInitalization();
-                            return variables.GetType().GetProperty(property.Name).GetValue(variables);
-                        };
-
-                    Action<object> setAction = async (value) =>
-                        {
-                            variables.WaitInitalization();
-
-                            string variableName = property.GetSingleAttribute<ServerVariableNameAttribute>().Name;
-
-                            await Send(command, variableName, value);
-                            variables.GetType().GetProperty(property.Name).SetValue(variables, value);
-                        };
-
-                    var tt = setAction.GetType();
-
-                    var propertyTypeParameter = Expression.Parameter(property.PropertyType);
-                    var setBody = Expression.Call(Expression.Constant(setAction), setAction.GetType().GetMethod("Invoke", new Type[] { typeof(object) }), Expression.Convert(propertyTypeParameter, typeof(object)));
-
-                    var getBody = Expression.Convert(Expression.Call(Expression.Constant(getFunction), getFunction.GetType().GetMethod("Invoke")), property.PropertyType);
-                    obj.GetType().GetField("__set_" + property.Name).SetValue(obj, Expression.Lambda(setBody, propertyTypeParameter).Compile());
-                    obj.GetType().GetField("__get_" + property.Name).SetValue(obj, Expression.Lambda(getBody).Compile());
-                }
-
-                return (TAbstractClass)obj;
-            }
-        }
-        #endregion
 
         public IFicsServerVariables ServerVariables { get; private set; }
         public IFicsServerInterfaceVariables ServerInterfaceVariables { get; private set; }
@@ -859,11 +810,11 @@
             return game;
         }
 
-        private static TEnum ParseEnum<TEnum>(string value) where TEnum : Enum
+        private static TEnum ParseEnum<TEnum>(string value) where TEnum : struct
         {
             foreach (TEnum enumValue in Enum.GetValues(typeof(TEnum)))
             {
-                if (typeof(TEnum).GetSingleAttribute<ServerVariableNameAttribute>(enumValue.ToString()).Name == value
+                if (((Enum)(object)enumValue).GetSingleAttribute<ServerVariableNameAttribute>().Name == value
                     || enumValue.ToString().Equals(value, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return enumValue;
@@ -881,7 +832,7 @@
             {
                 if (((int)(object)options & (int)(object)option) == (int)(object)option)
                 {
-                    result += typeof(TEnum).GetSingleAttribute<ServerVariableNameAttribute>(option.ToString()).Name;
+                    result += ((Enum)(object)option).GetSingleAttribute<ServerVariableNameAttribute>().Name;
                 }
             }
 
