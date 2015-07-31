@@ -14,16 +14,24 @@
     [TestClass]
     public class FicsClientTests : TestsBase
     {
+        private static FicsClient client;
+
+        [ClassInitialize, Timeout(DefaultTestTimeout)]
+        public static void ClassInitialize(TestContext context)
+        {
+            client = SetupGuestClient();
+        }
+
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsGuestLogin()
         {
-            SetupGuestClient();
+            Debug.Assert(client != null);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsListAllGames()
         {
-            var games = Wait(SetupGuestClient().ListGames());
+            var games = Wait(client.ListGames());
 
             Debug.Assert(games.Count > 0);
         }
@@ -31,7 +39,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsReadServerLists()
         {
-            var lists = Wait(SetupGuestClient().GetLists());
+            var lists = Wait(client.GetLists());
 
             Debug.Assert(lists.Count > 0);
         }
@@ -39,7 +47,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsListBughouse()
         {
-            var bughouse = Wait(SetupGuestClient().ListBughouse());
+            var bughouse = Wait(client.ListBughouse());
 
             Debug.Assert(bughouse.Games != null);
             Debug.Assert(bughouse.Partnerships != null);
@@ -49,7 +57,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsListPlayers()
         {
-            var players = Wait(SetupGuestClient().ListPlayers());
+            var players = Wait(client.ListPlayers());
 
             Debug.Assert(players.Count > 0);
         }
@@ -57,7 +65,6 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsTestServerVariables()
         {
-            FicsClient client = SetupGuestClient();
             var serverVariables = client.ServerVariables;
 
             foreach (var property in serverVariables.GetType().GetProperties())
@@ -75,7 +82,6 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsTestServerInterfaceVariables()
         {
-            FicsClient client = SetupGuestClient();
             var serverInterfaceVariables = client.ServerInterfaceVariables;
 
             foreach (var property in serverInterfaceVariables.GetType().GetProperties())
@@ -93,7 +99,6 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsObserveGame()
         {
-            FicsClient client = SetupGuestClient();
             var games = Wait(client.ListGames());
             Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
             game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
@@ -136,6 +141,7 @@
             client.ServerVariables.Style = 12;
             client.ServerVariables.ShowProvisionalRatings = true;
             client.ServerVariables.Interface = "FicsClientLibraryTests";
+            client.ServerVariables.Seek = false;
             client.ServerInterfaceVariables.PreciseTimes = true;
             client.ServerInterfaceVariables.DetailedGameInfo = true;
             client.ServerInterfaceVariables.PreMove = true;
