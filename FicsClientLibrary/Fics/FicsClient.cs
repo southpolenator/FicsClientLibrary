@@ -255,46 +255,62 @@
         {
             const string headerStart = "Variable settings of ";
             string output = await Execute(FicsCommand.ListServerVariables, username);
-            string parsedUsername;
-            var variables = ParseVariablesCommand(headerStart, output, out parsedUsername);
 
-            if (parsedUsername != username)
+            try
             {
-                throw new Exception("Unexpected username returned");
-            }
+                string parsedUsername;
+                var variables = ParseVariablesCommand(headerStart, output, out parsedUsername);
 
-            if (username == Username)
+                if (parsedUsername != username)
+                {
+                    throw new Exception("Unexpected username returned");
+                }
+
+                if (username == Username)
+                {
+                    this.variables.Initialize(variables);
+                    return this.ServerVariables;
+                }
+
+                FicsServerVariables result = new FicsServerVariables();
+                result.Initialize(variables);
+                return result;
+            }
+            catch (Exception ex)
             {
-                this.variables.Initialize(variables);
-                return this.ServerVariables;
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
-
-            FicsServerVariables result = new FicsServerVariables();
-            result.Initialize(variables);
-            return result;
         }
 
         public async Task<IFicsServerInterfaceVariables> GetServerInterfaceVariables(string username)
         {
             const string headerStart = "Interface variable settings of ";
             string output = await Execute(FicsCommand.ListServerInterfaceVariables, username);
-            string parsedUsername;
-            var variables = ParseVariablesCommand(headerStart, output, out parsedUsername);
 
-            if (parsedUsername != username)
+            try
             {
-                throw new Exception("Unexpected username returned");
-            }
+                string parsedUsername;
+                var variables = ParseVariablesCommand(headerStart, output, out parsedUsername);
 
-            if (username == Username)
+                if (parsedUsername != username)
+                {
+                    throw new Exception("Unexpected username returned");
+                }
+
+                if (username == Username)
+                {
+                    this.ivariables.Initialize(variables);
+                    return this.ServerInterfaceVariables;
+                }
+
+                var result = new FicsServerInterfaceVariables();
+                result.Initialize(variables);
+                return result;
+            }
+            catch (Exception ex)
             {
-                this.ivariables.Initialize(variables);
-                return this.ServerInterfaceVariables;
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
-
-            var result = new FicsServerInterfaceVariables();
-            result.Initialize(variables);
-            return result;
         }
 
         public async Task<Game> ListGames(int gameNumber)
@@ -308,7 +324,14 @@
         {
             string output = await Execute(FicsCommand.ListGames, playerUsernameStart);
 
-            return ParseGames(output);
+            try
+            {
+                return ParseGames(output);
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
         }
 
         public async Task<IList<Game>> ListGames(GamesListingOptions options)
@@ -319,126 +342,158 @@
         public async Task<BughouseListingResult> ListBughouse(BughouseListingOptions options = BughouseListingOptions.Games | BughouseListingOptions.Partnerships | BughouseListingOptions.Players)
         {
             string output = await Execute(FicsCommand.ListBughouse, GenerateEnumString(options));
-            var result = new BughouseListingResult();
-            StringReader reader = new StringReader(output);
 
-            if (options.HasFlag(BughouseListingOptions.Games))
+            try
             {
-                string line = reader.ReadLine();
+                var result = new BughouseListingResult();
+                StringReader reader = new StringReader(output);
 
-                result.Games = new List<Game2x2>();
-                Debug.Assert(line == "Bughouse games in progress");
-                line = reader.ReadLine();
-                while (!string.IsNullOrEmpty(line) && !line.StartsWith(" " + result.Games.Count + " game"))
+                if (options.HasFlag(BughouseListingOptions.Games))
                 {
-                    Game2x2 game2x2 = new Game2x2();
+                    string line = reader.ReadLine();
 
-                    game2x2.First = ParseGame(line);
+                    result.Games = new List<Game2x2>();
+                    Debug.Assert(line == "Bughouse games in progress");
                     line = reader.ReadLine();
-                    game2x2.Second = ParseGame(line);
-                    result.Games.Add(game2x2);
+                    while (!string.IsNullOrEmpty(line) && !line.StartsWith(" " + result.Games.Count + " game"))
+                    {
+                        Game2x2 game2x2 = new Game2x2();
+
+                        game2x2.First = ParseGame(line);
+                        line = reader.ReadLine();
+                        game2x2.Second = ParseGame(line);
+                        result.Games.Add(game2x2);
+                        line = reader.ReadLine();
+                        Debug.Assert(line == "");
+                        line = reader.ReadLine();
+                    }
+
+                    if (line == "")
+                    {
+                        line = reader.ReadLine();
+                    }
+
+                    Debug.Assert(line.StartsWith(" " + result.Games.Count + " game"));
                     line = reader.ReadLine();
-                    Debug.Assert(line == "");
-                    line = reader.ReadLine();
+                    Debug.Assert(string.IsNullOrEmpty(line));
                 }
 
-                if (line == "")
+                if (options.HasFlag(BughouseListingOptions.Partnerships))
                 {
+                    string line = reader.ReadLine();
+
+                    result.Partnerships = new List<Partnership>();
+                    Debug.Assert(line == "Partnerships not playing bughouse");
                     line = reader.ReadLine();
+                    while (!string.IsNullOrEmpty(line))
+                    {
+                        result.Partnerships.Add(ParsePartnership(line, ServerVariables.ShowProvisionalRatings));
+                        line = reader.ReadLine();
+                    }
+
+                    line = reader.ReadLine();
+                    Debug.Assert(line.StartsWith(" " + result.Partnerships.Count + " partnership"));
+                    line = reader.ReadLine();
+                    Debug.Assert(string.IsNullOrEmpty(line));
                 }
 
-                Debug.Assert(line.StartsWith(" " + result.Games.Count + " game"));
-                line = reader.ReadLine();
-                Debug.Assert(string.IsNullOrEmpty(line));
-            }
-
-            if (options.HasFlag(BughouseListingOptions.Partnerships))
-            {
-                string line = reader.ReadLine();
-
-                result.Partnerships = new List<Partnership>();
-                Debug.Assert(line == "Partnerships not playing bughouse");
-                line = reader.ReadLine();
-                while (!string.IsNullOrEmpty(line))
+                if (options.HasFlag(BughouseListingOptions.Players))
                 {
-                    result.Partnerships.Add(ParsePartnership(line, ServerVariables.ShowProvisionalRatings));
-                    line = reader.ReadLine();
+                    string line = reader.ReadLine();
+
+                    Debug.Assert(line == "Unpartnered players with bugopen on");
+                    result.Players = ParsePlayers(reader, ServerVariables.ShowProvisionalRatings);
                 }
 
-                line = reader.ReadLine();
-                Debug.Assert(line.StartsWith(" " + result.Partnerships.Count + " partnership"));
-                line = reader.ReadLine();
-                Debug.Assert(string.IsNullOrEmpty(line));
+                return result;
             }
-
-            if (options.HasFlag(BughouseListingOptions.Players))
+            catch (Exception ex)
             {
-                string line = reader.ReadLine();
-
-                Debug.Assert(line == "Unpartnered players with bugopen on");
-                result.Players = ParsePlayers(reader, ServerVariables.ShowProvisionalRatings);
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
-
-            return result;
         }
 
         public async Task<IList<Player>> ListPlayers(PlayersListingOptions options = PlayersListingOptions.BlitzRating)
         {
             string output = await Execute(FicsCommand.ListPlayers, GenerateEnumString(options));
-            StringReader reader = new StringReader(output);
 
-            return ParsePlayers(reader, ServerVariables.ShowProvisionalRatings);
+            try
+            {
+                StringReader reader = new StringReader(output);
+
+                return ParsePlayers(reader, ServerVariables.ShowProvisionalRatings);
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
         }
 
         public async Task<IList<ServerList>> GetLists()
         {
             string output = await Execute(FicsCommand.ShowList);
-            StringReader reader = new StringReader(output);
-            string line = reader.ReadLine();
-            List<ServerList> lists = new List<ServerList>();
 
-            Debug.Assert(line == "Lists:");
-            line = reader.ReadLine();
-            Debug.Assert(string.IsNullOrEmpty(line));
-            line = reader.ReadLine();
-            while (!string.IsNullOrEmpty(line))
+            try
             {
-                int listNameEnd = line.IndexOf(' ');
-                string name = line.Substring(0, listNameEnd);
-                bool isPublic = line.EndsWith("is PUBLIC");
+                StringReader reader = new StringReader(output);
+                string line = reader.ReadLine();
+                List<ServerList> lists = new List<ServerList>();
 
-                lists.Add(GetServerList(name, isPublic));
+                Debug.Assert(line == "Lists:");
                 line = reader.ReadLine();
-            }
+                Debug.Assert(string.IsNullOrEmpty(line));
+                line = reader.ReadLine();
+                while (!string.IsNullOrEmpty(line))
+                {
+                    int listNameEnd = line.IndexOf(' ');
+                    string name = line.Substring(0, listNameEnd);
+                    bool isPublic = line.EndsWith("is PUBLIC");
 
-            return lists;
+                    lists.Add(GetServerList(name, isPublic));
+                    line = reader.ReadLine();
+                }
+
+                return lists;
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
         }
 
         internal async Task<IList<string>> GetListEntries(string listName)
         {
             string output = await Execute(FicsCommand.ShowList, listName);
-            StringReader reader = new StringReader(output);
-            List<string> entries = new List<string>();
-            string line = reader.ReadLine();
 
-            Debug.Assert(line.StartsWith("--"));
-            while (true)
+            try
             {
-                line = reader.ReadLine();
-                if (line == null)
+                StringReader reader = new StringReader(output);
+                List<string> entries = new List<string>();
+                string line = reader.ReadLine();
+
+                Debug.Assert(line.StartsWith("--"));
+                while (true)
                 {
-                    break;
+                    line = reader.ReadLine();
+                    if (line == null)
+                    {
+                        break;
+                    }
+
+                    string[] elements = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string element in elements)
+                    {
+                        entries.Add(element);
+                    }
                 }
 
-                string[] elements = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string element in elements)
-                {
-                    entries.Add(element);
-                }
+                return entries;
             }
-
-            return entries;
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
         }
 
         internal async void AddListEntry(string listName, string entry)
@@ -475,43 +530,51 @@
 
         public async Task<ObserveGameResult> ObserveGame(string query)
         {
-            ObserveGameResult result = new ObserveGameResult();
             string output = await Execute(FicsCommand.ObserveGame, query);
-            StringReader reader = new StringReader(output);
-            string line = reader.ReadLine();
 
-            if (!line.StartsWith("You are now observing game "))
+            try
             {
-                throw new Exception(query);
-            }
+                ObserveGameResult result = new ObserveGameResult();
+                StringReader reader = new StringReader(output);
+                string line = reader.ReadLine();
 
-            int gameIdEnd = line.IndexOf('.');
-            int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
+                if (!line.StartsWith("You are now observing game "))
+                {
+                    throw new Exception(query);
+                }
 
-            // Parse game info
-            string shortGameInfo = reader.ReadLine();
-            string detailedGameInfo = null;
+                int gameIdEnd = line.IndexOf('.');
+                int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
 
-            Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
-            line = reader.ReadLine();
-            Debug.Assert(string.IsNullOrEmpty(line));
+                // Parse game info
+                string shortGameInfo = reader.ReadLine();
+                string detailedGameInfo = null;
 
-            if (ServerInterfaceVariables.DetailedGameInfo)
-            {
-                detailedGameInfo = reader.ReadLine();
+                Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
                 line = reader.ReadLine();
                 Debug.Assert(string.IsNullOrEmpty(line));
+
+                if (ServerInterfaceVariables.DetailedGameInfo)
+                {
+                    detailedGameInfo = reader.ReadLine();
+                    line = reader.ReadLine();
+                    Debug.Assert(string.IsNullOrEmpty(line));
+                }
+
+                // Take game info
+                result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, this.ServerVariables.ShowProvisionalRatings);
+
+                // Parse game state (style 12)
+                string style12gameLine = reader.ReadLine();
+                string style12piecesLine = reader.ReadLine();
+
+                result.GameState = ParseGameState(style12gameLine, style12piecesLine);
+                return result;
             }
-
-            // Take game info
-            result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, this.ServerVariables.ShowProvisionalRatings);
-
-            // Parse game state (style 12)
-            string style12gameLine = reader.ReadLine();
-            string style12piecesLine = reader.ReadLine();
-
-            result.GameState = ParseGameState(style12gameLine, style12piecesLine);
-            return result;
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
         }
         #endregion
 
@@ -1117,11 +1180,6 @@
                 while (ratingEnd < line.Length && char.IsDigit(line[ratingEnd]))
                 {
                     ratingEnd++;
-                }
-
-                if (ratingEnd == position)
-                {
-                    throw new FormatException("Incorrect number format.\nLine: '" + line + "'");
                 }
 
                 rating = int.Parse(line.Substring(position, ratingEnd - position));
