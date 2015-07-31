@@ -144,7 +144,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FicsClientLibrary\FicsClientLibraryPortable.csproj">
       <Project>{04836b54-e59d-49ea-8992-848bb71be1dc}</Project>
-      <Name>FicsClientLibrary</Name>
+      <Name>FicsClientLibraryPortable</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

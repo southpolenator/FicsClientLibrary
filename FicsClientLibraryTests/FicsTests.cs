@@ -1,7 +1,11 @@
 ﻿namespace FicsClientLibraryUnitTests
 {
     using Internet.Chess.Server.Fics;
+#if NETFX_CORE
     using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+#else
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+#endif
     using System;
     using System.Diagnostics;
     using System.Linq;
