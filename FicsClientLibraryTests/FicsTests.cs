@@ -15,11 +15,22 @@
     public class FicsClientTests : TestsBase
     {
         private static FicsClient client;
+        private static TestContext context;
 
         [ClassInitialize, Timeout(DefaultTestTimeout)]
         public static void ClassInitialize(TestContext context)
         {
             client = SetupGuestClient();
+            FicsClientTests.context = context;
+        }
+
+        [TestCleanup, Timeout(DefaultTestTimeout)]
+        public void TestCleanup()
+        {
+            if (context.CurrentTestOutcome != UnitTestOutcome.Passed)
+            {
+                ClassInitialize(context);
+            }
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
