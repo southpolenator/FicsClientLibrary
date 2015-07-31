@@ -4,6 +4,7 @@
     using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
     using System;
     using System.Diagnostics;
+    using System.Linq;
 
     [TestClass]
     public class FicsClientTests : TestsBase
@@ -12,6 +13,55 @@
         public void FicsGuestLogin()
         {
             SetupGuestClient();
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsListAllGames()
+        {
+            var games = Wait(SetupGuestClient().ListGames());
+
+            Debug.Assert(games.Count > 0);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsReadServerLists()
+        {
+            var lists = Wait(SetupGuestClient().GetLists());
+
+            Debug.Assert(lists.Count > 0);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsListBughouse()
+        {
+            var bughouse = Wait(SetupGuestClient().ListBughouse());
+
+            Debug.Assert(bughouse.Games != null);
+            Debug.Assert(bughouse.Partnerships != null);
+            Debug.Assert(bughouse.Players != null);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsListPlayers()
+        {
+            var players = Wait(SetupGuestClient().ListPlayers());
+
+            Debug.Assert(players.Count > 0);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsObserveGame()
+        {
+            FicsClient client = SetupGuestClient();
+            var games = Wait(client.ListGames());
+            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
+            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
+            game = game ?? games[new Random().Next(games.Count)];
+            var observeGameResult = Wait(client.ObserveGame(game));
+
+            Debug.Assert(observeGameResult.GameInfo.GameId == game.Id);
+
+            // TODO: Wait until game ends
         }
 
         private static FicsClient SetupGuestClient()
@@ -24,9 +74,9 @@
 
         private static FicsClient SetupClient(string username, string password)
         {
-            return SetupClient((client) =>
+            return SetupClient(async (client) =>
             {
-                Wait(client.Login(username, password));
+                await client.Login(username, password);
             });
         }
 
