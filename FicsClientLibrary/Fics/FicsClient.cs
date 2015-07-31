@@ -361,15 +361,7 @@
                 line = reader.ReadLine();
                 while (!string.IsNullOrEmpty(line))
                 {
-                    Partnership partnership = new Partnership();
-                    int position = 0;
-
-                    partnership.Player1 = ParsePlayer(line, ref position, false);
-                    SkipWhiteSpaces(line, ref position);
-                    Debug.Assert(line[position] == '/');
-                    position++;
-                    partnership.Player2 = ParsePlayer(line, ref position, false);
-                    result.Partnerships.Add(partnership);
+                    result.Partnerships.Add(ParsePartnership(line, ServerVariables.ShowProvisionalRatings));
                     line = reader.ReadLine();
                 }
 
@@ -681,7 +673,7 @@
         }
 
         #region Parsing
-        private static IList<Game> ParseGames(string output)
+        internal static IList<Game> ParseGames(string output)
         {
             List<Game> games = new List<Game>();
             StringReader reader = new StringReader(output);
@@ -704,7 +696,7 @@
             return games;
         }
 
-        private static Game ParseGame(string line)
+        internal static Game ParseGame(string line)
         {
             Game game = new Game();
             int position = 0;
@@ -807,7 +799,7 @@
             return game;
         }
 
-        private static TEnum ParseEnum<TEnum>(string value) where TEnum : struct
+        internal static TEnum ParseEnum<TEnum>(string value) where TEnum : struct
         {
             foreach (TEnum enumValue in Enum.GetValues(typeof(TEnum)))
             {
@@ -821,7 +813,7 @@
             throw new Exception("Unable to parse enum " + typeof(TEnum));
         }
 
-        private static string GenerateEnumString<TEnum>(TEnum options) where TEnum : struct
+        internal static string GenerateEnumString<TEnum>(TEnum options) where TEnum : struct
         {
             string result = "";
 
@@ -836,12 +828,12 @@
             return result;
         }
 
-        private static TimeSpan ParseTime(string str)
+        internal static TimeSpan ParseTime(string str)
         {
             return TimeSpan.ParseExact(str, new string[] { @"%h\:mm\:ss", @"%m\:ss", @"%h\:mm\:ss\.fff", @"%m\:ss\.fff" }, null);
         }
 
-        private static void SkipWhiteSpaces(string line, ref int position)
+        internal static void SkipWhiteSpaces(string line, ref int position)
         {
             while (position < line.Length && char.IsWhiteSpace(line[position]))
             {
@@ -849,7 +841,20 @@
             }
         }
 
-        private static IList<Player> ParsePlayers(TextReader reader, bool hasProvisionalRating)
+        internal static Partnership ParsePartnership(string line, bool hasProvisionalRating)
+        {
+            Partnership partnership = new Partnership();
+            int position = 0;
+
+            partnership.Player1 = ParsePlayer(line, ref position, hasProvisionalRating);
+            SkipWhiteSpaces(line, ref position);
+            Debug.Assert(line[position] == '/');
+            position++;
+            partnership.Player2 = ParsePlayer(line, ref position, hasProvisionalRating);
+            return partnership;
+        }
+
+        internal static IList<Player> ParsePlayers(TextReader reader, bool hasProvisionalRating)
         {
             var players = new List<Player>();
             string line = reader.ReadLine();
@@ -877,7 +882,7 @@
             return players;
         }
 
-        private static Player ParsePlayer(string line, ref int position, bool hasProvisionalRating)
+        internal static Player ParsePlayer(string line, ref int position, bool hasProvisionalRating)
         {
             Player player = new Player();
 
@@ -927,7 +932,7 @@
             return player;
         }
 
-        private static Dictionary<string, string> ParseVariablesCommand(string commandHeader, string command, out string username)
+        internal static Dictionary<string, string> ParseVariablesCommand(string commandHeader, string command, out string username)
         {
             // Check command header
             if (!command.StartsWith(commandHeader))
@@ -948,7 +953,7 @@
             return ParseVariables(reader);
         }
 
-        private static Dictionary<string, string> ParseVariables(TextReader reader)
+        internal static Dictionary<string, string> ParseVariables(TextReader reader)
         {
             Dictionary<string, string> variables = new Dictionary<string, string>();
 
@@ -987,7 +992,7 @@
             return variables;
         }
 
-        private static GameInfo ParseGameInfo(string line, string detailedGameInfo, bool hasProvisionalRating)
+        internal static GameInfo ParseGameInfo(string line, string detailedGameInfo, bool hasProvisionalRating)
         {
             // Since rating is being printed inside brackets with witdh=4, there is possibility of having spaces after (
             line = line.Replace("( ", "(").Replace("( ", "(").Replace("( ", "(");
@@ -1067,28 +1072,28 @@
             return info;
         }
 
-        private static int ParseRating(string line, bool hasProvisionalRating, ref PlayerProvisionalRating provisionalRating)
+        internal static int ParseRating(string line, bool hasProvisionalRating, ref PlayerProvisionalRating provisionalRating)
         {
             int position = 0;
 
             return ParseRating(line, ref position, hasProvisionalRating, ref provisionalRating);
         }
 
-        private static int ParseRating(string line, bool hasProvisionalRating)
+        internal static int ParseRating(string line, bool hasProvisionalRating)
         {
             int position = 0;
 
             return ParseRating(line, ref position, hasProvisionalRating);
         }
 
-        private static int ParseRating(string line, ref int position, bool hasProvisionalRating)
+        internal static int ParseRating(string line, ref int position, bool hasProvisionalRating)
         {
             PlayerProvisionalRating provisionalRating = PlayerProvisionalRating.Unknown;
 
             return ParseRating(line, ref position, hasProvisionalRating, ref provisionalRating);
         }
 
-        private static int ParseRating(string line, ref int position, bool hasProvisionalRating, ref PlayerProvisionalRating provisionalRating)
+        internal static int ParseRating(string line, ref int position, bool hasProvisionalRating, ref PlayerProvisionalRating provisionalRating)
         {
             // Rating
             int rating;
@@ -1114,6 +1119,11 @@
                     ratingEnd++;
                 }
 
+                if (ratingEnd == position)
+                {
+                    throw new FormatException("Incorrect number format.\nLine: '" + line + "'");
+                }
+
                 rating = int.Parse(line.Substring(position, ratingEnd - position));
                 position = ratingEnd;
             }
@@ -1127,7 +1137,7 @@
             return rating;
         }
 
-        private static GameState ParseGameState(string gameLine, string piecesLine)
+        internal static GameState ParseGameState(string gameLine, string piecesLine)
         {
             GameState state = new GameState();
 

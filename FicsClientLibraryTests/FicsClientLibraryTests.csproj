@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="FicsParsingTests.cs" />
     <Compile Include="FicsTests.cs" />
     <Compile Include="IcsClientTests.cs" />
     <Compile Include="TelnetTests.cs" />
