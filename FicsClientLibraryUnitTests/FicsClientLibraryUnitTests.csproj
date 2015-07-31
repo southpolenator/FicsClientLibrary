@@ -142,7 +142,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FicsClientLibrary\FicsClientLibrary.csproj">
+    <ProjectReference Include="..\FicsClientLibrary\FicsClientLibraryPortable.csproj">
       <Project>{04836b54-e59d-49ea-8992-848bb71be1dc}</Project>
       <Name>FicsClientLibrary</Name>
     </ProjectReference>

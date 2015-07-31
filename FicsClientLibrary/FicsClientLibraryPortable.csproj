@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{04836B54-E59D-49EA-8992-848BB71BE1DC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Internet.Chess.Server</RootNamespace>
+    <AssemblyName>FicsClientLibrary</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <TargetPlatform Include="Windows, Version=8.1" />
+    <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fics\AccountStatus.cs" />
+    <Compile Include="Fics\BughouseListingOptions.cs" />
+    <Compile Include="Fics\BughouseListingResult.cs" />
+    <Compile Include="Fics\ChessPiece.cs" />
+    <Compile Include="Fics\ChessPieceColor.cs" />
+    <Compile Include="Fics\ChessPieceWithColor.cs" />
+    <Compile Include="Fics\FicsClient.cs" />
+    <Compile Include="Fics\FicsCommand.cs" />
+    <Compile Include="Fics\FicsServerInterfaceVariables.cs" />
+    <Compile Include="Fics\FicsServerVariables.cs" />
+    <Compile Include="Fics\Game.cs" />
+    <Compile Include="Fics\Game2x2.cs" />
+    <Compile Include="Fics\GameInfo.cs" />
+    <Compile Include="Fics\GamesListingOptions.cs" />
+    <Compile Include="Fics\GameState.cs" />
+    <Compile Include="Fics\GameType.cs" />
+    <Compile Include="Fics\IFicsServerInterfaceVariables.cs" />
+    <Compile Include="Fics\IFicsServerVariables.cs" />
+    <Compile Include="Fics\ObserveGameResult.cs" />
+    <Compile Include="Fics\Partnership.cs" />
+    <Compile Include="Fics\Player.cs" />
+    <Compile Include="Fics\PlayerProvisionalRating.cs" />
+    <Compile Include="Fics\PlayersListingOptions.cs" />
+    <Compile Include="Fics\PlayerStatus.cs" />
+    <Compile Include="Fics\ServerCommandCodeAttribute.cs" />
+    <Compile Include="Fics\ServerCommandNameAttribute.cs" />
+    <Compile Include="Fics\ServerList.cs" />
+    <Compile Include="Fics\ServerVariableNameAttribute.cs" />
+    <Compile Include="Fics\ServerVariablesBase.cs" />
+    <Compile Include="IcsClient.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
+    <Compile Include="TelnetClient.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
