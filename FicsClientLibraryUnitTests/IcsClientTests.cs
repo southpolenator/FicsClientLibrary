@@ -7,7 +7,7 @@
     [TestClass]
     public class IcsClientTests : TestsBase
     {
-        [TestMethod]
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void IcsGuestLogin()
         {
             IcsClient client = new IcsClient("freechess.org", 5000, "fics% ", "\n\r");

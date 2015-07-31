@@ -39,11 +39,16 @@
         /// <param name="encoding">The server encoding.</param>
         public TelnetClient(string server, int port, string prompt = "", string newLine = "\n\r", Encoding encoding = null)
         {
-            this.socket.ConnectAsync(new HostName(server), port.ToString()).AsTask().Wait();
-            this.Prompt = prompt;
-            this.Encoding = encoding != null ? encoding : Encoding.UTF8;
-            this.NewLine = newLine;
+            socket.ConnectAsync(new HostName(server), port.ToString()).AsTask().Wait();
+            Prompt = prompt;
+            Encoding = encoding != null ? encoding : Encoding.UTF8;
+            NewLine = newLine;
         }
+
+        /// <summary>
+        /// Gets the username of logged in user.
+        /// </summary>
+        public string Username { get; private set; }
 
         /// <summary>
         /// Gets or sets the server prompt.
@@ -70,23 +75,34 @@
         {
             var prompt = this.Prompt;
 
-            this.Prompt = "login: ";
-            string usernameMessage = await Read();
+            Prompt = "login: ";
+            string usernameMessage = Read();
             await Write(username);
+            Username = username;
             if (username != GuestUsername)
             {
-                this.Prompt = "password: ";
+                Prompt = "password: ";
+                string passwordMessage = Read();
+                await Write(password);
             }
             else
             {
-                this.Prompt = "";
+                Prompt = "";
+                string passwordMessage = Read();
+                int quotesEnd = passwordMessage.LastIndexOf('"');
+                int quotesBegin = passwordMessage.LastIndexOf('"', quotesEnd - 1);
+
                 password = "";
+                if (quotesBegin >= 0 && quotesEnd > 0)
+                {
+                    Username = passwordMessage.Substring(quotesBegin + 1, quotesEnd - quotesBegin - 1);
+                }
+
+                await Write(password);
             }
 
-            string passwordMessage = await Read();
-            await Write(password);
-            this.Prompt = prompt;
-            string loginMessage = await Read();
+            Prompt = prompt;
+            string loginMessage = Read();
 
             return loginMessage;
         }
@@ -105,37 +121,34 @@
         /// </summary>
         /// <remarks>This function is NOT thread safe.</remarks>
         /// <returns>Message read from the server</returns>
-        public async Task<string> Read()
+        public string Read()
         {
-            const int ReadingBufferSize = 10240;
-            byte[] buffer = new byte[0];
             string result = "";
+            byte[] buffer = new byte[10240];
+            int position = 0;
 
-            using (DataReader reader = new DataReader(socket.InputStream))
+            while (true)
             {
-                reader.InputStreamOptions = InputStreamOptions.Partial;
-                await reader.LoadAsync(ReadingBufferSize);
-                while (reader.UnconsumedBufferLength > 0)
+                if (buffer.Length == position)
                 {
-                    int position = buffer.Length;
-                    int count = (int)reader.UnconsumedBufferLength;
-
-                    Array.Resize(ref buffer, buffer.Length + count);
-                    reader.ReadBuffer(reader.UnconsumedBufferLength).CopyTo(0, buffer, position, count);
-
-                    result = new string(this.Encoding.GetChars(buffer));
-                    if (string.IsNullOrEmpty(this.Prompt) || result.EndsWith(this.Prompt))
-                    {
-                        break;
-                    }
-
-                    await reader.LoadAsync(ReadingBufferSize);
+                    Array.Resize(ref buffer, buffer.Length * 2);
                 }
 
-                reader.DetachStream();
-                result = result.Replace(NewLine, "\n");
-                return result;
+                int size = buffer.Length - position;
+                IBuffer inputBuffer = buffer.AsBuffer(position, size);
+                IBuffer read = socket.InputStream.ReadAsync(inputBuffer, (uint)size, InputStreamOptions.Partial).AsTask().Result;
+
+                read.CopyTo(inputBuffer);
+                position += (int)read.Length;
+                result = new string(Encoding.GetChars(buffer, 0, position));
+                if (string.IsNullOrEmpty(Prompt) || result.EndsWith(Prompt))
+                {
+                    break;
+                }
             }
+
+            result = result.Replace(NewLine, "\n");
+            return result;
         }
 
         /// <summary>
@@ -145,7 +158,7 @@
         /// <param name="message">The message.</param>
         public async Task Write(string message)
         {
-            byte[] buffer = this.Encoding.GetBytes((message + NewLine).ToCharArray());
+            byte[] buffer = Encoding.GetBytes((message + NewLine).ToCharArray());
 
             await writeSemaphore.WaitAsync();
             try

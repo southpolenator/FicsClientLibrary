@@ -51,7 +51,7 @@
         /// <summary>
         /// Gets the username of logged in user.
         /// </summary>
-        public string Username { get; private set; }
+        public string Username { get { return telnet.Username; } }
 
         /// <summary>
         /// Logins the specified user.
@@ -60,10 +60,9 @@
         /// <param name="password">The password.</param>
         public async Task Login(string username, string password)
         {
-            Username = username;
             ProcessMessages(await telnet.Login(username, password));
             messageReadingTask.Start();
-            await LoginFinished();
+            LoginFinished();
         }
 
         /// <summary>
@@ -96,10 +95,7 @@
         /// <summary>
         /// Event when login is finished.
         /// </summary>
-        /// <returns></returns>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        protected virtual async Task LoginFinished()
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected virtual void LoginFinished()
         {
             // Do nothing
         }
@@ -117,11 +113,11 @@
         /// <summary>
         /// Background task for reading and dispatching messages.
         /// </summary>
-        private async void MessageReadingTask()
+        private void MessageReadingTask()
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                ProcessMessages(await telnet.Read());
+                ProcessMessages(telnet.Read());
             }
         }
 

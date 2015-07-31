@@ -8,12 +8,13 @@
     [TestClass]
     public class TelnetTests : TestsBase
     {
-        [TestMethod]
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void TelnetGuestLogin()
         {
             TelnetClient client = new TelnetClient("freechess.org", 5000, "fics% ");
 
-            Debug.Assert(!string.IsNullOrEmpty(Wait(client.LoginGuest())));
+            string welcomeMessage = Wait(client.LoginGuest());
+            Debug.Assert(!string.IsNullOrEmpty(welcomeMessage));
         }
     }
 }

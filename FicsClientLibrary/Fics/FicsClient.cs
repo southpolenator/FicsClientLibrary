@@ -5,9 +5,6 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using System.Reflection.Emit;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
@@ -600,13 +597,13 @@
             return state.Result;
         }
 
-        protected override async Task LoginFinished()
+        protected override void LoginFinished()
         {
-            await base.LoginFinished();
-            await Send("iset block true");
+            base.LoginFinished();
+            Send("iset block true").Wait();
             ivariables.SendCommandsAsBlock = true;
-            var v1 = GetServerVariables(this.Username);
-            var v2 = GetServerInterfaceVariables(this.Username);
+            var v1 = GetServerVariables(Username);
+            var v2 = GetServerInterfaceVariables(Username);
         }
 
         protected override bool IsKnownMessage(ref string message)
@@ -628,7 +625,7 @@
 
                 if (commandState.Command == FicsCommand.NotSet)
                 {
-                    message = commandCode + "\n" + commandResult;
+                    message = commandResult;
                     commandState.IsExecuting = false;
                     return false;
                 }

@@ -1,19 +1,23 @@
 ﻿namespace FicsClientLibraryUnitTests
 {
-    using System.Diagnostics;
+    using System;
     using System.Threading.Tasks;
 
     public class TestsBase
     {
-        public static T Wait<T>(Task<T> task, int millisecondsTimeout = 10000)
+        public const int DefaultTestTimeout = 15000;
+
+        public static T Wait<T>(Task<T> task, int millisecondsTimeout = 15000)
         {
-            Debug.Assert(task.Wait(millisecondsTimeout));
+            if (!task.Wait(millisecondsTimeout))
+                throw new TimeoutException();
             return task.Result;
         }
 
-        public static void Wait(Task task, int millisecondsTimeout = 10000)
+        public static void Wait(Task task, int millisecondsTimeout = 15000)
         {
-            Debug.Assert(task.Wait(millisecondsTimeout));
+            if (!task.Wait(millisecondsTimeout))
+                throw new TimeoutException();
         }
     }
 }
