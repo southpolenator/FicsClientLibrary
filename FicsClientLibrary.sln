@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibrary", "FicsClientLibrary\FicsClientLibraryPortable.csproj", "{04836B54-E59D-49EA-8992-848BB71BE1DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryPortable", "FicsClientLibrary\FicsClientLibraryPortable.csproj", "{04836B54-E59D-49EA-8992-848BB71BE1DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryUnitTests", "FicsClientLibraryUnitTests\FicsClientLibraryUnitTests.csproj", "{EC1EC2DC-4D1B-42DF-B274-8A033D2FCA4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTestsWindows", "FicsClientLibraryTests\FicsClientLibraryTestsWindows.csproj", "{EC1EC2DC-4D1B-42DF-B274-8A033D2FCA4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
