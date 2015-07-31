@@ -12,15 +12,17 @@
 
     public class FicsClient : IcsClient
     {
+        #region Event delegates
         public delegate void GameStateChangeDelegate(GameState gameState);
+        #endregion
 
-        internal class AFicsServerVariablesBase
+        internal class AutoFicsServerVariablesBase
         {
             private FicsClient client;
             private ServerVariablesBase variables;
             private FicsCommand command;
 
-            public AFicsServerVariablesBase(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+            public AutoFicsServerVariablesBase(FicsClient client, ServerVariablesBase variables, FicsCommand command)
             {
                 this.client = client;
                 this.variables = variables;
@@ -45,9 +47,9 @@
             }
         }
 
-        internal class AFicsServerVariables : AFicsServerVariablesBase, IFicsServerVariables
+        internal class AutoFicsServerVariables : AutoFicsServerVariablesBase, IFicsServerVariables
         {
-            public AFicsServerVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+            public AutoFicsServerVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
                 : base(client, variables, command)
             {
             }
@@ -103,9 +105,9 @@
             public string Interface { get { return GetValue(); } set { SetValue(value); } }
         }
 
-        internal class AFicsServerInterfaceVariables : AFicsServerVariablesBase, IFicsServerInterfaceVariables
+        internal class AutoFicsServerInterfaceVariables : AutoFicsServerVariablesBase, IFicsServerInterfaceVariables
         {
-            public AFicsServerInterfaceVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
+            public AutoFicsServerInterfaceVariables(FicsClient client, ServerVariablesBase variables, FicsCommand command)
                 : base(client, variables, command)
             {
             }
@@ -215,8 +217,8 @@
         public FicsClient(string server = DefaultServer, int port = DefaultServerPort, string prompt = DefaultPrompt, string newLine = DefaultNewLine)
             : base(server, port, prompt, newLine)
         {
-            ServerVariables = new AFicsServerVariables(this, variables, FicsCommand.SetServerVariable);
-            ServerInterfaceVariables = new AFicsServerInterfaceVariables(this, ivariables, FicsCommand.SetServerInterfaceVariable);
+            ServerVariables = new AutoFicsServerVariables(this, variables, FicsCommand.SetServerVariable);
+            ServerInterfaceVariables = new AutoFicsServerInterfaceVariables(this, ivariables, FicsCommand.SetServerInterfaceVariable);
 
             // Create standard server personal lists
             CensoredList = GetServerList(ServerList.CensoredList, isPublic: false);
@@ -226,7 +228,10 @@
 
         public IFicsServerVariables ServerVariables { get; private set; }
         public IFicsServerInterfaceVariables ServerInterfaceVariables { get; private set; }
+
+        #region Events
         public event GameStateChangeDelegate GameStateChange;
+        #endregion
 
         #region Server lists
         public ServerList CensoredList { get; private set; }
