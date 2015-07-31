@@ -9,8 +9,8 @@
     <ProjectGuid>{EC1EC2DC-4D1B-42DF-B274-8A033D2FCA4F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FicsClientLibraryUnitTests</RootNamespace>
-    <AssemblyName>FicsClientLibraryUnitTests</AssemblyName>
+    <RootNamespace>FicsClientLibraryTests</RootNamespace>
+    <AssemblyName>FicsClientLibraryTestsWindows</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>

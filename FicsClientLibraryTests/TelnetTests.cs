@@ -1,4 +1,4 @@
-﻿namespace FicsClientLibraryUnitTests
+﻿namespace FicsClientLibraryTests
 {
     using Internet.Chess.Server;
 #if NETFX_CORE

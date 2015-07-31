@@ -1,4 +1,4 @@
-﻿namespace FicsClientLibraryUnitTests
+﻿namespace FicsClientLibraryTests
 {
     using System;
     using System.Threading.Tasks;
