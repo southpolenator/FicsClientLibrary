@@ -1,5 +1,6 @@
 ﻿namespace FicsClientLibraryUnitTests
 {
+    using Internet.Chess.Server;
     using Internet.Chess.Server.Fics;
 #if NETFX_CORE
     using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -51,6 +52,42 @@
             var players = Wait(SetupGuestClient().ListPlayers());
 
             Debug.Assert(players.Count > 0);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsTestServerVariables()
+        {
+            FicsClient client = SetupGuestClient();
+            var serverVariables = client.ServerVariables;
+
+            foreach (var property in serverVariables.GetType().GetProperties())
+            {
+                object value = property.GetValue(serverVariables);
+
+                Debug.WriteLine("{0} = {1}", property.Name, value);
+                if (value != null)
+                {
+                    property.SetValue(serverVariables, value);
+                }
+            }
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsTestServerInterfaceVariables()
+        {
+            FicsClient client = SetupGuestClient();
+            var serverInterfaceVariables = client.ServerInterfaceVariables;
+
+            foreach (var property in serverInterfaceVariables.GetType().GetProperties())
+            {
+                object value = property.GetValue(serverInterfaceVariables);
+
+                Debug.WriteLine("{0} = {1}", property.Name, value);
+                if (value != null)
+                {
+                    property.SetValue(serverInterfaceVariables, value);
+                }
+            }
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]

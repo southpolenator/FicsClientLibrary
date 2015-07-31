@@ -4,7 +4,7 @@
     using System.Linq;
     using System.Reflection;
 
-    internal static class ReflectionHelpers
+    public static class ReflectionHelpers
     {
         public static Type[] GetInterfaces(this Type type)
         {
@@ -19,11 +19,6 @@
         public static PropertyInfo GetProperty(this Type type, string name)
         {
             return type.GetTypeInfo().GetDeclaredProperty(name);
-        }
-
-        public static FieldInfo GetField(this Type type, string name)
-        {
-            return type.GetTypeInfo().GetDeclaredField(name);
         }
 
         public static T GetSingleAttribute<T>(this Enum enumValue) where T : Attribute
