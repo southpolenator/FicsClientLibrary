@@ -27,8 +27,8 @@
         public int AvailableMin { get { return GetValue(); } set { SetValue(value); } }
         public bool MoveBell { get { return GetValue(); } set { SetValue(value); } }
         public bool Pgn { get { return GetValue(); } set { SetValue(value); } }
-        public bool Tell { get { return GetValue(); } set { SetValue(value); } }
-        public bool CTell { get { return GetValue(); } set { SetValue(value); } }
+        public bool AllowTellFromUnregisteredUsers { get { return GetValue(); } set { SetValue(value); } }
+        public bool AllowChannelTellFromUnregisteredUsers { get { return GetValue(); } set { SetValue(value); } }
         public int AvailableMax { get { return GetValue(); } set { SetValue(value); } }
         public int Width { get { return GetValue(); } set { SetValue(value); } }
         public bool BugOpen { get { return GetValue(); } set { SetValue(value); } }
@@ -39,10 +39,10 @@
         public bool ShowPromptTime { get { return GetValue(); } set { SetValue(value); } }
         public bool Tourney { get { return GetValue(); } set { SetValue(value); } }
         public bool MessageReply { get { return GetValue(); } set { SetValue(value); } }
-        public bool ChannelsOff { get { return GetValue(); } set { SetValue(value); } }
+        public bool BlockMessagesFromChannels { get { return GetValue(); } set { SetValue(value); } }
         public bool ShowOwnSeek { get { return GetValue(); } set { SetValue(value); } }
         public bool ShowProvisionalRatings { get { return GetValue(); } set { SetValue(value); } }
-        public bool Silence { get { return GetValue(); } set { SetValue(value); } }
+        public bool InGameSilence { get { return GetValue(); } set { SetValue(value); } }
         public bool AutoFlag { get { return GetValue(); } set { SetValue(value); } }
         public bool Unobserve { get { return GetValue(); } set { SetValue(value); } }
         public bool Echo { get { return GetValue(); } set { SetValue(value); } }

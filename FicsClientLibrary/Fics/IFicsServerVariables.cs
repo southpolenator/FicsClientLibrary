@@ -62,11 +62,17 @@
         [ServerVariableName("pgn")]
         bool Pgn { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether you will receive tell messages from unregistered users.
+        /// </summary>
         [ServerVariableName("tell")]
-        bool Tell { get; set; }
+        bool AllowTellFromUnregisteredUsers { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether you will receive channel tell messages from unregistered users.
+        /// </summary>
         [ServerVariableName("ctell")]
-        bool CTell { get; set; }
+        bool AllowChannelTellFromUnregisteredUsers { get; set; }
 
         [ServerVariableName("availmax")]
         int AvailableMax { get; set; }
@@ -98,8 +104,11 @@
         [ServerVariableName("messreply")]
         bool MessageReply { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether you block receiving channel tell messages.
+        /// </summary>
         [ServerVariableName("chanoff")]
-        bool ChannelsOff { get; set; }
+        bool BlockMessagesFromChannels { get; set; }
 
         [ServerVariableName("showownseek")]
         bool ShowOwnSeek { get; set; }
@@ -107,8 +116,14 @@
         [ServerVariableName("provshow")]
         bool ShowProvisionalRatings { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether you want silence during the game.
+        /// Setting silence to <c>true</c> will turn off global messages (shouts, cshouts and channel tells)
+        /// while you play, examine or observe a game so that communications to you will be less distracting
+        /// to you. When you are not playing, examining or observing a game, you will hear global messages again.
+        /// </summary>
         [ServerVariableName("silence")]
-        bool Silence { get; set; }
+        bool InGameSilence { get; set; }
 
         [ServerVariableName("autoflag")]
         bool AutoFlag { get; set; }
