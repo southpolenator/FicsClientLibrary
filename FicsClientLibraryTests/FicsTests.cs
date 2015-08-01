@@ -123,6 +123,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsSendMessage()
         {
+            // Verify that message can be sent
             const string messageText = "Test message";
             FicsClient secondClient = SetupGuestClient();
             string username = null, message = null;
@@ -138,6 +139,11 @@
             messageWaiting.Wait();
             Assert.AreEqual(username, client.Username);
             Assert.AreEqual(message, messageText);
+
+            // Block (censor) user from sending message
+            secondClient.CensoredList.Add(client.Username);
+            VerifyException(client.SendMessage(secondClient.Username, messageText), "Player \"" + secondClient.Username + "\" is censoring you.\n");
+            secondClient.CensoredList.Remove(client.Username);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
