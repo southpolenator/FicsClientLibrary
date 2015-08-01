@@ -22,8 +22,8 @@
         public int AvailableMin { get; set; }
         public bool MoveBell { get; set; }
         public bool Pgn { get; set; }
-        public bool Tell { get; set; }
-        public bool CTell { get; set; }
+        public bool AllowTellFromUnregisteredUsers { get; set; }
+        public bool AllowChannelTellFromUnregisteredUsers { get; set; }
         public int AvailableMax { get; set; }
         public int Width { get; set; }
         public bool BugOpen { get; set; }
@@ -34,10 +34,10 @@
         public bool ShowPromptTime { get; set; }
         public bool Tourney { get; set; }
         public bool MessageReply { get; set; }
-        public bool ChannelsOff { get; set; }
+        public bool BlockMessagesFromChannels { get; set; }
         public bool ShowOwnSeek { get; set; }
         public bool ShowProvisionalRatings { get; set; }
-        public bool Silence { get; set; }
+        public bool InGameSilence { get; set; }
         public bool AutoFlag { get; set; }
         public bool Unobserve { get; set; }
         public bool Echo { get; set; }
