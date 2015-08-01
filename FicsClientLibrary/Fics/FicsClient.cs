@@ -6,14 +6,33 @@
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Free Internet Chess Server client
+    /// </summary>
     public class FicsClient : IcsClient
     {
         #region Event delegates
+        /// <summary>
+        /// Delegate for game state changes (while observing the game).
+        /// </summary>
+        /// <param name="gameState">State of the game.</param>
         public delegate void GameStateChangeDelegate(GameState gameState);
+
+        /// <summary>
+        /// Delegate when new message arrives.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="message">The message.</param>
         public delegate void MessageReceivedDelegate(string username, string message);
+
+        /// <summary>
+        /// Delegate when new message arrives over the channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="username">The username.</param>
+        /// <param name="message">The message.</param>
         public delegate void ChannelMessageReceivedDelegate(int channel, string username, string message);
         #endregion
 
@@ -24,18 +43,32 @@
         public const int AlternateServerPort = 23;
         public const string DefaultNewLine = "\n\r";
 
-        public const char CommandBlockStart = (char)21;
-        public const char CommandBlockSeparator = (char)22;
-        public const char CommandBlockEnd = (char)23;
-        public const char CommandBlockPoseStart = (char)24;
-        public const char CommandBlockPoseEnd = (char)25;
+        private const char CommandBlockStart = (char)21;
+        private const char CommandBlockSeparator = (char)22;
+        private const char CommandBlockEnd = (char)23;
+        private const char CommandBlockPoseStart = (char)24;
+        private const char CommandBlockPoseEnd = (char)25;
         #endregion
 
         #region Cached values of server variables
+        /// <summary>
+        /// The server variables cached values
+        /// </summary>
         private FicsServerVariables variables = new FicsServerVariables();
+
+        /// <summary>
+        /// The server interface cached variables
+        /// </summary>
         private FicsServerInterfaceVariables ivariables = new FicsServerInterfaceVariables();
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FicsClient"/> class.
+        /// </summary>
+        /// <param name="server">The server address.</param>
+        /// <param name="port">The server port.</param>
+        /// <param name="prompt">The server prompt.</param>
+        /// <param name="newLine">The server new line.</param>
         public FicsClient(string server = DefaultServer, int port = DefaultServerPort, string prompt = DefaultPrompt, string newLine = DefaultNewLine)
             : base(server, port, prompt, newLine)
         {
@@ -48,23 +81,87 @@
             ListeningChannelsList = GetServerList(ServerList.ListeningChannelsList, isPublic: false);
         }
 
+        /// <summary>
+        /// Gets the server variables.
+        /// </summary>
         public IFicsServerVariables ServerVariables { get; private set; }
+
+        /// <summary>
+        /// Gets the server interface variables.
+        /// </summary>
         public IFicsServerInterfaceVariables ServerInterfaceVariables { get; private set; }
 
         #region Events
+        /// <summary>
+        /// Occurs when game state changes (while observing the game).
+        /// </summary>
         public event GameStateChangeDelegate GameStateChange;
+
+        /// <summary>
+        /// Occurs when new message is received.
+        /// </summary>
         public event MessageReceivedDelegate MessageReceived;
+
+        /// <summary>
+        /// Occurs when new shout message is received.
+        /// </summary>
         public event MessageReceivedDelegate ShoutMessageReceived;
+
+        /// <summary>
+        /// Occurs when new chess shout message is received.
+        /// </summary>
         public event MessageReceivedDelegate ChessShoutMessageReceived;
+
+        /// <summary>
+        /// Occurs when new channel message is received.
+        /// </summary>
         public event ChannelMessageReceivedDelegate ChannelMessageReceived;
         #endregion
 
         #region Server lists
+        /// <summary>
+        /// Gets the censored list.
+        /// When a player is on your censor list, you will not hear anything from
+        /// him/her when he/she uses a tell, shout, cshout, match, kibitz, whisper,
+        /// say or message. Tells to you as individual and tells to a channel are both
+        /// affected. Since match commands are also filtered, players on your censor
+        /// list cannot challenge you to a game of chess. Lastly, messages from a player
+        /// on your censor list will also be rejected.
+        /// 
+        /// When users on your censor list send you a direct message using "tell", or
+        /// an indirect message using "message", they will be notified of their being
+        /// on your censor list. Your censor list is otherwise private and cannot be
+        /// read by other users.
+        /// </summary>
         public ServerList CensoredList { get; private set; }
+
+        /// <summary>
+        /// Gets the wont play list.
+        /// When a player is on your "won't play" list, all match requests from that player
+        /// will be declined automatically.
+        /// </summary>
         public ServerList WontPlayList { get; private set; }
+
+        /// <summary>
+        /// Gets the listening channels list.
+        /// When a channel is on your list, you will receive messages(tells) sent to that
+        /// channel. Also, if you send a tell to channels 1, 2, 49 or 50, the FICS will
+        /// attempt to add it to your channel list (unless it is already there).
+        /// </summary>
         public ServerList ListeningChannelsList { get; private set; }
+
+        /// <summary>
+        /// The cached server list objects used when querying server for the list.
+        /// </summary>
         private Dictionary<string, ServerList> serverLists = new Dictionary<string,ServerList>();
 
+        /// <summary>
+        /// Gets the server list from cached server list objects. If list is not in the cached list,
+        /// it will be automatically added.
+        /// </summary>
+        /// <param name="name">The name of the list.</param>
+        /// <param name="isPublic">if set to <c>true</c> the list is public.</param>
+        /// <returns>Cached server list object.</returns>
         private ServerList GetServerList(string name, bool isPublic)
         {
             ServerList list;
@@ -82,6 +179,11 @@
         #endregion
 
         #region Commands
+        /// <summary>
+        /// Gets the server variables for a given user.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <returns>Server variables</returns>
         public async Task<IFicsServerVariables> GetServerVariables(string username)
         {
             const string headerStart = "Variable settings of ";
@@ -113,6 +215,11 @@
             }
         }
 
+        /// <summary>
+        /// Gets the server interface variables.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <returns>Server interface variables</returns>
         public async Task<IFicsServerInterfaceVariables> GetServerInterfaceVariables(string username)
         {
             const string headerStart = "Interface variable settings of ";
@@ -144,13 +251,23 @@
             }
         }
 
-        public async Task<Game> ListGames(int gameNumber)
+        /// <summary>
+        /// Gets the game info from the server.
+        /// </summary>
+        /// <param name="gameNumber">The game number.</param>
+        /// <returns>The game</returns>
+        public async Task<Game> GetGame(int gameNumber)
         {
             IList<Game> games = await ListGames(gameNumber.ToString());
 
             return games.Count > 0 ? games[0] : null;
         }
 
+        /// <summary>
+        /// Lists the games from a given user.
+        /// </summary>
+        /// <param name="playerUsernameStart">The player username start.</param>
+        /// <returns>List of games</returns>
         public async Task<IList<Game>> ListGames(string playerUsernameStart = "")
         {
             string output = await Execute(FicsCommand.ListGames, playerUsernameStart);
@@ -165,11 +282,21 @@
             }
         }
 
+        /// <summary>
+        /// Lists the games currently in progress on the server.
+        /// </summary>
+        /// <param name="options">The listing options.</param>
+        /// <returns>List of games</returns>
         public async Task<IList<Game>> ListGames(GamesListingOptions options)
         {
             return await ListGames("/" + GenerateEnumString(options));
         }
 
+        /// <summary>
+        /// Lists the bughouse current games/partnerships/available partners.
+        /// </summary>
+        /// <param name="options">The listing options.</param>
+        /// <returns>Games/partnerships/available partners</returns>
         public async Task<BughouseListingResult> ListBughouse(BughouseListingOptions options = BughouseListingOptions.Games | BughouseListingOptions.Partnerships | BughouseListingOptions.Players)
         {
             string output = await Execute(FicsCommand.ListBughouse, GenerateEnumString(options));
@@ -244,6 +371,11 @@
             }
         }
 
+        /// <summary>
+        /// Lists the players currently active on the server.
+        /// </summary>
+        /// <param name="options">The listing options.</param>
+        /// <returns>List of players</returns>
         public async Task<IList<Player>> ListPlayers(PlayersListingOptions options = PlayersListingOptions.BlitzRating)
         {
             string output = await Execute(FicsCommand.ListPlayers, GenerateEnumString(options));
@@ -260,6 +392,10 @@
             }
         }
 
+        /// <summary>
+        /// Gets the server lists.
+        /// </summary>
+        /// <returns>All server lists</returns>
         public async Task<IList<ServerList>> GetLists()
         {
             string output = await Execute(FicsCommand.ShowList);
@@ -292,6 +428,11 @@
             }
         }
 
+        /// <summary>
+        /// Gets the server list entries.
+        /// </summary>
+        /// <param name="listName">Name of the list.</param>
+        /// <returns>Server list entries</returns>
         internal async Task<IList<string>> GetListEntries(string listName)
         {
             string output = await Execute(FicsCommand.ShowList, listName);
@@ -327,6 +468,11 @@
             }
         }
 
+        /// <summary>
+        /// Adds the server list entry.
+        /// </summary>
+        /// <param name="listName">Name of the list.</param>
+        /// <param name="entry">The entry.</param>
         internal async void AddListEntry(string listName, string entry)
         {
             string output = await Execute(FicsCommand.AddToList, listName, entry);
@@ -338,6 +484,11 @@
             }
         }
 
+        /// <summary>
+        /// Removes the list entry.
+        /// </summary>
+        /// <param name="listName">Name of the list.</param>
+        /// <param name="entry">The entry.</param>
         internal async void RemoveListEntry(string listName, string entry)
         {
             string output = await Execute(FicsCommand.RemoveFromList, listName, entry);
@@ -349,16 +500,31 @@
             }
         }
 
+        /// <summary>
+        /// Starts observing the players game.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        /// <returns>Game info and game state</returns>
         public async Task<ObserveGameResult> ObserveGame(Player player)
         {
             return await ObserveGame(player.Username);
         }
 
+        /// <summary>
+        /// Starts observing the game.
+        /// </summary>
+        /// <param name="game">The game.</param>
+        /// <returns>Game info and game state</returns>
         public async Task<ObserveGameResult> ObserveGame(Game game)
         {
             return await ObserveGame(game.Id.ToString());
         }
 
+        /// <summary>
+        /// Starts observing the game.
+        /// </summary>
+        /// <param name="query">The query (username/game id).</param>
+        /// <returns>Game info and game state</returns>
         public async Task<ObserveGameResult> ObserveGame(string query)
         {
             string output = await Execute(FicsCommand.ObserveGame, query);
@@ -408,6 +574,11 @@
             }
         }
 
+        /// <summary>
+        /// Sends the message.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="message">The message.</param>
         public async Task SendMessage(string username, string message)
         {
             string output = await Execute(FicsCommand.SendMessage, username, message);
@@ -418,6 +589,12 @@
             }
         }
 
+        /// <summary>
+        /// Sends the message to the specified channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="message">The message.</param>
+        /// <returns>Number of players that received the message</returns>
         public async Task<int> SendMessage(int channel, string message)
         {
             string output = await Execute(FicsCommand.SendMessage, channel, message);
@@ -433,6 +610,10 @@
             return int.Parse(output.Substring(userCountStart + 1, userCountEnd - userCountStart - 1));
         }
 
+        /// <summary>
+        /// Sends the shout message.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public async Task SendShoutMessage(string message)
         {
             string output = await Execute(FicsCommand.SendShoutMessage, message);
@@ -443,6 +624,10 @@
             }
         }
 
+        /// <summary>
+        /// Sends the chess shout message.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public async Task SendChessShoutMessage(string message)
         {
             string output = await Execute(FicsCommand.SendChessShoutMessage, message);
