@@ -51,7 +51,7 @@
     <Compile Include="Fics\AutoFicsServerVariablesBase.cs" />
     <Compile Include="Fics\BughouseListingOptions.cs" />
     <Compile Include="Fics\BughouseListingResult.cs" />
-    <Compile Include="Fics\ChessPiece.cs" />
+    <Compile Include="Fics\ChessPieceType.cs" />
     <Compile Include="Fics\ChessPieceColor.cs" />
     <Compile Include="Fics\ChessPieceWithColor.cs" />
     <Compile Include="Fics\FicsClient.cs" />

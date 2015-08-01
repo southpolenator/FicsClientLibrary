@@ -2,7 +2,7 @@
 {
     public class ChessPieceWithColor
     {
-        public ChessPiece Piece { get; set; }
+        public ChessPieceType Piece { get; set; }
         public ChessPieceColor Color { get; set; }
 
         public override string ToString()

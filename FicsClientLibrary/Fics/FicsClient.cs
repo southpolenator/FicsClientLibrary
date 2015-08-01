@@ -1383,7 +1383,7 @@
                         {
                             state.Board[y, x] = new ChessPieceWithColor()
                             {
-                                Piece = ParseEnum<ChessPiece>(char.ToUpper(piece).ToString()),
+                                Piece = ParseEnum<ChessPieceType>(char.ToUpper(piece).ToString()),
                                 Color = char.IsUpper(piece) ? ChessPieceColor.White : ChessPieceColor.Black,
                             };
                         }
@@ -1441,16 +1441,16 @@
                 string whitePieces = tokens[4].Substring(1, tokens[4].Length - 2);
                 string blackPieces = tokens[6].Substring(1, tokens[6].Length - 2);
 
-                state.WhitePieces = new List<ChessPiece>();
+                state.WhitePieces = new List<ChessPieceType>();
                 foreach (char piece in whitePieces)
                 {
-                    state.WhitePieces.Add(ParseEnum<ChessPiece>(char.ToUpper(piece).ToString()));
+                    state.WhitePieces.Add(ParseEnum<ChessPieceType>(char.ToUpper(piece).ToString()));
                 }
 
-                state.BlackPieces = new List<ChessPiece>();
+                state.BlackPieces = new List<ChessPieceType>();
                 foreach (char piece in blackPieces)
                 {
-                    state.BlackPieces.Add(ParseEnum<ChessPiece>(char.ToUpper(piece).ToString()));
+                    state.BlackPieces.Add(ParseEnum<ChessPieceType>(char.ToUpper(piece).ToString()));
                 }
             }
 
