@@ -40,6 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Fics\AccountStatus.cs" />
+    <Compile Include="Fics\AutoFicsServerInterfaceVariables.cs" />
+    <Compile Include="Fics\AutoFicsServerVariables.cs" />
+    <Compile Include="Fics\AutoFicsServerVariablesBase.cs" />
     <Compile Include="Fics\BughouseListingOptions.cs" />
     <Compile Include="Fics\BughouseListingResult.cs" />
     <Compile Include="Fics\ChessPiece.cs" />
@@ -47,6 +50,7 @@
     <Compile Include="Fics\ChessPieceWithColor.cs" />
     <Compile Include="Fics\FicsClient.cs" />
     <Compile Include="Fics\FicsCommand.cs" />
+    <Compile Include="Fics\FicsCommandState.cs" />
     <Compile Include="Fics\FicsServerInterfaceVariables.cs" />
     <Compile Include="Fics\FicsServerVariables.cs" />
     <Compile Include="Fics\Game.cs" />
