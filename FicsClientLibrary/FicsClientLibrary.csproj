@@ -7,7 +7,7 @@
     <ProjectGuid>{C734A91D-733F-4A92-92A4-F6736186ADE5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>nternet.Chess.Server</RootNamespace>
+    <RootNamespace>Internet.Chess.Server</RootNamespace>
     <AssemblyName>FicsClientLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
@@ -46,6 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Fics\AccountStatus.cs" />
+    <Compile Include="Fics\AutoFicsServerInterfaceVariables.cs" />
+    <Compile Include="Fics\AutoFicsServerVariables.cs" />
+    <Compile Include="Fics\AutoFicsServerVariablesBase.cs" />
     <Compile Include="Fics\BughouseListingOptions.cs" />
     <Compile Include="Fics\BughouseListingResult.cs" />
     <Compile Include="Fics\ChessPiece.cs" />
@@ -53,6 +56,7 @@
     <Compile Include="Fics\ChessPieceWithColor.cs" />
     <Compile Include="Fics\FicsClient.cs" />
     <Compile Include="Fics\FicsCommand.cs" />
+    <Compile Include="Fics\FicsCommandState.cs" />
     <Compile Include="Fics\FicsServerInterfaceVariables.cs" />
     <Compile Include="Fics\FicsServerVariables.cs" />
     <Compile Include="Fics\Game.cs" />
