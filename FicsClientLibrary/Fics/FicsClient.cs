@@ -54,6 +54,8 @@
         #region Events
         public event GameStateChangeDelegate GameStateChange;
         public event MessageReceivedDelegate MessageReceived;
+        public event MessageReceivedDelegate ShoutMessageReceived;
+        public event MessageReceivedDelegate ChessShoutMessageReceived;
         public event ChannelMessageReceivedDelegate ChannelMessageReceived;
         #endregion
 
@@ -430,6 +432,26 @@
 
             return int.Parse(output.Substring(userCountStart + 1, userCountEnd - userCountStart - 1));
         }
+
+        public async Task SendShoutMessage(string message)
+        {
+            string output = await Execute(FicsCommand.SendShoutMessage, message);
+
+            if (!output.StartsWith(Username + " shouts:"))
+            {
+                throw new Exception(output);
+            }
+        }
+
+        public async Task SendChessShoutMessage(string message)
+        {
+            string output = await Execute(FicsCommand.SendChessShoutMessage, message);
+
+            if (!output.StartsWith(Username + " cshouts:"))
+            {
+                throw new Exception(output);
+            }
+        }
         #endregion
 
         #region Sending and executing commands
@@ -643,7 +665,35 @@
                         }
                     }
 
-                    // TODO: Shout messages
+                    // Shout messages
+                    const string shouts = " shouts: ";
+
+                    if (restOfLine.StartsWith(shouts))
+                    {
+                        string messageText = restOfLine.Substring(shouts.Length);
+
+                        if (ShoutMessageReceived != null)
+                        {
+                            ShoutMessageReceived(username, messageText);
+                        }
+
+                        return true;
+                    }
+
+                    // Chess Shout messages
+                    const string cshouts = " cshouts: ";
+
+                    if (restOfLine.StartsWith(cshouts))
+                    {
+                        string messageText = restOfLine.Substring(cshouts.Length);
+
+                        if (ChessShoutMessageReceived != null)
+                        {
+                            ChessShoutMessageReceived(username, messageText);
+                        }
+
+                        return true;
+                    }
                 }
             }
 

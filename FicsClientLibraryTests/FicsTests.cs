@@ -140,6 +140,24 @@
             Assert.AreEqual(message, messageText);
         }
 
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsChannelMessage()
+        {
+            VerifyException(client.SendMessage(100, "I'm bored"), "Only registered users may send tells to channels other than 4, 7 and 53.\n");
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsShoutMessage()
+        {
+            VerifyException(client.SendShoutMessage("I'm bored"), "Only registered players can use the shout command.\n");
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsChessShoutMessage()
+        {
+            VerifyException(client.SendChessShoutMessage("I'm bored"), "Only registered players can use the cshout command.\n");
+        }
+
         private static FicsClient SetupGuestClient()
         {
             return SetupClient((client) =>

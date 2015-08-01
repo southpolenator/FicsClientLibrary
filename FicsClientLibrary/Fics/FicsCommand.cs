@@ -200,6 +200,9 @@
         [ServerCommandName("bugwho"), ServerCommandCode(22)]
         ListBughouse,
 
+        [ServerCommandName("cshout"), ServerCommandCode(31)]
+        SendChessShoutMessage,
+
         [ServerCommandName("games"), ServerCommandCode(43)]
         ListGames,
 
@@ -215,6 +218,9 @@
         [ServerCommandName("set"), ServerCommandCode(109)]
         SetServerVariable,
 
+        [ServerCommandName("shout"), ServerCommandCode(110)]
+        SendShoutMessage,
+
         [ServerCommandName("showlist"), ServerCommandCode(111)]
         ShowList,
 
@@ -229,6 +235,5 @@
 
         [ServerCommandName("who"), ServerCommandCode(146)]
         ListPlayers,
-
     }
 }
