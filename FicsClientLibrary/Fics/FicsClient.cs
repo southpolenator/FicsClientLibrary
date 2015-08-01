@@ -13,6 +13,8 @@
     {
         #region Event delegates
         public delegate void GameStateChangeDelegate(GameState gameState);
+        public delegate void MessageReceivedDelegate(string username, string message);
+        public delegate void ChannelMessageReceivedDelegate(int channel, string username, string message);
         #endregion
 
         #region Constants
@@ -51,6 +53,8 @@
 
         #region Events
         public event GameStateChangeDelegate GameStateChange;
+        public event MessageReceivedDelegate MessageReceived;
+        public event ChannelMessageReceivedDelegate ChannelMessageReceived;
         #endregion
 
         #region Server lists
@@ -401,35 +405,35 @@
                 throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
         }
+
+        public async Task SendMessage(string username, string message)
+        {
+            string output = await Execute(FicsCommand.SendMessage, username, message);
+
+            if (output != "(told " + username + ")\n")
+            {
+                throw new Exception(output);
+            }
+        }
+
+        public async Task<int> SendMessage(int channel, string message)
+        {
+            string output = await Execute(FicsCommand.SendMessage, channel, message);
+
+            if (!output.StartsWith("(told "))
+            {
+                throw new Exception(output);
+            }
+
+            int userCountStart = output.IndexOf(' ');
+            int userCountEnd = output.IndexOf(' ', userCountStart + 1);
+
+            return int.Parse(output.Substring(userCountStart + 1, userCountEnd - userCountStart - 1));
+        }
         #endregion
 
+        #region Sending and executing commands
         private List<FicsCommandState> executingCommands = new List<FicsCommandState>();
-
-        internal async Task<FicsCommandState> Send(FicsCommand command, params object[] args)
-        {
-            string commandName = "$$" + command.GetSingleAttribute<ServerCommandNameAttribute>().Name;
-            FicsCommandState commandState = null;
-
-            if (ivariables.SendCommandsAsBlock)
-            {
-                int commandNumber = ReserveCommandNumber(command);
-
-                commandState = executingCommands[commandNumber - 1];
-                commandName = string.Format("{0} {1}", commandNumber, commandName);
-            }
-
-            StringBuilder commandText = new StringBuilder();
-
-            commandText.Append(commandName);
-            for (int i = 0; i < args.Length; i++)
-            {
-                commandText.Append(' ');
-                commandText.Append(args[i].ToString());
-            }
-
-            await base.Send(commandText.ToString());
-            return commandState;
-        }
 
         private int ReserveCommandNumber(FicsCommand command)
         {
@@ -457,6 +461,32 @@
             }
         }
 
+        internal async Task<FicsCommandState> Send(FicsCommand command, params object[] args)
+        {
+            string commandName = "$$" + command.GetSingleAttribute<ServerCommandNameAttribute>().Name;
+            FicsCommandState commandState = null;
+
+            if (ivariables.SendCommandsAsBlock)
+            {
+                int commandNumber = ReserveCommandNumber(command);
+
+                commandState = executingCommands[commandNumber - 1];
+                commandName = string.Format("{0} {1}", commandNumber, commandName);
+            }
+
+            StringBuilder commandText = new StringBuilder();
+
+            commandText.Append(commandName);
+            for (int i = 0; i < args.Length; i++)
+            {
+                commandText.Append(' ');
+                commandText.Append(args[i].ToString());
+            }
+
+            await base.Send(commandText.ToString());
+            return commandState;
+        }
+
         public override async Task Send(string message)
         {
             if (ivariables.SendCommandsAsBlock)
@@ -476,6 +506,7 @@
             state.WaitForEnd();
             return state.Result;
         }
+        #endregion
 
         protected override void LoginFinished()
         {
@@ -520,11 +551,12 @@
             }
 
             // Check if it is game state change message (from observing a game)
+            StringReader reader = new StringReader(message);
+
             if (message.StartsWith("\n<12>"))
             {
                 if (GameStateChange != null)
                 {
-                    StringReader reader = new StringReader(message);
                     string emptyLine = reader.ReadLine();
                     string gameLine = reader.ReadLine();
                     string piecesLine = reader.ReadLine();
@@ -542,7 +574,6 @@
             {
                 if (GameStateChange != null)
                 {
-                    StringReader reader = new StringReader(message);
                     string emptyLine = reader.ReadLine();
                     string piecesLine = reader.ReadLine();
 
@@ -554,6 +585,66 @@
                 }
 
                 return true;
+            }
+
+            // Check if it is a text message
+            int position = 0;
+            string line = reader.ReadLine();
+
+            if (string.IsNullOrEmpty(line))
+            {
+                line = reader.ReadLine();
+                AccountStatus accountStatus;
+                string username = ParsePlayerAccountWithStatus(line, ref position, out accountStatus);
+
+                if (username != null)
+                {
+                    string restOfLine = line.Substring(position);
+
+                    // Direct message
+                    const string tellsYou = " tells you: ";
+                    if (restOfLine.StartsWith(tellsYou))
+                    {
+                        string messageText = restOfLine.Substring(tellsYou.Length);
+
+                        if (MessageReceived != null)
+                        {
+                            MessageReceived(username, messageText);
+                        }
+
+                        return true;
+                    }
+
+                    // Channel message
+                    if (restOfLine.Length > 0 && restOfLine[0] == '(')
+                    {
+                        int endOfChannelNumber = position = 1;
+
+                        while (endOfChannelNumber < restOfLine.Length && char.IsDigit(restOfLine[endOfChannelNumber]))
+                        {
+                            endOfChannelNumber++;
+                        }
+
+                        if (position < endOfChannelNumber)
+                        {
+                            string s = restOfLine.Substring(endOfChannelNumber);
+
+                            if (s.StartsWith("): "))
+                            {
+                                if (ChannelMessageReceived != null)
+                                {
+                                    int channel = int.Parse(restOfLine.Substring(position, endOfChannelNumber - position));
+
+                                    ChannelMessageReceived(channel, username, s.Substring(3));
+                                }
+
+                                return true;
+                            }
+                        }
+                    }
+
+                    // TODO: Shout messages
+                }
             }
 
             return false;
@@ -782,15 +873,31 @@
             // Status
             player.Status = ParseEnum<PlayerStatus>(line.Substring(position++, 1));
 
-            // Username
+            // Username and account status
+            AccountStatus accountStatus;
+
             SkipWhiteSpaces(line, ref position);
+            player.Username = ParsePlayerAccountWithStatus(line, ref position, out accountStatus);
+            player.AccountStatus = accountStatus;
+            return player;
+        }
+
+        internal static string ParsePlayerAccountWithStatus(string line, ref int position, out AccountStatus accountStatus)
+        {
+            accountStatus = AccountStatus.RegularAccount;
+
             int usernameEnd = position;
             while (usernameEnd < line.Length && (char.IsLetter(line[usernameEnd]) || line[usernameEnd] == '.' || line[usernameEnd] == ',' || char.IsDigit(line[usernameEnd])))
             {
                 usernameEnd++;
             }
 
-            player.Username = line.Substring(position, usernameEnd - position);
+            if (usernameEnd == position)
+            {
+                return null;
+            }
+
+            string username = line.Substring(position, usernameEnd - position);
             position = usernameEnd;
 
             // Parse account status
@@ -807,7 +914,7 @@
 
                         if (position + statusString.Length <= line.Length && line.Substring(position, statusString.Length) == statusString)
                         {
-                            player.AccountStatus |= status;
+                            accountStatus |= status;
                             position += statusString.Length;
                             found = true;
                             break;
@@ -816,7 +923,7 @@
                 }
             }
 
-            return player;
+            return username;
         }
 
         internal static Dictionary<string, string> ParseVariablesCommand(string commandHeader, string command, out string username)

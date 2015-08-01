@@ -10,6 +10,7 @@
     using System;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
 
     [TestClass]
     public class FicsClientTests : TestsBase
@@ -36,7 +37,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsGuestLogin()
         {
-            Debug.Assert(client != null);
+            Assert.IsNotNull(client);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
@@ -44,7 +45,7 @@
         {
             var games = Wait(client.ListGames());
 
-            Debug.Assert(games.Count > 0);
+            Assert.IsTrue(games.Count > 0);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
@@ -52,7 +53,7 @@
         {
             var lists = Wait(client.GetLists());
 
-            Debug.Assert(lists.Count > 0);
+            Assert.IsTrue(lists.Count > 0);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
@@ -60,9 +61,9 @@
         {
             var bughouse = Wait(client.ListBughouse());
 
-            Debug.Assert(bughouse.Games != null);
-            Debug.Assert(bughouse.Partnerships != null);
-            Debug.Assert(bughouse.Players != null);
+            Assert.IsNotNull(bughouse.Games);
+            Assert.IsNotNull(bughouse.Partnerships);
+            Assert.IsNotNull(bughouse.Players);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
@@ -70,7 +71,7 @@
         {
             var players = Wait(client.ListPlayers());
 
-            Debug.Assert(players.Count > 0);
+            Assert.IsTrue(players.Count > 0);
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
@@ -116,9 +117,27 @@
             game = game ?? games[new Random().Next(games.Count)];
             var observeGameResult = Wait(client.ObserveGame(game));
 
-            Debug.Assert(observeGameResult.GameInfo.GameId == game.Id);
+            Assert.AreEqual(observeGameResult.GameInfo.GameId, game.Id);
+        }
 
-            // TODO: Wait until game ends
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsSendMessage()
+        {
+            const string messageText = "Test message";
+            FicsClient secondClient = SetupGuestClient();
+            string username = null, message = null;
+            ManualResetEventSlim messageWaiting = new ManualResetEventSlim();
+
+            secondClient.MessageReceived += (u, m) =>
+            {
+                username = u;
+                message = m;
+                messageWaiting.Set();
+            };
+            Wait(client.SendMessage(secondClient.Username, messageText));
+            messageWaiting.Wait();
+            Assert.AreEqual(username, client.Username);
+            Assert.AreEqual(message, messageText);
         }
 
         private static FicsClient SetupGuestClient()
@@ -148,11 +167,11 @@
 
             loginAction(client);
             client.ServerVariables.ShowPromptTime = false;
+            client.ServerVariables.Seek = false;
             client.ServerVariables.MoveBell = false;
             client.ServerVariables.Style = 12;
             client.ServerVariables.ShowProvisionalRatings = true;
             client.ServerVariables.Interface = "FicsClientLibraryTests";
-            client.ServerVariables.Seek = false;
             client.ServerInterfaceVariables.PreciseTimes = true;
             client.ServerInterfaceVariables.DetailedGameInfo = true;
             client.ServerInterfaceVariables.PreMove = true;

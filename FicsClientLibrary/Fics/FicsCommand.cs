@@ -221,6 +221,9 @@
         [ServerCommandName("sublist"), ServerCommandCode(129)]
         RemoveFromList,
 
+        [ServerCommandName("tell"), ServerCommandCode(132)]
+        SendMessage,
+
         [ServerCommandName("variables"), ServerCommandCode(143)]
         ListServerVariables,
 
