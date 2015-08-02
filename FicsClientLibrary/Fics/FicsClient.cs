@@ -505,9 +505,9 @@
         /// </summary>
         /// <param name="player">The player.</param>
         /// <returns>Game info and game state</returns>
-        public async Task<ObserveGameResult> ObserveGame(Player player)
+        public async Task<ObserveGameResult> StartObservingGame(Player player)
         {
-            return await ObserveGame(player.Username);
+            return await StartObservingGame(player.Username);
         }
 
         /// <summary>
@@ -515,9 +515,9 @@
         /// </summary>
         /// <param name="game">The game.</param>
         /// <returns>Game info and game state</returns>
-        public async Task<ObserveGameResult> ObserveGame(Game game)
+        public async Task<ObserveGameResult> StartObservingGame(Game game)
         {
-            return await ObserveGame(game.Id.ToString());
+            return await StartObservingGame(game.Id.ToString());
         }
 
         /// <summary>
@@ -525,7 +525,7 @@
         /// </summary>
         /// <param name="query">The query (username/game id).</param>
         /// <returns>Game info and game state</returns>
-        public async Task<ObserveGameResult> ObserveGame(string query)
+        public async Task<ObserveGameResult> StartObservingGame(string query)
         {
             string output = await Execute(FicsCommand.ObserveGame, query);
 
@@ -571,6 +571,38 @@
             catch (Exception ex)
             {
                 throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
+        }
+
+        /// <summary>
+        /// Stops observing the players game.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        public async Task StopObservingGame(Player player)
+        {
+            await StopObservingGame(player.Username);
+        }
+
+        /// <summary>
+        /// Stops observing the game.
+        /// </summary>
+        /// <param name="game">The game.</param>
+        public async Task StopObservingGame(Game game)
+        {
+            await StopObservingGame(game.Id.ToString());
+        }
+
+        /// <summary>
+        /// Stops observing the game.
+        /// </summary>
+        /// <param name="query">The query (username/game id).</param>
+        public async Task StopObservingGame(string query)
+        {
+            string output = await Execute(FicsCommand.UnobserveGame, query);
+
+            if (!output.StartsWith("Removing game ") || !output.EndsWith(" from observation list.\n"))
+            {
+                throw new Exception(output);
             }
         }
 

@@ -230,6 +230,9 @@
         [ServerCommandName("tell"), ServerCommandCode(132)]
         SendMessage,
 
+        [ServerCommandName("unobserve"), ServerCommandCode(138)]
+        UnobserveGame,
+
         [ServerCommandName("variables"), ServerCommandCode(143)]
         ListServerVariables,
 
