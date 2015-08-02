@@ -523,6 +523,16 @@
         /// <summary>
         /// Starts observing the game.
         /// </summary>
+        /// <param name="gameId">The game id.</param>
+        /// <returns>Game info and game state</returns>
+        public async Task<ObserveGameResult> StartObservingGame(int gameId)
+        {
+            return await StartObservingGame(gameId.ToString());
+        }
+
+        /// <summary>
+        /// Starts observing the game.
+        /// </summary>
         /// <param name="query">The query (username/game id).</param>
         /// <returns>Game info and game state</returns>
         public async Task<ObserveGameResult> StartObservingGame(string query)
@@ -590,6 +600,15 @@
         public async Task StopObservingGame(Game game)
         {
             await StopObservingGame(game.Id.ToString());
+        }
+
+        /// <summary>
+        /// Stops observing the game.
+        /// </summary>
+        /// <param name="gameId">The game id.</param>
+        public async Task StopObservingGame(int gameId)
+        {
+            await StopObservingGame(gameId.ToString());
         }
 
         /// <summary>

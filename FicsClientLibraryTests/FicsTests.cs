@@ -111,19 +111,24 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsObserveGame()
         {
-            Debug.WriteLine("Getting list of games");
             var games = Wait(client.ListGames());
             Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
             game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
             game = game ?? games[new Random().Next(games.Count)];
-            Debug.WriteLine("Starting to observe game {0}", game.Id);
             var observeGameResult = Wait(client.StartObservingGame(game));
 
             Assert.AreEqual(observeGameResult.GameInfo.GameId, game.Id);
 
-            Debug.WriteLine("Ending it");
+            if (observeGameResult.GameInfo.PartnersGameId > 0)
+            {
+                var observePartnerGameResult = Wait(client.StartObservingGame(observeGameResult.GameInfo.PartnersGameId));
+
+                Assert.AreEqual(observePartnerGameResult.GameInfo.GameId, observeGameResult.GameInfo.PartnersGameId);
+
+                Wait(client.StopObservingGame(observePartnerGameResult.GameInfo.GameId));
+            }
+
             Wait(client.StopObservingGame(game));
-            Debug.WriteLine("All done");
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
