@@ -758,6 +758,14 @@
 
         protected override bool IsKnownMessage(ref string message)
         {
+            return TryParseCommandBlock(ref message)
+                || TryParseGameStateChange(message)
+                || TryParseTextMessage(message);
+        }
+
+        #region TryParsing
+        internal bool TryParseCommandBlock(ref string message)
+        {
             if (message.Length > 0 && message[0] == CommandBlockStart)
             {
                 // <BLOCK_START><command identifier><BLOCK_SEPARATOR><command code><BLOCK_SEPARATOR><command output><BLOCK_END>
@@ -789,6 +797,11 @@
                 return true;
             }
 
+            return false;
+        }
+
+        internal bool TryParseGameStateChange(string message)
+        {
             // Check if it is game state change message (from observing a game)
             StringReader reader = new StringReader(message);
 
@@ -826,7 +839,13 @@
                 return true;
             }
 
+            return false;
+        }
+
+        internal bool TryParseTextMessage(string message)
+        {
             // Check if it is a text message
+            StringReader reader = new StringReader(message);
             int position = 0;
             string line = reader.ReadLine();
 
@@ -916,6 +935,7 @@
 
             return false;
         }
+        #endregion
 
         #region Parsing
         internal static IList<Game> ParseGames(string output)
