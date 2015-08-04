@@ -51,12 +51,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="FicsParsingTests.cs" />
-    <Compile Include="FicsTests.cs" />
-    <Compile Include="IcsClientTests.cs" />
-    <Compile Include="TelnetTests.cs" />
+    <Compile Include="..\Tests\FicsParsingTests.cs" />
+    <Compile Include="..\Tests\FicsTests.cs" />
+    <Compile Include="..\Tests\IcsClientTests.cs" />
+    <Compile Include="..\Tests\TelnetTests.cs" />
+    <Compile Include="..\Tests\TestsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FicsClientLibrary\FicsClientLibrary.csproj">

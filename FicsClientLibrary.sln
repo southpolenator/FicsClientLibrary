@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryPortable", "FicsClientLibrary\FicsClientLibraryPortable.csproj", "{04836B54-E59D-49EA-8992-848BB71BE1DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryPortable", "FicsClientLibraryPortable\FicsClientLibraryPortable.csproj", "{04836B54-E59D-49EA-8992-848BB71BE1DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTestsWindows", "FicsClientLibraryTests\FicsClientLibraryTestsWindows.csproj", "{EC1EC2DC-4D1B-42DF-B274-8A033D2FCA4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTestsWindows", "FicsClientLibraryTestsWindows\FicsClientLibraryTestsWindows.csproj", "{EC1EC2DC-4D1B-42DF-B274-8A033D2FCA4F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibrary", "FicsClientLibrary\FicsClientLibrary.csproj", "{C734A91D-733F-4A92-92A4-F6736186ADE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTests", "FicsClientLibraryTests\FicsClientLibraryTests.csproj", "{ACFE0DCE-6458-4D15-B00C-56CA83CD2128}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTestsPhone", "FicsClientLibraryTests\FicsClientLibraryTestsPhone.csproj", "{E52D695D-BF80-4740-B120-F27BB1792E4A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicsClientLibraryTestsPhone", "FicsClientLibraryTestsPhone\FicsClientLibraryTestsPhone.csproj", "{E52D695D-BF80-4740-B120-F27BB1792E4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
