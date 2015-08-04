@@ -8,6 +8,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <StackPanel x:Name="stackPanel" Orientation="Horizontal">
+            <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,10,10" Visibility="Collapsed"/>
+        </StackPanel>
+        <ProgressRing x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Width="150" Height="150"  IsActive="True"/>
     </Grid>
 </Page>

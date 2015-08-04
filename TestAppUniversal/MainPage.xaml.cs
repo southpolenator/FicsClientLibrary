@@ -1,17 +1,10 @@
-﻿using System;
+﻿using Internet.Chess.Server.Fics;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -22,9 +15,67 @@ namespace TestAppUniversal
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private FicsClient fics;
+
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            Task.Run(() => { StartFics(); });
+        }
+
+        private async void StartFics()
+        {
+            fics = new FicsClient();
+            await fics.LoginGuest();
+
+            var games = await fics.ListGames();
+
+            await GamesList.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                Dictionary<GameType, ListView> typeGames = new Dictionary<GameType, ListView>();
+
+                foreach (var game in games.OrderByDescending(g => g.WhitePlayer.Rating + g.BlackPlayer.Rating))
+                {
+                    ListView listView;
+
+                    if (!typeGames.TryGetValue(game.Type, out listView))
+                    {
+                        listView = new ListView();
+                        stackPanel.Children.Add(listView);
+                        listView.Visibility = Visibility.Collapsed;
+                        typeGames.Add(game.Type, listView);
+                    }
+
+                    listView.Items.Add(game);
+                }
+
+                foreach (var typeGame in typeGames.OrderBy(kvp => kvp.Key.ToString()))
+                {
+                    dynamic text = new ToStringExpandoObject();
+
+                    text.ToString = new ToStringFunc(() =>
+                    {
+                        return string.Format("{0} ({1})", typeGame.Key, typeGame.Value.Items.Count);
+                    });
+                    text.GameType = typeGame.Key;
+
+                    GamesList.Items.Add(text);
+                }
+
+                GamesList.SelectionChanged += (o, e) =>
+                {
+                    foreach (var typeGame in typeGames)
+                    {
+                        typeGame.Value.Visibility = Visibility.Collapsed;
+                    }
+
+                    dynamic text = GamesList.SelectedItem;
+
+                    typeGames[(GameType)text.GameType].Visibility = Visibility.Visible;
+                };
+                GamesList.Visibility = Visibility.Visible;
+                LoadingProgress.Visibility = Visibility.Collapsed;
+            });
         }
     }
 }
