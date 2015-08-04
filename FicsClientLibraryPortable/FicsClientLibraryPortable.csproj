@@ -39,39 +39,105 @@
     <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Source\Fics\AccountStatus.cs" />
-    <Compile Include="..\Source\Fics\AutoFicsServerInterfaceVariables.cs" />
-    <Compile Include="..\Source\Fics\AutoFicsServerVariables.cs" />
-    <Compile Include="..\Source\Fics\AutoFicsServerVariablesBase.cs" />
-    <Compile Include="..\Source\Fics\BughouseListingOptions.cs" />
-    <Compile Include="..\Source\Fics\BughouseListingResult.cs" />
-    <Compile Include="..\Source\Fics\ChessPieceColor.cs" />
-    <Compile Include="..\Source\Fics\ChessPieceType.cs" />
-    <Compile Include="..\Source\Fics\ChessPieceWithColor.cs" />
-    <Compile Include="..\Source\Fics\FicsClient.cs" />
-    <Compile Include="..\Source\Fics\FicsCommand.cs" />
-    <Compile Include="..\Source\Fics\FicsCommandState.cs" />
-    <Compile Include="..\Source\Fics\FicsServerInterfaceVariables.cs" />
-    <Compile Include="..\Source\Fics\FicsServerVariables.cs" />
-    <Compile Include="..\Source\Fics\Game.cs" />
-    <Compile Include="..\Source\Fics\Game2x2.cs" />
-    <Compile Include="..\Source\Fics\GameInfo.cs" />
-    <Compile Include="..\Source\Fics\GamesListingOptions.cs" />
-    <Compile Include="..\Source\Fics\GameState.cs" />
-    <Compile Include="..\Source\Fics\GameType.cs" />
-    <Compile Include="..\Source\Fics\IFicsServerInterfaceVariables.cs" />
-    <Compile Include="..\Source\Fics\IFicsServerVariables.cs" />
-    <Compile Include="..\Source\Fics\ObserveGameResult.cs" />
-    <Compile Include="..\Source\Fics\Partnership.cs" />
-    <Compile Include="..\Source\Fics\Player.cs" />
-    <Compile Include="..\Source\Fics\PlayerProvisionalRating.cs" />
-    <Compile Include="..\Source\Fics\PlayersListingOptions.cs" />
-    <Compile Include="..\Source\Fics\PlayerStatus.cs" />
-    <Compile Include="..\Source\Fics\ServerCommandCodeAttribute.cs" />
-    <Compile Include="..\Source\Fics\ServerCommandNameAttribute.cs" />
-    <Compile Include="..\Source\Fics\ServerList.cs" />
-    <Compile Include="..\Source\Fics\ServerVariableNameAttribute.cs" />
-    <Compile Include="..\Source\Fics\ServerVariablesBase.cs" />
+    <Compile Include="..\Source\Fics\AccountStatus.cs">
+      <Link>Fics\AccountStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\AutoFicsServerInterfaceVariables.cs">
+      <Link>Fics\AutoFicsServerInterfaceVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\AutoFicsServerVariables.cs">
+      <Link>Fics\AutoFicsServerVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\AutoFicsServerVariablesBase.cs">
+      <Link>Fics\AutoFicsServerVariablesBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\BughouseListingOptions.cs">
+      <Link>Fics\BughouseListingOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\BughouseListingResult.cs">
+      <Link>Fics\BughouseListingResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ChessPieceType.cs">
+      <Link>Fics\ChessPieceType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ChessPieceColor.cs">
+      <Link>Fics\ChessPieceColor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ChessPieceWithColor.cs">
+      <Link>Fics\ChessPieceWithColor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\FicsClient.cs">
+      <Link>Fics\FicsClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\FicsCommand.cs">
+      <Link>Fics\FicsCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\FicsCommandState.cs">
+      <Link>Fics\FicsCommandState.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\FicsServerInterfaceVariables.cs">
+      <Link>Fics\FicsServerInterfaceVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\FicsServerVariables.cs">
+      <Link>Fics\FicsServerVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\Game.cs">
+      <Link>Fics\Game.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\Game2x2.cs">
+      <Link>Fics\Game2x2.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\GameInfo.cs">
+      <Link>Fics\GameInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\GamesListingOptions.cs">
+      <Link>Fics\GamesListingOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\GameState.cs">
+      <Link>Fics\GameState.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\GameType.cs">
+      <Link>Fics\GameType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\IFicsServerInterfaceVariables.cs">
+      <Link>Fics\IFicsServerInterfaceVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\IFicsServerVariables.cs">
+      <Link>Fics\IFicsServerVariables.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ObserveGameResult.cs">
+      <Link>Fics\ObserveGameResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\Partnership.cs">
+      <Link>Fics\Partnership.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\Player.cs">
+      <Link>Fics\Player.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\PlayerProvisionalRating.cs">
+      <Link>Fics\PlayerProvisionalRating.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\PlayersListingOptions.cs">
+      <Link>Fics\PlayersListingOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\PlayerStatus.cs">
+      <Link>Fics\PlayerStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ServerCommandCodeAttribute.cs">
+      <Link>Fics\ServerCommandCodeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ServerCommandNameAttribute.cs">
+      <Link>Fics\ServerCommandNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ServerList.cs">
+      <Link>Fics\ServerList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ServerVariableNameAttribute.cs">
+      <Link>Fics\ServerVariableNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ServerVariablesBase.cs">
+      <Link>Fics\ServerVariablesBase.cs</Link>
+    </Compile>
     <Compile Include="..\Source\IcsClient.cs" />
     <Compile Include="..\Source\ReflectionHelpers.cs" />
     <Compile Include="..\Source\TelnetClient.cs" />
