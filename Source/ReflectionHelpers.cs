@@ -1,4 +1,11 @@
-﻿namespace Internet.Chess.Server
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("FicsClientLibraryTests")]
+[assembly: InternalsVisibleTo("FicsClientLibraryTestsWindows")]
+[assembly: InternalsVisibleTo("FicsClientLibraryTestsPhone")]
+[assembly: InternalsVisibleTo("FicsClientLibraryTestsUniversal")]
+
+namespace Internet.Chess.Server
 {
     using System;
     using System.Linq;
