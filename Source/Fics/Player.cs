@@ -38,6 +38,26 @@
         public PlayerProvisionalRating ProvisionalRating { get; set; }
 
         /// <summary>
+        /// Player's Rating as returned by the server
+        /// </summary>
+        public string RatingString
+        {
+            get
+            {
+                if (!IsRegistered)
+                {
+                    return "++++";
+                }
+                else if (!IsRated)
+                {
+                    return "----";
+                }
+
+                return Rating.ToString();
+            }
+        }
+
+        /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>A string that represents the current object.</returns>

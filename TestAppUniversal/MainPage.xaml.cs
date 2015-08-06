@@ -46,7 +46,14 @@ namespace TestAppUniversal
                         typeGames.Add(game.Type, listView);
                     }
 
-                    listView.Items.Add(game);
+                    dynamic text = new ToStringExpandoObject();
+
+                    text.ToString = new ToStringFunc(() =>
+                    {
+                        return string.Format("{4}: {0} ({1})  VS  {2} ({3})", game.WhitePlayer.Username, game.WhitePlayer.RatingString, game.BlackPlayer.Username, game.BlackPlayer.RatingString, game.Rated ? "Rated" : "Unrated");
+                    });
+                    text.Game = game;
+                    listView.Items.Add(text);
                 }
 
                 foreach (var typeGame in typeGames.OrderBy(kvp => kvp.Key.ToString()))
