@@ -65,9 +65,9 @@ namespace TestAppUniversal
             }
         }
 
-        private void UpdateField<T>(ref T variable, T value)
+        private void UpdateField<T>(ref T variable, T value) where T : IEquatable<T>
         {
-            if (!value.Equals(variable))
+            if ((value != null) != (variable != null) || !value.Equals(variable))
             {
                 variable = value;
                 UpdateLook();

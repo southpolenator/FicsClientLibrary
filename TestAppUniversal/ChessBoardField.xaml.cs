@@ -46,9 +46,9 @@ namespace TestAppUniversal
             set { UpdateField(ref chessPiece, value); }
         }
 
-        private void UpdateField<T>(ref T variable, T value)
+        private void UpdateField<T>(ref T variable, T value) where T : IEquatable<T>
         {
-            if (!value.Equals(variable))
+            if ((value != null) != (variable != null) || (value != null && !value.Equals(variable)))
             {
                 variable = value;
                 UpdateLook();

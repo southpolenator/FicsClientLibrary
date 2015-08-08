@@ -21,34 +21,35 @@ namespace TestAppUniversal
         public MainPage()
         {
             InitializeComponent();
-            ChessBoard[0, 0] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Bishop };
-            ChessBoard[0, 1] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.King };
-            ChessBoard[0, 2] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Knight };
-            ChessBoard[0, 3] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Pawn };
-            ChessBoard[0, 4] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Queen };
-            ChessBoard[0, 5] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Rook };
-            ChessBoard[1, 0] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Bishop };
-            ChessBoard[1, 1] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.King };
-            ChessBoard[1, 2] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Knight };
-            ChessBoard[1, 3] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Pawn };
-            ChessBoard[1, 4] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Queen };
-            ChessBoard[1, 5] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Rook };
-            Task.Run(() => { StartFics(); });
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
+
+            App.Current.FicsClientReady += OnFicsClientReady;
         }
 
-        private async void StartFics()
+        private void OnFicsClientReady(FicsClient client)
+        {
+            App.Current.FicsClientReady -= OnFicsClientReady;
+            fics = client;
+            Task.Run(() => { RefreshGames(); });
+        }
+
+        private async void RefreshGames()
         {
             try
             {
-                fics = new FicsClient();
-                await fics.LoginGuest();
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    ProgressText.Text = "Loading games";
+                });
 
                 var games = await fics.ListGames();
 
-                await GamesList.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
                     Dictionary<GameType, ListView> typeGames = new Dictionary<GameType, ListView>();
 
+                    ChildGamesPanel.Children.Clear();
+                    GamesList.Items.Clear();
                     foreach (var game in games.OrderByDescending(g => g.WhitePlayer.Rating + g.BlackPlayer.Rating))
                     {
                         ListView listView;
@@ -56,8 +57,17 @@ namespace TestAppUniversal
                         if (!typeGames.TryGetValue(game.Type, out listView))
                         {
                             listView = new ListView();
-                            stackPanel.Children.Add(listView);
                             listView.Visibility = Visibility.Collapsed;
+                            listView.IsItemClickEnabled = true;
+                            listView.ItemClick += (o, e) =>
+                            {
+                                dynamic gameText = e.ClickedItem;
+                                Game g = gameText.Game;
+
+                                Frame rootFrame = Window.Current.Content as Frame;
+                                rootFrame.Navigate(typeof(GamePage), g);
+                            };
+                            ChildGamesPanel.Children.Add(listView);
                             typeGames.Add(game.Type, listView);
                         }
 
@@ -84,19 +94,21 @@ namespace TestAppUniversal
                         GamesList.Items.Add(text);
                     }
 
-                    GamesList.SelectionChanged += (o, e) =>
+                    GamesList.IsItemClickEnabled = true;
+                    GamesList.ItemClick += (o, e) =>
                     {
                         foreach (var typeGame in typeGames)
                         {
                             typeGame.Value.Visibility = Visibility.Collapsed;
                         }
 
-                        dynamic text = GamesList.SelectedItem;
+                        dynamic text = e.ClickedItem;
 
                         typeGames[(GameType)text.GameType].Visibility = Visibility.Visible;
                     };
-                    GamesList.Visibility = Visibility.Visible;
-                    LoadingProgress.Visibility = Visibility.Collapsed;
+
+                    GamesPanel.Visibility = Visibility.Visible;
+                    ProgressPanel.Visibility = Visibility.Collapsed;
                 });
             }
             catch (Exception ex)

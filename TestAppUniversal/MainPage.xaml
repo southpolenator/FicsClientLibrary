@@ -8,10 +8,14 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel x:Name="stackPanel" Orientation="Horizontal">
-            <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,10,10" Visibility="Collapsed"/>
-            <local:ChessBoard x:Name="ChessBoard" Rows="8" Columns="8" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="460" Height="460" />
+        <StackPanel x:Name="GamesPanel" Orientation="Horizontal" Visibility="Collapsed">
+            <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,10,10"/>
+            <StackPanel x:Name="ChildGamesPanel" Orientation="Horizontal">
+            </StackPanel>
         </StackPanel>
-        <ProgressRing x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Width="150" Height="150"  IsActive="True"/>
+        <StackPanel x:Name="ProgressPanel" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="ProgressText" Text="Connecting to the server" HorizontalAlignment="Center" />
+            <ProgressRing x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="10" IsActive="True"/>
+        </StackPanel>
     </Grid>
 </Page>

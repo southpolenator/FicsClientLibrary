@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Internet.Chess.Server.Fics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -22,6 +25,8 @@ namespace TestAppUniversal
     /// </summary>
     sealed partial class App : Application
     {
+        public delegate void FicsClientReadyDelegate(FicsClient client);
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -33,7 +38,59 @@ namespace TestAppUniversal
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            FicsClient = new FicsClient();
+            isFicsClientReady = false;
+            Task.Run(async () =>
+            {
+                await FicsClient.LoginGuest();
+                FicsClient.ServerVariables.ShowPromptTime = false;
+                FicsClient.ServerVariables.Seek = false;
+                FicsClient.ServerVariables.MoveBell = false;
+                FicsClient.ServerVariables.Style = 12;
+                FicsClient.ServerVariables.ShowProvisionalRatings = true;
+                FicsClient.ServerVariables.Interface = "TestAppUniversal";
+                FicsClient.ServerInterfaceVariables.PreciseTimes = true;
+                FicsClient.ServerInterfaceVariables.DetailedGameInfo = true;
+                FicsClient.ServerInterfaceVariables.PreMove = true;
+                FicsClient.ServerInterfaceVariables.SmartMove = false;
+
+                isFicsClientReady = true;
+                if (ficsClientReady != null)
+                {
+                    ficsClientReady(FicsClient);
+                }
+            });
         }
+
+        public static new App Current
+        {
+            get { return (App)Application.Current; }
+        }
+
+        internal FicsClient FicsClient { get; set; }
+
+        private volatile bool isFicsClientReady;
+        private event FicsClientReadyDelegate ficsClientReady;
+
+        internal event FicsClientReadyDelegate FicsClientReady
+        {
+            add
+            {
+                if (isFicsClientReady)
+                {
+                    value(FicsClient);
+                }
+
+                ficsClientReady += value;
+            }
+
+            remove
+            {
+                ficsClientReady -= value;
+            }
+        }
+
+        internal Frame RootFrame { get; set; }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -50,16 +107,17 @@ namespace TestAppUniversal
             }
 #endif
 
-            Frame rootFrame = Window.Current.Content as Frame;
+            RootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-            if (rootFrame == null)
+            if (RootFrame == null)
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
-                rootFrame = new Frame();
+                RootFrame = new Frame();
 
-                rootFrame.NavigationFailed += OnNavigationFailed;
+                RootFrame.NavigationFailed += OnNavigationFailed;
+                RootFrame.Navigated += OnPageNavigated;
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
@@ -67,18 +125,49 @@ namespace TestAppUniversal
                 }
 
                 // Place the frame in the current Window
-                Window.Current.Content = rootFrame;
+                Window.Current.Content = RootFrame;
             }
 
-            if (rootFrame.Content == null)
+            if (RootFrame.Content == null)
             {
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                RootFrame.Navigate(typeof(MainPage), e.Arguments);
             }
             // Ensure the current window is active
             Window.Current.Activate();
+        }
+
+        private void OnPageNavigated(object sender, NavigationEventArgs e)
+        {
+            if (RootFrame.CanGoBack)
+            {
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                SystemNavigationManager.GetForCurrentView().BackRequested += (source, args) =>
+                {
+                    if (RootFrame.CanGoBack)
+                    {
+                        RootFrame.GoBack();
+                    }
+                };
+
+                //if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
+                //{
+                //    Windows.Phone.UI.Input.HardwareButtons.BackPressed += (source, args) = &gt;
+                //    {
+                //        if (Frame.CanGoBack)
+                //        {
+                //            e.Handled = true;
+                //            Frame.GoBack();
+                //        }
+                //    };
+                //}
+            }
+            else
+            {
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
+            }
         }
 
         /// <summary>
