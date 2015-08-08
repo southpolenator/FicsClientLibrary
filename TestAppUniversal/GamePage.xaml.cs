@@ -79,7 +79,25 @@ namespace TestAppUniversal
 
                 OnGameStateChanged(result.GameState);
 
-                // TODO: Check if we have one more game to observe at the same time
+                // Check if we have one more game to observe at the same time
+                if (result.GameInfo.PartnersGameId > 0)
+                {
+                    rightGame = await fics.GetGame(result.GameInfo.PartnersGameId);
+                    var resultRight = await fics.StartObservingGame(rightGame);
+
+                    if (resultRight.GameInfo.PartnersGameId != leftGame.Id)
+                    {
+                        // TODO: Partners game finished (almost zero probability of this to happen)
+                    }
+
+                    var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        RightGame.Visibility = Visibility.Visible;
+                        RightGame.InitializeGameInfo(resultRight.GameInfo);
+                    });
+
+                    OnGameStateChanged(resultRight.GameState);
+                }
             }
             catch (Exception ex)
             {

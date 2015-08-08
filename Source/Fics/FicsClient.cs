@@ -282,7 +282,7 @@
         {
             IList<Game> games = await ListGames(gameNumber.ToString());
 
-            return games.Count > 0 ? games[0] : null;
+            return games.FirstOrDefault(g => g.Id == gameNumber);
         }
 
         /// <summary>
@@ -1141,7 +1141,7 @@
 
                 // Black clock
                 nextSpaceIndex = line.IndexOf('(', position);
-                game.WhiteClock = ParseTime(line.Substring(position, nextSpaceIndex - position).Trim());
+                game.BlackClock = ParseTime(line.Substring(position, nextSpaceIndex - position).Trim());
                 position = nextSpaceIndex;
 
                 // White strength

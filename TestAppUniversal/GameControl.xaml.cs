@@ -22,7 +22,7 @@ namespace TestAppUniversal
     public sealed partial class GameControl : UserControl
     {
         private Brush originalTextColor;
-        DispatcherTimer dispatcherTimer;
+        private DispatcherTimer dispatcherTimer;
 
         public GameControl()
         {
@@ -36,6 +36,12 @@ namespace TestAppUniversal
         public bool IsWhiteMove
         {
             get { return WhitePlayerSymbol.Visibility == Visibility.Visible; }
+        }
+
+        public bool BlackShouldBeDown
+        {
+            get { return ChessBoard.Flipped; }
+            set { ChessBoard.Flipped = value; }
         }
 
         public TimeSpan WhiteClock { get; private set; }
@@ -64,18 +70,19 @@ namespace TestAppUniversal
 
         public void OnGameStateChanged(GameState gameState)
         {
-            ChessBoard.Flipped = gameState.BlackAtBottom;
             if (gameState.Board != null)
+            {
                 for (int y = 0; y < 8; y++)
                     for (int x = 0; x < 8; x++)
                         ChessBoard[y, x] = gameState.Board[y, x];
 
-            WhitePlayerSymbol.Visibility = gameState.WhiteMove ? Visibility.Visible : Visibility.Collapsed;
-            BlackPlayerSymbol.Visibility = !gameState.WhiteMove ? Visibility.Visible : Visibility.Collapsed;
+                WhitePlayerSymbol.Visibility = gameState.WhiteMove ? Visibility.Visible : Visibility.Collapsed;
+                BlackPlayerSymbol.Visibility = !gameState.WhiteMove ? Visibility.Visible : Visibility.Collapsed;
 
-            ShowTime(WhitePlayerTime, WhiteClock = gameState.WhiteClock);
-            ShowTime(BlackPlayerTime, BlackClock = gameState.BlackClock);
-            dispatcherTimer.Start();
+                ShowTime(WhitePlayerTime, WhiteClock = gameState.WhiteClock);
+                ShowTime(BlackPlayerTime, BlackClock = gameState.BlackClock);
+                dispatcherTimer.Start();
+            }
         }
 
         public void OnGameEnded(GameEndedInfo info)
