@@ -1454,7 +1454,7 @@
                         {
                             state.Board[y, x] = new ChessPieceWithColor()
                             {
-                                Piece = ParseEnum<ChessPieceType>(char.ToUpper(piece).ToString()),
+                                Type = ParseEnum<ChessPieceType>(char.ToUpper(piece).ToString()),
                                 Color = char.IsUpper(piece) ? ChessPieceColor.White : ChessPieceColor.Black,
                             };
                         }

@@ -10,6 +10,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel x:Name="stackPanel" Orientation="Horizontal">
             <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,10,10" Visibility="Collapsed"/>
+            <local:ChessBoard x:Name="ChessBoard" Rows="8" Columns="8" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="460" Height="460" />
         </StackPanel>
         <ProgressRing x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Width="150" Height="150"  IsActive="True"/>
     </Grid>
