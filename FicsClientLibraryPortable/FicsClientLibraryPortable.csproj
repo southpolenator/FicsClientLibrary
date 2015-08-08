@@ -87,6 +87,9 @@
     <Compile Include="..\Source\Fics\Game2x2.cs">
       <Link>Fics\Game2x2.cs</Link>
     </Compile>
+    <Compile Include="..\Source\Fics\GameEndedInfo.cs">
+      <Link>Fics\GameEndedInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Source\Fics\GameInfo.cs">
       <Link>Fics\GameInfo.cs</Link>
     </Compile>

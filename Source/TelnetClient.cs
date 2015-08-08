@@ -22,7 +22,7 @@
         /// <summary>
         /// The socket connection to the telnet server
         /// </summary>
-        private StreamSocket socket = new StreamSocket();
+        private StreamSocket socket;
 
         /// <summary>
         /// The semaphore used for writing to the socket
@@ -39,11 +39,22 @@
         /// <param name="encoding">The server encoding.</param>
         public TelnetClient(string server, int port, string prompt = "", string newLine = "\n\r", Encoding encoding = null)
         {
-            socket.ConnectAsync(new HostName(server), port.ToString()).AsTask().Wait();
+            Server = server;
+            ServerPort = port;
             Prompt = prompt;
             Encoding = encoding != null ? encoding : Encoding.UTF8;
             NewLine = newLine;
         }
+
+        /// <summary>
+        /// Gets the server address.
+        /// </summary>
+        public string Server { get; private set; }
+
+        /// <summary>
+        /// Gets the server port.
+        /// </summary>
+        public int ServerPort { get; private set; }
 
         /// <summary>
         /// Gets the username of logged in user.
@@ -73,6 +84,9 @@
         /// <returns>Welcome message from the server</returns>
         public async Task<string> Login(string username, string password)
         {
+            socket = new StreamSocket();
+            socket.ConnectAsync(new HostName(Server), ServerPort.ToString()).AsTask().Wait();
+
             var prompt = this.Prompt;
 
             Prompt = "login: ";

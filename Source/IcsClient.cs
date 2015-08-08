@@ -105,7 +105,7 @@
         /// </summary>
         /// <param name="message">The message.</param>
         /// <returns><c>true</c> if it is known message, <c>false</c> otherwise</returns>
-        protected virtual bool IsKnownMessage(ref string message)
+        internal virtual bool IsKnownMessage(ref string message)
         {
             return false;
         }

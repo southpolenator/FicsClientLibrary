@@ -21,6 +21,12 @@
         public delegate void GameStateChangeDelegate(GameState gameState);
 
         /// <summary>
+        /// Delegate for game ended (while observing the game)
+        /// </summary>
+        /// <param name="gameId">The game identifier.</param>
+        public delegate void GameEndedDelegate(GameEndedInfo info);
+
+        /// <summary>
         /// Delegate when new message arrives.
         /// </summary>
         /// <param name="username">The username.</param>
@@ -96,6 +102,11 @@
         /// Occurs when game state changes (while observing the game).
         /// </summary>
         public event GameStateChangeDelegate GameStateChange;
+
+        /// <summary>
+        /// Occurs when game has ended.
+        /// </summary>
+        public event GameEndedDelegate GameEnded;
 
         /// <summary>
         /// Occurs when new message is received.
@@ -775,10 +786,11 @@
             var v2 = GetServerInterfaceVariables(Username);
         }
 
-        protected override bool IsKnownMessage(ref string message)
+        internal override bool IsKnownMessage(ref string message)
         {
             return TryParseCommandBlock(ref message)
                 || TryParseGameStateChange(message)
+                || TryParseGameEnded(message)
                 || TryParseTextMessage(message);
         }
 
@@ -853,6 +865,57 @@
                     GameState gameState = ParseGameState(null, piecesLine);
 
                     GameStateChange(gameState);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryParseGameEnded(string message)
+        {
+            if (message.StartsWith("\n{Game "))
+            {
+                GameEndedInfo info = new GameEndedInfo();
+                int position = 7;
+
+                // Game id
+                int gameIdEnd = message.IndexOf(' ', position);
+
+                info.GameId = int.Parse(message.Substring(position, gameIdEnd - position));
+                position = gameIdEnd + 1;
+
+                // Players
+                Debug.Assert(message[position] == '(');
+
+                int playersEnd = message.IndexOf(')');
+                string[] players = message.Substring(position + 1, playersEnd - position - 1).Split(new string[] { " vs. " }, StringSplitOptions.None);
+
+                info.WhitePlayerUsername = players[0];
+                info.BlackPlayerUsername = players[1];
+                position = playersEnd + 1;
+
+                // Message
+                Debug.Assert(message[position] == ' ');
+                position++;
+
+                int messageEnd = message.IndexOf('}', position);
+
+                info.Message = message.Substring(position, messageEnd - position);
+                position = messageEnd + 1;
+
+                // Points
+                Debug.Assert(message[position] == ' ');
+                position++;
+
+                string[] points = message.Substring(position).Split("-".ToCharArray());
+                info.WhitePlayerPoints = double.Parse(points[0]);
+                info.BlackPlayerPoints = double.Parse(points[1]);
+
+                if (GameEnded != null)
+                {
+                    GameEnded(info);
                 }
 
                 return true;

@@ -1,6 +1,7 @@
 ﻿using Internet.Chess.Server.Fics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -53,6 +54,10 @@ namespace TestAppUniversal
                 FicsClient.ServerInterfaceVariables.DetailedGameInfo = true;
                 FicsClient.ServerInterfaceVariables.PreMove = true;
                 FicsClient.ServerInterfaceVariables.SmartMove = false;
+                FicsClient.UnknownMessageReceived += (message) =>
+                {
+                    Debug.Assert(false, message);
+                };
 
                 isFicsClientReady = true;
                 if (ficsClientReady != null)
