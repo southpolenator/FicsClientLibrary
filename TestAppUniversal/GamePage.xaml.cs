@@ -25,30 +25,18 @@ namespace TestAppUniversal
     public sealed partial class GamePage : Page
     {
         private FicsClient fics;
-        private Game game;
+        private Game leftGame;
+        private Game rightGame;
 
         public GamePage()
         {
             this.InitializeComponent();
-            ChessBoard[0, 0] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Bishop };
-            ChessBoard[0, 1] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.King };
-            ChessBoard[0, 2] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Knight };
-            ChessBoard[0, 3] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Pawn };
-            ChessBoard[0, 4] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Queen };
-            ChessBoard[0, 5] = new ChessPieceWithColor() { Color = ChessPieceColor.White, Type = ChessPieceType.Rook };
-            ChessBoard[1, 0] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Bishop };
-            ChessBoard[1, 1] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.King };
-            ChessBoard[1, 2] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Knight };
-            ChessBoard[1, 3] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Pawn };
-            ChessBoard[1, 4] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Queen };
-            ChessBoard[1, 5] = new ChessPieceWithColor() { Color = ChessPieceColor.Black, Type = ChessPieceType.Rook };
-
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            game = (Game)e.Parameter;
+            leftGame = (Game)e.Parameter;
             App.Current.FicsClientReady += OnFicsClientReady;
         }
 
@@ -57,8 +45,9 @@ namespace TestAppUniversal
             base.OnNavigatedFrom(e);
             if (fics != null)
             {
-                var t = fics.StopObservingGame(game);
+                var t = fics.StopObservingGame(leftGame);
                 fics.GameStateChange -= OnGameStateChanged;
+                fics.GameEnded -= OnGameEnded;
             }
         }
 
@@ -67,6 +56,7 @@ namespace TestAppUniversal
             App.Current.FicsClientReady -= OnFicsClientReady;
             fics = client;
             fics.GameStateChange += OnGameStateChanged;
+            fics.GameEnded += OnGameEnded;
             Task.Run(() => { StartGame(); });
         }
 
@@ -74,15 +64,22 @@ namespace TestAppUniversal
         {
             try
             {
-                var result = await fics.StartObservingGame(game);
+                var result = await fics.StartObservingGame(leftGame);
 
-                if (result.GameInfo.BlackPlayer.Username != game.BlackPlayer.Username
-                    || result.GameInfo.WhitePlayer.Username != game.WhitePlayer.Username)
+                if (result.GameInfo.BlackPlayer.Username != leftGame.BlackPlayer.Username
+                    || result.GameInfo.WhitePlayer.Username != leftGame.WhitePlayer.Username)
                 {
                     // TODO: Stop observing wrong game
                 }
 
+                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    LeftGame.InitializeGameInfo(result.GameInfo);
+                });
+
                 OnGameStateChanged(result.GameState);
+
+                // TODO: Check if we have one more game to observe at the same time
             }
             catch (Exception ex)
             {
@@ -92,16 +89,41 @@ namespace TestAppUniversal
 
         private void OnGameStateChanged(GameState gameState)
         {
-            if (gameState.GameId == game.Id)
+            if (leftGame != null && gameState.GameId == leftGame.Id)
             {
                 var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    if (gameState.Board != null)
-                        for (int y = 0; y < 8; y++)
-                            for (int x = 0; x < 8; x++)
-                                ChessBoard[y, x] = gameState.Board[y, x];
+                    LeftGame.OnGameStateChanged(gameState);
                 });
             }
+            else if (rightGame != null && gameState.GameId == rightGame.Id)
+            {
+                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    RightGame.OnGameStateChanged(gameState);
+                });
+            }
+        }
+
+        private void OnGameEnded(GameEndedInfo info)
+        {
+            // Mark winner
+            if (leftGame != null && info.GameId == leftGame.Id)
+            {
+                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    LeftGame.OnGameEnded(info);
+                });
+            }
+            else if (rightGame != null && info.GameId == rightGame.Id)
+            {
+                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    RightGame.OnGameEnded(info);
+                });
+            }
+
+            // TODO: Start observing new game if there is one
         }
     }
 }

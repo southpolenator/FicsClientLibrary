@@ -1060,7 +1060,7 @@
 
             Debug.Assert(string.IsNullOrEmpty(line));
             line = reader.ReadLine();
-            Debug.Assert(line.StartsWith("  " + (games.Count - games.Count(g => g.Type == GameType.Bughouse) / 2) + " game"));
+            Debug.Assert(line.StartsWith("  " + (games.Count - games.Count(g => g.Type == GameType.Bughouse && !g.InSetup && !g.Examined) / 2) + " game"));
             line = reader.ReadLine();
             Debug.Assert(string.IsNullOrEmpty(line));
 

@@ -8,6 +8,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <local:ChessBoard x:Name="ChessBoard" Rows="8" Columns="8" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="460" Height="460" />
+        <StackPanel Orientation="Horizontal">
+            <local:GameControl x:Name="LeftGame" />
+            <local:GameControl x:Name="RightGame" Visibility="Collapsed" />
+        </StackPanel>
     </Grid>
 </Page>
