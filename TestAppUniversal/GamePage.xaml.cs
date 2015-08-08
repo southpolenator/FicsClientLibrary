@@ -92,14 +92,16 @@ namespace TestAppUniversal
 
         private void OnGameStateChanged(GameState gameState)
         {
-            var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            if (gameState.GameId == game.Id)
             {
-                for (int y = 0; y < 8; y++)
-                    for (int x = 0; x < 8; x++)
-                    {
-                        ChessBoard[y, x] = gameState.Board[y, x];
-                    }
-            });
+                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    if (gameState.Board != null)
+                        for (int y = 0; y < 8; y++)
+                            for (int x = 0; x < 8; x++)
+                                ChessBoard[y, x] = gameState.Board[y, x];
+                });
+            }
         }
     }
 }

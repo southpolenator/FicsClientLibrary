@@ -46,5 +46,20 @@
             Assert.AreEqual(gameEndedInfo.WhitePlayerPoints, 1);
             Assert.AreEqual(gameEndedInfo.BlackPlayerPoints, 0);
         }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseGameStoppedObserving()
+        {
+            string RemovingGameMessage = "\nRemoving game 129 from observation list.";
+            FicsClient client = new FicsClient();
+            int gameId = 0;
+
+            client.GameStoppedObserving += (id) =>
+            {
+                gameId = id;
+            };
+            client.IsKnownMessage(ref RemovingGameMessage);
+            Assert.AreEqual(gameId, 129);
+        }
     }
 }

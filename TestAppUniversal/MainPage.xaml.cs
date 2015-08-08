@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -21,8 +22,7 @@ namespace TestAppUniversal
         public MainPage()
         {
             InitializeComponent();
-            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Required;
-
+            NavigationCacheMode = NavigationCacheMode.Required; // Don't reload, but cache page when navigating
             App.Current.FicsClientReady += OnFicsClientReady;
         }
 

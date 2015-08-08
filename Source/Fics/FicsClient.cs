@@ -27,6 +27,12 @@
         public delegate void GameEndedDelegate(GameEndedInfo info);
 
         /// <summary>
+        /// Delegate for game stopped observing.
+        /// </summary>
+        /// <param name="gameId">The game identifier.</param>
+        public delegate void GameStoppedObservingDelegate(int gameId);
+
+        /// <summary>
         /// Delegate when new message arrives.
         /// </summary>
         /// <param name="username">The username.</param>
@@ -107,6 +113,11 @@
         /// Occurs when game has ended.
         /// </summary>
         public event GameEndedDelegate GameEnded;
+
+        /// <summary>
+        /// Occurs when game has ended and removed from observing list.
+        /// </summary>
+        public event GameStoppedObservingDelegate GameStoppedObserving;
 
         /// <summary>
         /// Occurs when new message is received.
@@ -916,6 +927,19 @@
                 if (GameEnded != null)
                 {
                     GameEnded(info);
+                }
+
+                return true;
+            }
+
+            if (message.StartsWith("\nRemoving game ") && message.EndsWith(" from observation list."))
+            {
+                const int start = 15, end = 23;
+                int gameId = int.Parse(message.Substring(start, message.Length - end - start));
+
+                if (GameStoppedObserving != null)
+                {
+                    GameStoppedObserving(gameId);
                 }
 
                 return true;
