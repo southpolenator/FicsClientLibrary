@@ -523,7 +523,7 @@
         }
 
         /// <summary>
-        /// Starts observing the players game.
+        /// Starts observing the player's game.
         /// </summary>
         /// <param name="player">The player.</param>
         /// <returns>Game info and game state</returns>
@@ -563,47 +563,111 @@
 
             try
             {
-                ObserveGameResult result = new ObserveGameResult();
                 StringReader reader = new StringReader(output);
-                string line = reader.ReadLine();
 
-                if (!line.StartsWith("You are now observing game "))
-                {
-                    throw new Exception(query);
-                }
-
-                int gameIdEnd = line.IndexOf('.');
-                int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
-
-                // Parse game info
-                string shortGameInfo = reader.ReadLine();
-                string detailedGameInfo = null;
-
-                Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
-                line = reader.ReadLine();
-                Debug.Assert(string.IsNullOrEmpty(line));
-
-                if (ServerInterfaceVariables.DetailedGameInfo)
-                {
-                    detailedGameInfo = reader.ReadLine();
-                    line = reader.ReadLine();
-                    Debug.Assert(string.IsNullOrEmpty(line));
-                }
-
-                // Take game info
-                result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, this.ServerVariables.ShowProvisionalRatings);
-
-                // Parse game state (style 12)
-                string style12gameLine = reader.ReadLine();
-                string style12piecesLine = reader.ReadLine();
-
-                result.GameState = ParseGameState(style12gameLine, style12piecesLine);
-                return result;
+                return ParseObserveGame(reader, ServerInterfaceVariables.DetailedGameInfo, ServerVariables.ShowProvisionalRatings);
             }
             catch (Exception ex)
             {
                 throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
+        }
+
+        internal static ObserveGameResult ParseObserveGame(StringReader reader, bool hasDetailedGameInfo, bool hasProvisionalRatings)
+        {
+            ObserveGameResult result = new ObserveGameResult();
+            string line = reader.ReadLine();
+
+            if (!line.StartsWith("You are now observing game "))
+            {
+                throw new Exception("Parsing wrong output for ObserveGame");
+            }
+
+            int gameIdEnd = line.IndexOf('.');
+            int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
+
+            // Parse game info
+            string shortGameInfo = reader.ReadLine();
+            string detailedGameInfo = null;
+
+            Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
+            line = reader.ReadLine();
+            Debug.Assert(string.IsNullOrEmpty(line));
+
+            if (hasDetailedGameInfo)
+            {
+                detailedGameInfo = reader.ReadLine();
+                line = reader.ReadLine();
+                Debug.Assert(string.IsNullOrEmpty(line));
+            }
+
+            // Take game info
+            result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, hasProvisionalRatings);
+
+            // Parse game state (style 12)
+            string style12gameLine = reader.ReadLine();
+            string style12piecesLine = reader.ReadLine();
+
+            result.GameState = ParseGameState(style12gameLine, style12piecesLine);
+            return result;
+        }
+
+        /// <summary>
+        /// Starts following the player's games.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        /// <returns>Game info and game state</returns>
+        public async Task<ObserveGameResult> StartFollowingPlayer(Player player)
+        {
+            return await StartFollowingPlayer(player.Username);
+        }
+
+        /// <summary>
+        /// Starts following the player's games.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <returns>Game info and game state</returns>
+        public async Task<ObserveGameResult> StartFollowingPlayer(string username)
+        {
+            string output = await Execute(FicsCommand.FollowPlayer, username);
+
+            try
+            {
+                StringReader reader = new StringReader(output);
+                string line = reader.ReadLine();
+
+                if (line.StartsWith("You will now be following " + username) && line.EndsWith("'s games."))
+                {
+                    // Check if player is currently playing a game
+                    if (output.Count(c => c == '\n') > 2)
+                    {
+                        return ParseObserveGame(reader, ServerInterfaceVariables.DetailedGameInfo, ServerVariables.ShowProvisionalRatings);
+                    }
+
+                    return null;
+                }
+                else if (line == "You will not follow any player's games.")
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new Exception(output);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
+            }
+        }
+
+        /// <summary>
+        /// Stop following the last followed player.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        public async Task StopFollowingPlayer()
+        {
+            await StartFollowingPlayer("");
         }
 
         /// <summary>

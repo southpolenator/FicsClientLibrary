@@ -203,6 +203,9 @@
         [ServerCommandName("cshout"), ServerCommandCode(31)]
         SendChessShoutMessage,
 
+        [ServerCommandName("follow"), ServerCommandCode(41)]
+        FollowPlayer,
+
         [ServerCommandName("games"), ServerCommandCode(43)]
         ListGames,
 

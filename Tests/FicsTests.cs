@@ -132,6 +132,40 @@
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsFollowPlayerPlayingGame()
+        {
+            var games = Wait(client.ListGames());
+            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
+            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
+            game = game ?? games[new Random().Next(games.Count)];
+            var observeGameResult = Wait(client.StartFollowingPlayer(game.WhitePlayer));
+
+            Assert.AreEqual(observeGameResult.GameInfo.GameId, game.Id);
+
+            if (observeGameResult.GameInfo.PartnersGameId > 0)
+            {
+                var observePartnerGameResult = Wait(client.StartObservingGame(observeGameResult.GameInfo.PartnersGameId));
+
+                Assert.AreEqual(observePartnerGameResult.GameInfo.GameId, observeGameResult.GameInfo.PartnersGameId);
+
+                Wait(client.StopObservingGame(observePartnerGameResult.GameInfo.GameId));
+            }
+
+            Wait(client.StopFollowingPlayer());
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsFollowPlayerNotPlayingGame()
+        {
+            var users = Wait(client.ListPlayers());
+            var user = users.FirstOrDefault(u => u.Username != client.Username && u.Status != PlayerStatus.ExaminingGame && u.Status != PlayerStatus.InvolvedInGame && u.Status != PlayerStatus.RunningSimulationMatch);
+            var observeGameResult = Wait(client.StartFollowingPlayer(user.Username));
+
+            Assert.IsNull(observeGameResult);
+            Wait(client.StopFollowingPlayer());
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsSendMessage()
         {
             // Verify that message can be sent
