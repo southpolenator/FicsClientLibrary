@@ -29,6 +29,8 @@ namespace TestAppUniversal
         {
             Rectangle rectangle = new Rectangle();
 
+            canvas.Width = 45;
+            canvas.Height = 45;
             rectangle.Width = canvas.Width;
             rectangle.Height = canvas.Height;
             rectangle.StrokeThickness = 2;
