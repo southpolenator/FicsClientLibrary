@@ -1280,7 +1280,7 @@
             accountStatus = AccountStatus.RegularAccount;
 
             int usernameEnd = position;
-            while (usernameEnd < line.Length && (char.IsLetter(line[usernameEnd]) || line[usernameEnd] == '.' || line[usernameEnd] == ',' || char.IsDigit(line[usernameEnd])))
+            while (usernameEnd < line.Length && (char.IsLetter(line[usernameEnd]) || line[usernameEnd] == '.' || line[usernameEnd] == '_' || line[usernameEnd] == ',' || char.IsDigit(line[usernameEnd])))
             {
                 usernameEnd++;
             }

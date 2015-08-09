@@ -105,6 +105,8 @@
     <Compile Include="ChessBoardField.xaml.cs">
       <DependentUpon>ChessBoardField.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChessBoardGraphics.cs" />
+    <Compile Include="ChessPieceGraphics.cs" />
     <Compile Include="GameControl.xaml.cs">
       <DependentUpon>GameControl.xaml</DependentUpon>
     </Compile>

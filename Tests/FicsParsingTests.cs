@@ -529,5 +529,366 @@
             Assert.IsNotNull(games);
             Assert.AreEqual(games.Count, 455);
         }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseGames2()
+        {
+            const string GamesString = @"
+  1 (Exam.    0 Bobby_Fisch    0 L_Miagmasu) [ uu  0   0] B:  5
+  6 (Exam.    0 GuestGTLF      0 puzzlebot ) [ uu  0   0] W:  1
+125 (Exam.    0 GuestZJGP      0 puzzlebot ) [ uu  0   0] W:  1
+212 (Exam.    0 guestbvg       0 rachile   ) [ bu  5  10] B: 49
+133 (Exam. 1296 DidP        1433 henusenebw) [ br  3   0] W: 11
+126 (Exam. 1671 AlwinKool   1576 Krockadile) [ sr 30  30] W: 14
+185 (Exam. 1788 zmd         1855 ericbwoo  ) [ br  5   0] W: 32
+ 48 (Exam. 1940 Aniruddha   1946 padreorujo) [ sr 30  30] B: 32
+  2 ++++ GuestJGTB   ++++ GuestSSQC  [ bu 10   0]  10:00 - 10:00 (39-39) B:  1
+  3 ---- DevilsOwn   ++++ GuestCXBD  [ bu 10   0]   8:05 -  9:27 (38-38) B: 10
+  7 ++++ GuestCYGL   ++++ GuestHKHJ  [ bu 10   5]   5:15 -  6:14 (21-18) B: 36
+  9 ++++ GuestNBRM   ++++ GuestLYRM  [ bu 10   0]   3:50 -  5:40 (22-18) W: 31
+ 12 ++++ GuestHPLM   ++++ GuestXCJV  [ bu  3   0]   2:40 -  2:50 (34-34) B:  9
+ 15 ++++ GuestSLSC   ++++ GuestBCKL  [ bu  5   0]   2:51 -  1:43 (29-29) W: 28
+ 17 ++++ GuestCSRN   ++++ GuestCFPS  [ su 30   5]  29:52 - 29:54 (39-39) W:  4
+ 21 ++++ eGuestWXBG  ++++ GuestPBVM  [ bu 10   0]   8:58 -  8:12 (29-28) W: 16
+ 24 ++++ Pikafiestas ++++ getga      [ bu  5  10]   4:39 -  5:12 (39-39) B:  5
+ 30 ++++ GuestPKGP   ++++ GuestPWJY  [ su 15   5]  14:23 - 13:50 (36-36) B: 11
+ 32 ++++ GuestLYVC   ++++ GuestMVCL  [ su 15   5]  12:36 - 11:18 (30-35) B: 15
+ 35 ++++ GuestYWHG   ++++ GuestWXHS  [ bu 10   0]   8:24 -  9:13 (36-36) B:  8
+ 41 ++++ GuestGKRL   ++++ RedRag     [ bu  2  12]   2:07 -  1:33 (26-26) B: 23
+ 44 ++++ GuestKVHB   ++++ GuestZXYT  [ bu 10   0]   9:46 -  9:24 (33-30) B:  9
+ 49 ++++ GuestPVVX   ++++ GuestCJTQ  [ bu  5   0]   4:40 -  3:35 (39-35) B:  8
+ 51 ++++ GuestKTCF   ---- rrenzz     [ su 15   0]  14:29 - 14:23 (38-38) B: 10
+ 52 ++++ GuestQFPV   ++++ GuestQBCQ  [ su 15   0]   7:18 - 10:54 (33-33) W: 21
+ 56 ++++ GuestZXXJ   ++++ GuestTFBM  [ su 15   0]  14:02 - 14:38 (38-38) B:  9
+ 63 ++++ GuestTCXH   ++++ GuestYRDL  [ bu  5   0]   4:48 -  4:53 (39-38) B:  8
+ 66 ++++ Doggydee    ++++ guestbvg   [ bu  5  10]   5:00 -  5:00 (39-39) B:  1
+ 68 ++++ GuestDLRV   ++++ GuestYYTG  [ su 35   0]  34:52 - 34:54 (39-39) B:  3
+ 71 ++++ GuestHFNR   ++++ GuestZSPW  [ bu 10   0]   8:10 -  8:26 (37-38) B: 10
+ 73 ++++ GuestJYQJ   ++++ GuestKMVK  [ su 15   5]   8:58 - 10:30 (32-32) B: 21
+ 75 ++++ GuestZGGM   ++++ GuestJBJN  [ bu  5   2]   3:49 -  4:25 (37-37) W: 17
+ 78 ++++ GuestYBLV   ++++ GuestXHYY  [ lu  1   0]   0:39 -  0:35 (17-28) W: 30
+ 79 ++++ GuestVYKF   ++++ GuestDCBR  [ su 15   2]   5:15 -  9:17 (30-26) B: 24
+ 84 ++++ GuestZRHS   ++++ GuestRTMB  [ bu  5   5]   4:56 -  5:00 (39-39) W:  3
+ 86 ++++ valesprec   ++++ GuestCDNM  [ bu 10   0]   9:56 -  9:50 (38-39) B:  3
+ 87 ++++ GuestFVFP   ++++ GuestTQRP  [ bu 10   0]   5:16 -  3:13 (38-37) W: 20
+ 93 ++++ GuestPHZL   ++++ GJoerg     [ su 15   0]  11:31 - 12:47 (32-31) B: 18
+ 96 ++++ GuestRMSQ   ++++ GuestNNZP  [ su 20  30]  20:00 - 20:00 (39-39) B:  1
+101 ++++ GuestMIGUEL ++++ GuestGZYD  [ bu  5   5]   4:16 -  5:00 (39-39) W:  2
+103 ++++ SooYouLose  ++++ akpandaq   [ su 15   0]   9:51 -  7:51 (25-21) W: 30
+110 ++++ GuestFBZC   ++++ GuestRZQS  [ bu 10   0]   5:36 -  7:49 (29-32) W: 21
+114 ++++ GuestMWSS   ++++ GuestFJWA  [ bu  5   5]   5:04 -  5:06 (36-36) B:  8
+116 ++++ GuestTJWQ   ++++ GuestZKNW  [ bu  2  12]   3:40 -  2:31 (35-35) B: 14
+121 ++++ GuestRBDL   ++++ GuestCKVC  [ su 15   5]  13:14 - 13:51 (38-37) W: 10
+124 ++++ Boorraskoso ++++ wwwkiuzmpk [ bu 10   0]   9:23 -  8:35 (30-36) W: 18
+127 ++++ mikemikey   ++++ GuestJKBT  [ bu  5   0]   2:35 -  3:03 (27-27) W: 27
+137 ++++ GuestSXBG   ++++ GuestYYNJ  [ bu  5   0]   3:18 -  3:38 (35-35) B: 13
+140 ++++ GuestFXCZ   ++++ GuestCLDB  [ bu 10   0]   6:01 -  7:59 (33-33) W: 17
+144 ++++ GuestXQGX   ++++ GuestTXNW  [ bu  5   0]   2:07 -  1:02 (36-35) B: 15
+147 ++++ GuestLMCY   ++++ GuestRXKN  [ bu  1   5]   1:14 -  0:35 (39-39) B: 14
+150 ++++ GuestFNPS   ++++ gfddfhf    [ su 10  20]   9:32 - 10:43 (38-38) W:  8
+157 ++++ GuestWKPH   ++++ Guestvwco  [ bu  5   0]   1:49 -  2:04 ( 5- 8) W: 46
+160 ++++ GuestZMSP   ++++ GuestMXXL  [ bu 10   0]   7:04 -  9:06 (38-38) B: 13
+165 ++++ guestTDDFT  ++++ GuestNVXV  [ lu  2   0]   1:58 -  0:28 (39-39) B:  2
+167 ++++ GuestWYPC   ++++ GuestPJXQ  [ bu  4   0]   2:09 -  1:49 ( 5- 6) B: 42
+170 ++++ GuestYSST   ++++ GuestHBBD  [ bu  5   5]   5:15 -  5:25 (39-39) W: 11
+179 ++++ GuestYTRJ   ++++ GuestLXVH  [ bu  9   0]   6:35 -  7:48 (35-38) B: 10
+180 ++++ GuestDJTQ   ++++ GuestZCJZ  [ su  0  31]   4:54 -  6:28 (15- 8) B: 37
+186 ++++ GuestHSMP   ++++ wtlcone    [ su 25  25]  27:13 - 24:14 (35-32) B:  8
+189 ++++ GuestDCDX   ++++ GuestNVDM  [ bu  5   0]   3:31 -  3:59 (34-34) B: 15
+190 ++++ GuestGPRV   ++++ nsriaad    [ bu  7   0]   7:00 -  7:00 (39-39) B:  1
+193 ++++ GuestPWML   ++++ GuestXWSW  [ bu  8  10]   7:44 -  2:31 (11-10) B: 30
+194 ++++ GuestWTZJ   ++++ GuestXZYZ  [ bu  2  12]   2:13 -  2:21 (39-39) W:  5
+195 ++++ GuestNDLC   ++++ GuestXRNL  [ bu 10   5]   9:55 -  6:05 (39-39) B:  3
+202 ++++ GuestTWGX   ++++ GuestJDDR  [ bu  5   5]   3:24 -  4:35 (31-34) W: 19
+208 ++++ Bangai      ++++ GuestSZTX  [ su 15   0]  13:52 - 14:27 (35-37) W: 10
+209 ++++ GuestWFNB   ++++ GuestVSRJ  [ bu  5   0]   1:06 -  1:38 (13-12) B: 31
+215 ++++ GuestFMQV   ++++ GuestBFSG  [ bu 10   0]   0:57 -  4:49 ( 9-18) W: 32
+219 ++++ GuestWHYX   ++++ FutureFord [ su 15   0]  14:54 - 14:19 (39-39) B:  2
+220 ++++ fgnfgh      ++++ GuestVWQJ  [ bu  3   0]   2:27 -  2:19 (37-37) W: 15
+227 ++++ avrokr      ++++ GuestDMRV  [ su 30  90]  49:45 - 48:14 (17-24) B: 19
+228 ++++ GuestRWNR   ++++ GuestTVLL  [ bu  5   0]   5:00 -  5:00 (39-39) W:  1
+229 ++++ GuestCDGH   ++++ GuestKCMY  [ bu  5   5]   5:14 -  5:06 (38-38) B:  8
+234 ++++ GuestBQBF   ++++ GuestPYQJ  [ bu  5   5]   3:59 -  3:49 (21-24) W: 30
+235 ++++ GuestKRNB   ++++ GuestZLSH  [ su 15   5]  12:02 - 12:55 (34-29) W: 22
+236 ++++ GuestZXQW   ++++ GuestNJCQ  [ bu  5   5]   3:03 -  1:21 (21-20) B: 36
+241 ++++ GuestXLKR   ++++ amaliku    [ su 30   5]  29:48 - 29:00 (38-38) W:  8
+242 ++++ GuestRDVW   ++++ Stuurmtroo [ bu 10   0]   8:09 -  0:00 (31- 3) B: 26
+250 ++++ GuestRWMJ   ---- NanditoXv  [ su 15   0]  14:52 - 14:58 (39-39) W:  3
+253 ---- sebastianor ++++ GuestSZVT  [ bu  5   0]   1:59 -  2:23 (23-26) W: 33
+254 ++++ GuestWPWL   ++++ GuestKYFM  [ bu  5   0]   4:32 -  4:21 (39-36) B:  7
+259 ++++ Guesthghkhj ++++ GuestLBDV  [ su 15   5]  14:06 - 14:00 (39-39) W:  7
+264 ++++ GuestFRVR   ++++ GuestNZBK  [ bu  5   0]   3:48 -  0:46 (37-37) B: 20
+265 ++++ GuestLRLQ   ++++ Alfioildra [ su 15   5]  14:36 - 14:20 (39-39) B:  8
+269 ++++ Justiz      ++++ kekbol     [ bu  7   2]   6:13 -  5:56 (36-36) W: 11
+271 ++++ GuestNGBW   ++++ GuestRWKV  [ bu 10   0]   9:08 -  9:09 (39-39) W:  5
+282 ++++ GuestRBJM   ++++ GuestCQXS  [ su 20   5]  15:20 - 18:01 (32-34) B: 12
+289 ++++ GuestCZLY   ++++ GuestWYPH  [ su 15   0]  14:24 - 14:36 (34-35) W: 11
+293 ++++ shanemathew ++++ GuestHSFC  [ bu  5   0]   3:56 -  4:10 (30-32) B: 15
+300 ++++ GuestGFGF   ++++ GuestHZXG  [ bu 10   0]   6:51 -  6:23 (34-34) W: 16
+302 ++++ GuestQNFL   ++++ GuestGRMK  [ su 15   5]  13:38 - 12:49 (31-32) W: 23
+303 ++++ GuestQGJL   ++++ GuestDNYB  [ su  5  20]   2:39 -  3:16 (35-27) W: 11
+305 ++++ GuestLGGB   ++++ GuestBXFZ  [ su 15   0]  13:30 - 11:10 (33-30) B: 15
+307 ++++ GuestXKBB   ++++ GuestCKTD  [ bu 10   0]   3:58 -  7:41 (20-25) W: 24
+311 ++++ GuestQPLB   ++++ GuestNHLF  [ bu  3   5]   2:22 -  3:19 (35-38) W: 12
+312 ++++ GuestGHTF   ++++ GuestGMKC  [ bu  3   3]   3:00 -  3:01 (39-39) W:  3
+314 ++++ GuestGNVR   ++++ GuestXJXK  [ bu 10   5]   8:43 -  7:28 (32-21) B: 21
+317 ++++ GuestDHCW   ++++ GuestFBYH  [ su 15   0]  11:39 - 13:37 (35-35) W: 14
+319 ++++ GuestPGFR   ++++ GuestYHBK  [ bu  5   0]   4:43 -  4:42 (38-38) B:  9
+321 ++++ GuestJZVH   ++++ GuestCHSX  [ bu 10   0]   8:15 -  7:13 (33-24) B: 17
+326 ++++ Guestyu     ++++ GuestPHKD  [ bu  5   0]   3:37 -  4:44 (39-39) W:  8
+328 ++++ GuestWQHX   ++++ buranija   [ su 15   0]  15:00 - 15:00 (39-39) B:  1
+338 ++++ GuestCJYF   ++++ GuestTSQD  [ bu  5   5]   3:35 -  3:04 (28-27) B: 17
+341 ++++ GuestHXYK   ++++ GuestKYXP  [ bu  5   0]   1:59 -  0:49 (17-21) B: 25
+343 ++++ GuestZNXL   ++++ GuestDMYT  [ bu  5   0]   4:01 -  3:48 (38-38) B: 13
+344 ++++ GuestLMTF   ---- UralEkb    [ su 15   0]  10:08 - 11:27 (27-26) W: 32
+345 ++++ Zalema      ++++ GuestZTWQ  [ bu 10   0]   8:56 -  8:47 (33-33) B: 10
+346 ++++ GuestSGZH   ++++ GuestSFHQ  [ su 15   0]   9:31 -  7:26 (16-13) W: 25
+348 ++++ GuestJPTN   ++++ GuestPWRZg [ bu  5   0]   2:49 -  2:34 (10-10) B: 40
+351 ++++ guestSDRY   ++++ GuestLQZR  [ bu 13   0]   9:05 -  5:31 (31-31) W: 22
+ 76  993 oOiiOo      ++++ GuestGHDT  [ lu  2   0]   2:00 -  2:00 (39-39) W:  1
+ 85 1032 Makhmoor    ++++ GuestVGGV  [ bu  5  10]   5:02 -  5:02 (35-35) B: 19
+172 1124 fujdur      ++++ GuestQPJW  [ bu  5   0]   1:44 -  2:22 (25-26) W: 24
+169 1161 elpidio     ++++ GuestFFRR  [ bu 10   0]   8:39 -  8:02 (36-38) W:  7
+214 ++++ lhance      1336 Abbasazizi [ su 15   0]   9:01 -  8:36 (19-22) B: 27
+231 1357 JosePad     ++++ GuestFCPZ  [ su 15   0]  10:46 - 10:35 (33-38) W: 21
+297 ++++ Roovers     1400 xukapy     [ bu 10   0]   6:39 -  6:57 (19-18) W: 23
+ 33 1413 WolSch      ++++ GuestYFGC  [ bu  5   0]   1:21 -  0:57 (22-29) W: 27
+233 1433 around      ++++ GuestMLWL  [ su 15  10]  14:30 - 13:55 (34-35) W: 14
+ 27 1449 qualitysing ++++ GuestLPVL  [ bu  5   0]   3:23 -  3:41 (23-21) B: 19
+285 ++++ GuestQPNG   1501 RCGT       [ su 12  60]  17:29 - 14:31 (38-36) B:  7
+ 14 1502 JufJanny    ++++ GuestWGJT  [ bu  2  12]   4:05 -  3:34 (31-22) W: 24
+315 ++++ GuestCLFX   1523 PaulFang   [ bu  5   5]   3:18 -  4:31 ( 4- 3) W: 60
+276 1553 jendavodka  ++++ GuestXCXY  [psu 15   0]  11:44 - 12:09 (32-34) B: 16
+301 1560 przemek     ++++ GuestJWTP  [ bu 10   0]   9:50 -  9:08 (39-39) W:  5
+154 1576 DrMasterMin ++++ GuestLGWM  [ bu 10   0]   3:36 -  1:09 (15-16) B: 35
+ 37 1591 leffejelm   ++++ GuestQXDF  [ su 25  10]  20:44 - 20:45 (11-12) B: 43
+292 ++++ cathysclown 1601 PetervG    [ su 15  15]  15:35 - 16:26 (31-30) B: 18
+218 ++++ opmentor    1672 Azterix    [ su 15   0]  13:21 - 13:23 (38-38) W: 12
+177 ++++ GuestTFDL   1694 Pieraleco  [ bu  5   0]   2:31 -  4:14 (30-31) W: 19
+355 1700 MisterSpain ++++ samghan    [ su 20   0]  17:52 - 16:58 (30-30) W: 16
+200 1710 reasoanblep ++++ GuestTSVW  [ bu  3   0]   0:05 -  0:05 (18-18) B: 35
+184 1743 TecMan      ++++ GuestBXCP  [ bu  3   0]   2:55 -  2:51 (35-35) B:  7
+272 ++++ GuestQDWB   1744 alekseju   [ su 15   0]  12:12 -  9:56 (29-30) W: 18
+ 62 ++++ GuestCCNR   1752 marquisce  [ bu  2  12]   9:41 - 11:12 ( 1- 3) W: 66
+164 1807 BigFatPope  ++++ GuestNWHX  [ bu  5   0]   2:19 -  1:45 (30-22) B: 25
+251 ++++ GuestKZSR   1878 pawntastic [ su 15   5]  11:33 - 13:24 (35-35) W: 15
+148 ++++ GuestXSQV   1925 jaymen     [ su 15   5]   3:55 -  7:45 (16-19) W: 38
+232 ++++ GuestGJGZ   1947 GriffyJr   [ bu  2  12]   4:07 -  9:31 (17-16) W: 40
+ 61 1058 Matinik      927 nikhilmeta [ br  5   5]   2:28 -  3:32 (34-35) B: 14
+217 2118 vapujara    ++++ GuestYLJJ  [ su 15   0]  14:20 - 14:29 (37-38) W:  8
+318 1038 skii        1137 niraj      [ br  5   5]   2:33 -  3:20 (12- 9) B: 43
+347 1093 magellanino 1158 taylathomp [ br  5   0]   3:47 -  3:34 (13-18) W: 26
+ 31 1190 Orgamix     1062 lenkara    [ br 10   0]   4:38 -  7:01 (33-32) W: 21
+166 1042 olivierk    1236 youssefhj  [ br  6  12]   5:29 -  6:15 (32-35) B: 10
+182 1162 Alibabaici  1129 Lovelost   [ br  8   0]   7:40 -  7:46 (39-39) W:  5
+210 1185 jfhumphrey  1173 vieille    [ br  2  13]   3:29 -  2:43 (26-29) W: 16
+255 1198 RudiW       1160 knkhan     [ br  4  12]   2:44 -  4:19 (27-26) B: 25
+ 29 1184 Altivolous  1180 Wilberone  [ br  2  12]   2:16 -  2:23 (35-36) W:  6
+134 1131 WhatKnight  1233 cimabue    [ br  5   0]   1:13 -  2:29 (18-25) B: 18
+156 1236 Stegalvenbr 1128 LiamAloysi [ br  5   5]   5:31 -  5:01 (39-39) B: 10
+178 1079 danielemont 1328 xxfred     [ br  5   5]   1:27 -  3:04 (18-19) B: 19
+ 20 1217 bombordir   1191 webbsterhh [ br 10   7]   6:19 -  3:22 (21-22) B: 20
+ 59 1188 Checkhound  1226 someswar   [ br  3   0]   1:51 -  2:06 (24-25) W: 18
+131 1254 CoffeeHead  1186 drtim      [ br  5   2]   4:36 -  4:55 (34-35) B: 10
+152 1292 cnatha      1156 episodenin [ br  2   5]   1:40 -  1:51 (38-38) B:  6
+159 1079 mastormike  1389 mariyurik  [ br  5   5]   3:38 -  4:30 (30-29) W: 28
+107 1259 PrimoSalama 1214 dotexe     [ br 10   5]   6:04 -  4:35 (18-18) W: 37
+191 1266 saramandaia 1226 corina     [ br 10   5]   9:10 -  7:05 (16-15) B: 25
+223 1305 monpoeme    1190 Deusto     [ br  5   0]   5:00 -  5:00 (39-39) W:  1
+334 1262 MichaelSwar 1234 MaverickPL [ br 10   0]   6:55 -  4:55 (19-22) W: 26
+ 69 1159 amplitude   1340 alivelidok [ br 10   0]   8:19 -  5:32 (39-38) B:  9
+188 1227 POCKETWATCH 1280 Wychbold   [ br  3   0]   0:11 -  0:28 ( 5-17) W: 63
+261 1176 kkpsA       1337 ThunderHea [ br  2  12]   1:25 -  2:12 (39-38) W:  4
+213 1335 sniktawiii  1198 HeinzA     [ br 10   0]   9:00 -  8:35 (38-37) B: 10
+ 98 1325 Nistoras    1209 Stelefante [ br  5   5]   5:04 -  5:02 (39-39) W:  4
+199 1262 fredyhinz   1280 NoahPlaysC [ bu  5   2]   0:07 -  0:30 (13-17) B: 24
+ 43 1279 drpeker     1265 Rheingauer [ br  3   1]   2:58 -  3:00 (38-38) B:  5
+ 36 1261 picudaroja  1288 HallyB     [ br  5   0]   4:46 -  4:43 (39-39) W: 11
+247 1263 damun       1305 Kingsdeath [ br  5   5]   2:29 -  4:04 (16-18) W: 28
+284 1438 AsVHEn      1132 iliasss    [ br  2   2]   2:03 -  1:51 (26-26) B: 15
+270 1281 Kallehas    1290 PervertedB [ br  5   0]   0:35 -  1:47 (10-11) B: 32
+135 1235 kii         1367 constable  [ br  2  12]   3:05 -  1:12 (30-31) B: 19
+197 1346 BananaX     1289 Dharmadhik [ br  5   0]   4:06 -  3:12 (33-27) B: 18
+309 1381 Kravchenko  1255 hamrays    [ br  6   0]   4:35 -  5:10 (38-38) B: 14
+275 1336 Dicemice    1322 knanah     [ sr 15   0]  13:53 - 13:47 (39-39) W:  8
+ 72 1373 perencia    1291 AjaiBanu   [ sr 20   0]   5:04 -  5:41 (25-18) B: 35
+ 95 1341 sunscreen   1326 aetze      [ br  3   0]   1:29 -  1:15 (26-20) B: 26
+104 1347 meire       1326 dannowich  [ br  2   5]   1:59 -  0:53 (31-32) W: 16
+238 1309 sirschaap   1375 Paull      [ br  5   0]   4:39 -  4:53 (38-38) W:  8
+117 1316 Shatranje   1369 Esoxmat    [ br  3   0]   1:57 -  2:04 (30-32) B: 20
+222 1127 Ooty        1563 XLpawn     [ br 10   2]   9:34 -  9:24 (37-37) B:  8
+118 1393 zzLV        1315 mehdiroomi [ br  5   5]   4:40 -  3:29 (36-35) W:  9
+146 1356 arunj       1355 huvulu     [ br  2  15]   3:05 -  3:45 (25-25) B: 18
+327 1453 Anapolix    1264 Pasheek    [ br  5   0]   4:12 -  3:53 (28-32) B: 13
+283 1289 Xredline    1434 fridayknig [ sr 15   0]   8:44 - 13:26 (32-30) W: 21
+257 1419 Sumsar      1312 Martineesc [pbr  5   0]   1:01 -  2:06 (10-13) B: 35
+288 1371 DarMup      1403 aptius     [ br  2  12]   0:56 -  4:00 (31-31) W: 18
+ 42 1431 ghostx      1344 javierpg   [ sr 30   0]  26:33 - 27:25 (39-39) B:  8
+278 1446 henusenebwe 1340 Horschtde  [ br  3   0]   2:31 -  2:41 (36-35) B: 10
+286 1443 olmeque     1357 SaturnRise [ br  6   0]   2:37 -  4:03 (22-19) B: 21
+162 1175 toyer       1652 sitepu     [ sr 15   5]  12:30 - 12:22 (32-35) B: 15
+206 1472 arslanburcu 1356 rustychub  [ sr 15   2]  14:43 - 13:59 (34-36) W: 10
+145 1505 SaarFarLodr 1324 Ereshkigal [ br  5   0]   4:43 -  4:49 (39-39) B:  7
+ 74 1422 mkhorshidi  1412 Servadio   [ br  5   0]   3:33 -  3:41 (21-23) W: 22
+201 1340 IsmailN     1498 anjii      [ sr 25   0]  23:34 - 17:10 (36-36) B:  6
+350 1449 TheKafka    1393 cdtgc      [ br  3   0]   2:26 -  2:26 (34-34) B: 18
+168 1191 ilvspad     1654 callerfrom [ br  3   0]   2:59 -  2:56 (39-39) B:  3
+225 1307 SPACEWALK   1544 antoniuske [ br  5   0]   2:27 -  0:19 (23-16) B: 28
+240 1442 ReflectionO 1410 fanachess  [pbr  3   0]   2:59 -  2:58 (39-39) W:  3
+ 88 1499 grenville   1365 LionRishi  [ sr 15   0]   4:37 - 10:27 (31-32) W: 22
+129 1577 Mussklprozz 1300 maxbld     [ br  5   0]   3:59 -  3:55 (32-32) W: 16
+106 1429 Havermeyer  1450 Petasluk   [ br  5   0]   0:04 -  1:06 (28-24) B: 29
+  5 1251 anakarpovdj 1631 fourpawns  [ br  3   4]   1:51 -  2:02 (29-32) W: 16
+281 1470 ammaralmali 1412 zhangpeng  [ br  3   3]   3:05 -  2:07 (29-20) B: 15
+244 1499 Voharwich   1402 mycontrol  [ br  3   0]   2:22 -  2:27 (39-38) B: 11
+360 1595 missfie     1325 LordOfChim [ br  3   0]   1:42 -  0:23 (22- 9) B: 29
+ 25 1572 alterman    1363 skrepper   [ br  5   0]   4:50 -  4:45 (38-38) W:  8
+130 1465 leskovcanin 1471 PabloSG    [ br  5   0]   4:09 -  4:29 (33-33) W: 13
+  4 1446 sfritz      1500 imsttirol  [ br  3   0]   2:33 -  2:41 (33-32) B: 11
+ 46 1346 Achat       1603 SchakenSch [ br 10   0]   5:08 -  7:06 (24-24) W: 35
+287 1512 cuicui      1437 sitaraam   [ sr 15   0]  13:30 - 14:15 (38-38) W: 10
+136 1349 synews      1629 AHund      [ br  5   0]   1:50 -  2:40 (15-13) B: 34
+263 1408 umamaheshwa 1579 profnabesh [ sr 15   0]   8:44 -  7:32 (37-37) B: 21
+ 57 1477 aldraba     1521 AndreaCape [ br  3   0]   2:03 -  1:51 (39-39) W: 18
+256 1453 greatcafe   1554 davewoodhe [ br  3   0]   1:42 -  2:28 (29-29) W: 20
+ 19 1516 Mofish      1517 Jasf       [ br  3   2]   1:11 -  1:28 (20-17) W: 24
+143 1595 Teobald     1438 valeri     [ br  5   0]   2:08 -  3:14 (32-32) W: 19
+203 1404 crystalaugu 1636 centrozap  [ br  5   0]   1:23 -  2:23 (19-19) B: 33
+ 13 1559 mottetotte  1486 thehempste [ br  3   0]   0:34 -  1:27 (29-29) B: 29
+153 1372 torko       1682 volcano    [ br  3   0]   0:37 -  1:02 (26-24) B: 23
+322 1595 Karic       1461 Roberto    [pbr  3   2]   2:47 -  2:22 (39-39) B:  9
+113 1563 Nirjharroyn 1514 Gurucool   [ sr 15   5]   5:37 -  5:40 ( 7- 9) W: 47
+139 1610 natator     1474 vopet      [ br  5   0]   3:07 -  4:52 (38-38) W:  9
+205 1509 Afafa       1576 callipygia [ br  5   0]   1:04 -  4:57 ( 3- 8) W: 37
+174 1537 shugart     1558 UweL       [ lr  1   0]   0:35 -  0:30 (32-32) B: 19
+221 1532 VetustaMorl 1570 HexenTom   [ br  3   0]   2:03 -  1:59 (35-36) W: 20
+ 40 1582 rmmsf       1529 railroadma [ sr 10  15]  10:59 - 10:48 (39-39) W:  7
+224 1648 roushend    1483 luoyu      [ sr 15   0]  15:00 - 15:00 (39-39) B:  1
+329 1564 halette     1582 demesamaus [ br  3   0]   2:50 -  2:45 (38-38) B: 11
+ 60 1632 ChessBook   1521 Vorland    [ br  3   0]   2:02 -  1:10 (31-31) W: 22
+ 97 1444 DerMeistere 1711 skakomatov [ br  3   0]   1:54 -  2:17 (28-32) W: 17
+112 1597 ddaannyy    1562 MindBooks  [ br  5   0]   0:59 -  1:52 (20-21) W: 48
+204 1502 miagy       1668 farsed     [ sr 15   0]  14:58 - 15:00 (39-39) W:  2
+290 1619 zulugodetia 1554 hanbingwan [ sr 20  20]  19:58 - 19:25 (39-39) B:  6
+ 65 1606 elror       1570 Gbit       [pbr  5   0]   4:06 -  3:47 (37-33) B: 12
+109 1467 sacra       1737 wizbob     [ br  3   0]   2:27 -  2:21 (35-35) W: 14
+273 1670 keichancehe 1534 tepes      [ zr  3   0]   2:20 -  1:45 (37-41) W: 18
+308 1597 smartsid    1610 dolochovi  [ sr 15   0]  12:15 - 13:11 (22-20) B: 23
+ 10 1389 Mucke       1823 Ddaris     [ br  3   0]   2:17 -  2:29 (31-32) W: 16
+151 1676 dadatiti    1538 Ketan      [ br  3   0]   1:46 -  2:11 (20-20) W: 22
+258 1624 Atqkhateeb  1592 hsbar      [ sr 15   5]   9:58 - 10:43 (27-27) B: 17
+ 99 1675 msamei      1548 ChessWizar [ sr 15   0]  13:11 -  9:13 (38-38) W: 15
+332 1497 velogrillo  1728 XXXXTOOLXX [ br  3   0]   2:45 -  2:51 (38-38) B:  9
+ 64 1691 reducto     1539 PAVLOVIC   [ br  3   0]   1:54 -  0:41 ( 8- 7) W: 45
+230 1554 germanym    1691 Anunakhu   [ sr 15   0]   8:32 -  4:04 (33-34) W: 26
+243 1497 anuraganura 1758 jhersky    [ sr 15   0]   2:02 -  2:22 (13-10) B: 44
+122 1655 ZahariSokol 1620 asturkon   [ sr 20   0]   4:04 -  1:13 (22-19) W: 42
+260 1663 Collibri    1619 RedPimpern [ sr 15   0]  11:56 - 10:58 (31-32) W: 20
+138 1531 HWaser      1755 piszkosfre [ sr 30  15]  12:11 - 25:16 (26-26) W: 15
+ 18 1664 lewlak      1631 Chicharrer [ br  3   5]   2:41 -  3:03 (36-35) W:  9
+226 1505 lucyal      1819 Niak       [ br  5   0]   3:24 -  3:09 (29-28) B: 30
+211 1655 Strack      1675 jobzaz     [ sr 20   0]  18:30 - 16:59 (36-36) B: 13
+173 1685 RSTu        1657 Paddel     [ br  1   4]   0:44 -  1:06 (31-31) B: 13
+324 1693 Dgarciux    1653 Euphron    [ sr 15   0]   4:34 -  4:42 (17-14) W: 28
+294 1770 Pfiffikus   1579 gbtami     [ br  3   0]   1:46 -  2:07 (20-19) B: 19
+183 1614 NAGPURINDIA 1738 kottarakka [ sr 15   0]   6:21 - 10:43 (31-30) B: 27
+291 1821 StevanM     1537 kapnobing  [ br 10   0]   8:36 -  8:16 (34-34) W: 14
+298 1745 Lordofwar   1614 ppn        [ su 18  18]  18:39 - 18:15 (39-39) B:  4
+198 1645 jollygood   1715 turkeyboy  [ br  3   0]   0:14 -  0:18 (20-10) B: 46
+310 1706 implacabile 1665 chesskeen  [ br  5   0]   1:21 -  0:07 (25-24) W: 38
+ 47 1665 Maziyar     1716 pusdas     [ sr 15   0]  13:30 - 14:27 (35-35) W: 13
+ 38 1435 irbissan    1949 fahratat   [ sr  1  90]  30:36 -  9:38 (24-24) B: 22
+171 1741 PetterO     1647 acetato    [ br  2   8]   0:31 -  3:32 (28-27) B: 32
+274 1780 AlteSchlunz 1615 hgir       [ br  3   0]   0:44 -  0:36 (21-20) B: 33
+181 1680 mattointre  1728 alleyn     [ br  2  12]   0:44 -  2:27 (30-30) W: 19
+ 91 1631 jrelm       1780 TheBartman [ sr 15   0]   8:49 -  8:57 (28-29) W: 26
+132 1732 Bluefruit   1680 ajeetk     [psr 15   0]   9:52 -  5:12 (30-32) B: 23
+ 81 1636 saturnz     1779 liaforever [ br  5   1]   1:36 -  2:54 (27-29) B: 27
+313 1646 aditinitya  1771 ciedan     [ sr 45  45]  31:40 - 21:01 (33-32) B: 17
+267 1486 bachio      1933 aep        [ br  3   0]   2:50 -  2:32 (35-35) W: 12
+237 1667 ozzynoid    1763 Itakha     [ br  3   0]   1:38 -  2:12 (26-26) W: 28
+ 70 1706 CaDuda      1744 Chessnull  [ lr  1   0]   0:39 -  0:31 (38-38) W: 22
+ 80 1706 ninoslava   1747 BugMare    [ br  3   0]   2:54 -  2:45 (39-38) B:  7
+163 1753 AppleStone  1706 Paccer     [pbr  3   0]   0:07 -  0:25 ( 4- 0) B: 60
+ 83 1592 Rambinats   1872 JPhilipp   [ sr 15   0]  15:00 - 15:00 (39-39) W:  1
+102 1797 gemorngokok 1671 Zozobra    [ br  3   0]   1:40 -  1:45 (32-32) B: 20
+316 1659 kimosfo     1816 Inschipupa [ br  3   0]   2:36 -  2:45 (39-39) B:  9
+279 1839 ClaudiuArad 1650 satolino   [ br  3   0]   1:39 -  1:18 (29-29) W: 29
+115 1657 Krsh        1858 Satana     [ sr 15   0]   7:39 -  9:29 (29-31) W: 20
+304 1683 mmiric      1837 Rapidgamer [ sr 15   0]  11:42 - 12:07 (30-30) B: 23
+245 1736 fastfoxy    1786 Mindreader [ br  3   0]   0:46 -  1:34 (31-28) W: 27
+128 1739 ciupilica   1785 anusja     [ sr 15  15]  14:08 -  5:38 (12-12) W: 34
+249 1735 nattyking   1795 xcvbnm     [ sr 11   8]  12:01 -  8:05 (14-14) B: 29
+339 1804 hgecruchbuc 1727 Giampy     [ sr 20   3]  11:28 - 10:50 (14-14) W: 27
+ 39 1791 golab       1742 Hieronymus [pbr  3   0]   2:16 -  1:57 (34-34) W: 13
+340 1806 Tomalak     1727 stefoo     [pbr  3   0]   2:17 -  2:00 (33-35) B: 18
+ 22 1789 mscp        1747 Enep       [ br  5   0]   4:54 -  1:02 ( 1- 7) B: 62
+323 1835 heyAdamBies 1711 LWRoad     [ sr 11  11]   6:26 -  5:07 (36-31) B: 16
+ 67 1763 biniek      1790 poimlknbv  [ sr 15  10]  12:13 - 13:51 (38-38) W: 13
+ 11 1912 genicolato  1649 danielboon [ br  5   0]   4:40 -  4:06 (38-38) W: 10
+119 1718 ImaRabbit   1848 sleppup    [ sr 15   0]   7:29 -  5:32 (20-20) W: 32
+216 1702 ItsOKwithMe 1887 PetkoPetko [ br  5   0]   5:00 -  5:00 (39-39) W:  1
+239 1614 zmute       1986 hanniballl [ bu  3   0]   2:42 -  2:50 (38-38) B:  6
+296 1408 lazamazu    2192 Rubus      [ br  5   0]   3:46 -  3:11 (27-30) W: 20
+ 82 1827 WinterSnow  1779 supernez   [plr  1   0]   0:47 -  0:48 (26-26) B: 12
+ 55 1601 memplex     2007 GriffySr   [ br  5   0]   3:27 -  4:56 ( 7- 9) W: 39
+123 1648 scranney    1978 CatNail    [ Sr  3   0]   2:55 -  3:00 (16-15) W:  3
+ 89 1813 bruut       1843 Urgenz     [ br  3   0]   2:50 -  2:54 (36-36) W: 10
+207 1556 duordy      2113 foggydew   [ sr 20  20]  22:02 - 18:06 (32-34) B: 10
+  8 1769 elisabeth   1901 Jaynesian  [ br  3   0]   2:11 -  2:23 (32-32) W: 16
+ 16 1937 SKC         1746 puscica    [ br  3   0]   1:39 -  2:22 (35-30) W: 12
+262 1951 blore       1797 NeoNunes   [ sr 15   0]  11:48 -  8:45 (33-36) W: 20
+192 1840 lanandt     1914 mistakeI   [ br  3   0]   1:47 -  1:26 (22-22) B: 24
+325 1852 Pacho       1919 muckxxx    [ br  3   0]   2:40 -  2:51 (26-26) W:  9
+246 1989 regeo       1845 RusselsTea [ sr 15   0]   4:37 -  4:44 (30-31) W: 25
+141 1972 leplusfaibl 1898 Haderlump  [ br  3   0]   2:29 -  2:32 (35-36) W: 13
+295 1927 shakthivish 1943 apitka     [pbr  3   0]   1:38 -  2:06 (30-31) B: 22
+158 1986 lair        1926 mkmiletic  [ br  3   0]   0:48 -  0:15 (13-16) W: 41
+108 1991 kopilica    1935 AlBig      [ br  3   0]   0:24 -  0:10 (15- 7) B: 44
+ 90 1960 kavinmartin 2008 smudlik    [ sr 15   0]  13:20 - 11:57 (38-38) W: 13
+353 2123 tentacle    1921 Crismate   [ br  5  12]   1:15 -  1:13 (22-22) B: 41
+ 50 2035 ArinaKisele 2154 IrinaAleks [ su120   0]   6:35 - 29:00 (25-26) W: 38
+ 45 1994 TagirSalemg 2222 DenisPersh [ su120   0]  15:20 - 19:00 (18-17) W: 37
+277 2004 EkaterBoris 2214 WIMStyazhk [ su120   0]  14:22 - 21:42 (24-24) B: 41
+330 2328 WFMParamzin 2069 WFMKistene [ su120   0]  23:16 -  4:27 (31-33) W: 31
+320 2445 IMVavulin   2053 PavelVolos [ su120   0] 1:58:11 -1:58:24 (19-18) B: 26
+252 2184 WFMChernyak 2318 TimofeySmi [ su120   0]  13:10 - 13:09 (25-26) W: 29
+161 2310 FMYeletsky  2263 FMTimerkha [ su120   0]  15:29 - 14:43 (27-26) B: 30
+149 2184 HBerggrenTo 2420 IMBraun    [ su120   0] 1:36:53 -1:48:35 (11-14) W: 32
+ 92 2328 FMOlund     2346 FMRydstrom [ su120   0] 1:59:17 -1:55:51 (39-39) B: 14
+335 2342 SergeiLoban 2358 SergeyDryg [ su120   0]  26:46 -  7:58 (13-11) W: 37
+ 34 2264 IvanMaslov  2450 IMZakharts [ su120   0]   0:52 - 48:46 (17-16) B: 53
+176 2469 IMAntonsen  2254 FMAlHadara [ su120   0] 1:02:16 -1:24:56 (23-23) W: 25
+248 2435 IMZenzera   2296 FMSavenkov [ su120   0]  31:42 -  2:04 (21-21) W: 37
+142 2413 FMLindgren  2356 IngvarAndr [ su120   0] 1:08:18 -1:18:54 (35-35) W: 25
+299 2407 IMGolubka   2382 FMHaubro   [ su120   0] 1:49:17 -1:56:16 (24-29) B: 20
+100 2571 GMOparin    2226 FMMinko    [ su120   0]  47:00 - 14:50 (29-29) B: 27
+196 2486 WGMGirya    2313 IMOvod     [ su120   0]  19:09 - 24:07 ( 6- 6) B: 43
+ 77 2423 IMJensNiels 2379 IMJohansso [ su120   0] 1:05:57 -1:21:15 (26-25) B: 30
+280 2449 IMAxelSmith 2355 FMHultin   [ su120   0] 1:19:06 -1:08:06 (20-19) B: 23
+ 23 2305 AndreyDryga 2513 GMAlekseen [ su120   0]  15:29 - 15:23 (16-17) B: 33
+111 2427 IMSavina    2410 IMGuseva   [ su120   0]  27:04 - 14:32 (13-13) B: 41
+ 54 2432 IMKashlinsk 2465 WGMPogonin [ su120   0]  20:31 - 22:18 (13-14) B: 42
+120 2461 IMWiedenkel 2450 IMZelbel   [ su120   0]  59:18 -1:27:54 (34-34) B: 21
+ 58 2517 GMKosteniuk 2428 IMBodnaruk [ su120   0]  23:51 - 18:30 (15-15) B: 43
+ 26 2530 GMRozentali 2452 IMWesterbe [ su120   0] 1:25:35 -1:38:30 (26-25) B: 29
+268 2530 GMLagno     2461 IMKovalevs [ su120   0]  59:07 -1:29:06 (31-32) W: 19
+266 2548 GMGunina    2486 WGMGoryach [ su120   0]   0:34 -  1:06 (25-29) B: 39
+ 28 2487 GMBlomqvist 2563 GMHillarpP [ su120   0] 1:44:46 -1:18:47 (35-35) W: 19
+105 2642 GMBukavshin 2671 GMLysyj    [ su120   0]  32:50 -  3:01 (22-23) B: 34
+175 2653 GMIKhairull 2661 GMDubov    [ su120   0]   2:42 - 50:57 ( 8- 7) B: 53
+187 2643 GMMotylev   2740 GMSvidler  [ su120   0]   6:46 - 51:22 (22-21) W: 33
+ 53 2660 GMArtemiev  2734 GMVitiugov [ su120   0]  23:48 -  9:11 (21-21) B: 26
+ 94 2753 GMKarjakin  2642 GMKhismatu [ su120   0]  29:40 -  0:00 (11-10) B: 41
+155 2745 GMTomashevs 2757 GMJakovenk [ su120   0]  27:16 - 31:14 (14-14) W: 42
+306 2847 stoccafisso 2896 Thiamath   [ sr 15   0]  11:56 - 12:53 (35-35) B: 19
+
+  348 games displayed.
+";
+            var games = FicsClient.ParseGames(GamesString);
+
+            Assert.IsNotNull(games);
+            Assert.AreEqual(games.Count, 348);
+        }
     }
 }

@@ -8,6 +8,7 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <local:GameControl x:Name="GameControl" VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="600" Height="600" />
         <StackPanel x:Name="GamesPanel" Orientation="Horizontal" Visibility="Collapsed">
             <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
             <StackPanel x:Name="ChildGamesPanel" Orientation="Horizontal">

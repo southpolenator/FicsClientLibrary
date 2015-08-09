@@ -24,6 +24,67 @@ namespace TestAppUniversal
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Required; // Don't reload, but cache page when navigating
             App.Current.FicsClientReady += OnFicsClientReady;
+
+
+            GameControl.BlackShouldBeDown = false;
+
+            GameInfo gameInfo = new GameInfo();
+
+            gameInfo.WhitePlayer = new Player()
+            {
+                Username = "WhitePlayer",
+                Rating = 1500,
+            };
+            gameInfo.BlackPlayer = new Player()
+            {
+                Username = "BlackPlayer",
+                Rating = 1500,
+            };
+            gameInfo.Type = GameType.Crazyhouse;
+            GameControl.InitializeGameInfo(gameInfo);
+
+            GameState gameState = new GameState();
+
+            gameState.Board = new ChessPieceWithColor[8, 8];
+            gameState.Board[0, 0] = ChessPieceWithColor.BlackRook;
+            gameState.Board[0, 1] = ChessPieceWithColor.BlackKnight;
+            gameState.Board[0, 2] = ChessPieceWithColor.BlackBishop;
+            gameState.Board[0, 3] = ChessPieceWithColor.BlackQueen;
+            gameState.Board[0, 4] = ChessPieceWithColor.BlackKing;
+            gameState.Board[0, 5] = ChessPieceWithColor.BlackBishop;
+            gameState.Board[0, 6] = ChessPieceWithColor.BlackKnight;
+            gameState.Board[0, 7] = ChessPieceWithColor.BlackRook;
+            gameState.Board[1, 0] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 1] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 2] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 3] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 4] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 5] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 6] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[1, 7] = ChessPieceWithColor.BlackPawn;
+            gameState.Board[6, 0] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 1] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 2] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 3] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 4] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 5] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 6] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[6, 7] = ChessPieceWithColor.WhitePawn;
+            gameState.Board[7, 0] = ChessPieceWithColor.WhiteRook;
+            gameState.Board[7, 1] = ChessPieceWithColor.WhiteKnight;
+            gameState.Board[7, 2] = ChessPieceWithColor.WhiteBishop;
+            gameState.Board[7, 3] = ChessPieceWithColor.WhiteQueen;
+            gameState.Board[7, 4] = ChessPieceWithColor.WhiteKing;
+            gameState.Board[7, 5] = ChessPieceWithColor.WhiteBishop;
+            gameState.Board[7, 6] = ChessPieceWithColor.WhiteKnight;
+            gameState.Board[7, 7] = ChessPieceWithColor.WhiteRook;
+            gameState.WhiteClock = TimeSpan.FromMilliseconds(10436);
+            gameState.BlackClock = TimeSpan.FromMilliseconds(9456);
+            gameState.WhiteMove = true;
+            gameState.WhitePieces = new List<ChessPieceType>() { ChessPieceType.Pawn, ChessPieceType.Pawn, ChessPieceType.Rook, ChessPieceType.Rook };
+            gameState.BlackPieces = new List<ChessPieceType>() { ChessPieceType.Pawn, ChessPieceType.Knight };
+
+            GameControl.OnGameStateChanged(gameState);
         }
 
         private void OnFicsClientReady(FicsClient client)
