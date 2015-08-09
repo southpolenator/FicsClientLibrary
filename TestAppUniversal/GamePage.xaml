@@ -10,7 +10,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel Orientation="Horizontal">
             <local:GameControl x:Name="LeftGame" />
-            <local:GameControl x:Name="RightGame" BlackShouldBeDown="True" Visibility="Collapsed" />
+            <local:GameControl x:Name="RightGame" BlackShouldBeDown="True" Visibility="Collapsed" Margin="10,0,0,0" />
         </StackPanel>
     </Grid>
 </Page>
