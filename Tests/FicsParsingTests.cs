@@ -890,5 +890,20 @@
             Assert.IsNotNull(games);
             Assert.AreEqual(games.Count, 348);
         }
+
+
+
+
+        // TODO: Parse unknown messages
+        const string Announcement = @"
+
+    **ANNOUNCEMENT** from relay: FICS is relaying the Russian Championship 
+\   Superfinal Men 2015 - Round 1, the Russian Championship Superfinal Women 
+\   2015 - Round 1 and the SS Manhem Chess Week IM/GM 2015 - Round 2. To find 
+\   more about Relay type ""tell relay help""
+";
+        const string Whispers = @"
+LurKing(C)(2442)[327] whispers: ply=19; eval=+0.20; nps=7.1M; time=8.53; 
+\   egtb=0";
     }
 }

@@ -83,6 +83,7 @@ namespace TestAppUniversal
             gameState.WhiteMove = true;
             gameState.WhitePieces = new List<ChessPieceType>() { ChessPieceType.Pawn, ChessPieceType.Pawn, ChessPieceType.Rook, ChessPieceType.Rook };
             gameState.BlackPieces = new List<ChessPieceType>() { ChessPieceType.Pawn, ChessPieceType.Knight };
+            gameState.LastMoveVerbose = "P/d7-f1";
 
             GameControl.OnGameStateChanged(gameState);
         }

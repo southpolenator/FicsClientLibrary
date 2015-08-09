@@ -1,6 +1,7 @@
 ﻿using Internet.Chess.Server.Fics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -122,7 +123,12 @@ namespace TestAppUniversal
                     var canvasProperty = GetType().GetTypeInfo().GetDeclaredProperty(canvasPropertyName);
 
                     if (canvasProperty != null)
-                        ChessPieceGraphics.DrawPiece((Canvas)canvasProperty.GetValue(this), chessPiece);
+                    {
+                        Canvas canvas = (Canvas)canvasProperty.GetValue(this);
+
+                        canvas.Children.Clear();
+                        ChessPieceGraphics.DrawPiece(canvas, chessPiece);
+                    }
                 }
         }
 
@@ -142,6 +148,53 @@ namespace TestAppUniversal
 
                 dispatcherTimer.Start();
                 lastTick = DateTime.UtcNow;
+
+                if (gameState.LastMoveVerbose != null)
+                {
+                    List<Tuple<int, int>> lastMoveFields = new List<Tuple<int, int>>();
+
+                    if (gameState.LastMoveVerbose == "o-o")
+                    {
+                        if (gameState.WhiteMove)
+                        {
+                            lastMoveFields.Add(Tuple.Create(0, 4));
+                            lastMoveFields.Add(Tuple.Create(0, 6));
+                        }
+                        else
+                        {
+                            lastMoveFields.Add(Tuple.Create(7, 4));
+                            lastMoveFields.Add(Tuple.Create(7, 6));
+                        }
+                    }
+                    else if (gameState.LastMoveVerbose == "o-o-o")
+                    {
+                        if (gameState.WhiteMove)
+                        {
+                            lastMoveFields.Add(Tuple.Create(0, 4));
+                            lastMoveFields.Add(Tuple.Create(0, 2));
+                        }
+                        else
+                        {
+                            lastMoveFields.Add(Tuple.Create(7, 4));
+                            lastMoveFields.Add(Tuple.Create(7, 2));
+                        }
+                    }
+                    else if (gameState.LastMoveVerbose.Contains('/'))
+                    {
+                        string[] tokens = gameState.LastMoveVerbose.Split("/-".ToCharArray());
+
+                        if (tokens[1] != "@@")
+                            lastMoveFields.Add(ConvertNotationToPosition(tokens[1]));
+                        lastMoveFields.Add(ConvertNotationToPosition(tokens[2]));
+                    }
+                    else
+                    {
+                        Debug.Assert(false, gameState.LastMoveVerbose);
+                    }
+
+                    ChessBoard.SetMarkedFields(lastMoveFields);
+                    GameResultText.Text = gameState.LastMoveVerbose;
+                }
             }
 
             if (gameState.WhitePieces != null)
@@ -153,6 +206,14 @@ namespace TestAppUniversal
                     SetChessPieceCount(ChessPieceColor.Black, pieceType, gameState.BlackPieces.Count(cp => cp == pieceType));
         }
 
+        private Tuple<int, int> ConvertNotationToPosition(string notation)
+        {
+            int column = Char.ToLower(notation[0]) - 'a';
+            int row = '8' - notation[1];
+
+            return Tuple.Create(row, column);
+        }
+
         public void OnGameEnded(GameEndedInfo info)
         {
             dispatcherTimer.Stop();
@@ -162,7 +223,7 @@ namespace TestAppUniversal
                 WhitePlayer.Foreground = new SolidColorBrush(Colors.Green);
                 BlackPlayer.Foreground = new SolidColorBrush(Colors.Red);
             }
-            else if (info.WhitePlayerPoints > info.BlackPlayerPoints)
+            else if (info.WhitePlayerPoints < info.BlackPlayerPoints)
             {
                 WhitePlayer.Foreground = new SolidColorBrush(Colors.Red);
                 BlackPlayer.Foreground = new SolidColorBrush(Colors.Green);

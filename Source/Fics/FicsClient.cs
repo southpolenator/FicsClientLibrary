@@ -920,6 +920,8 @@
                 Debug.Assert(message[position] == ' ');
                 position++;
 
+Debug.WriteLine(message.Substring(1));
+Debug.WriteLine(message.Substring(position));
                 string[] points = message.Substring(position).Split("-".ToCharArray());
                 info.WhitePlayerPoints = double.Parse(points[0]);
                 info.BlackPlayerPoints = double.Parse(points[1]);
@@ -1564,6 +1566,7 @@
                 state.BlackClock = TimeSpan.FromMilliseconds(double.Parse(tokens[25]));
                 state.Move = int.Parse(tokens[26]);
                 state.LastMoveVerbose = tokens[27];
+Debug.WriteLine(string.Format("Last move: {0}", state.LastMoveVerbose));
                 Debug.Assert(tokens[28].StartsWith("(") && tokens[28].EndsWith(")"));
                 state.LastMoveTime = ParseTime(tokens[28].Substring(1, tokens[28].Length - 2));
                 state.LastMove = tokens[29];

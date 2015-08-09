@@ -1,6 +1,8 @@
 ﻿using Windows.Foundation;
 using Windows.UI;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Shapes;
 
 namespace TestAppUniversal
 {
@@ -21,6 +23,18 @@ namespace TestAppUniversal
             stop2.Offset = 1;
             brush.GradientStops.Add(stop2);
             return brush;
+        }
+
+        public static void DrawFieldMark(Canvas canvas)
+        {
+            Rectangle rectangle = new Rectangle();
+
+            rectangle.Width = canvas.Width;
+            rectangle.Height = canvas.Height;
+            rectangle.StrokeThickness = 2;
+            rectangle.Stroke = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
+            rectangle.Fill = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));
+            canvas.Children.Add(rectangle);
         }
     }
 }

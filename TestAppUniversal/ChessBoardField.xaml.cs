@@ -23,6 +23,7 @@ namespace TestAppUniversal
     public sealed partial class ChessBoardField : UserControl
     {
         private bool white;
+        private bool marked;
         private ChessPieceWithColor chessPiece;
 
         public ChessBoardField()
@@ -35,6 +36,12 @@ namespace TestAppUniversal
         {
             get { return white; }
             set { UpdateField(ref white, value); }
+        }
+
+        public bool Marked
+        {
+            get { return marked; }
+            set { UpdateField(ref marked, value); }
         }
 
         public ChessPieceWithColor ChessPiece
@@ -69,6 +76,11 @@ namespace TestAppUniversal
             if (ChessPiece != null)
             {
                 ChessPieceGraphics.DrawPiece(Canvas, ChessPiece);
+            }
+
+            if (marked)
+            {
+                ChessBoardGraphics.DrawFieldMark(Canvas);
             }
         }
     }

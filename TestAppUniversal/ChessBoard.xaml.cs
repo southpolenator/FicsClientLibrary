@@ -156,5 +156,18 @@ namespace TestAppUniversal
             Grid.SetRow(element, row);
             Grid.SetColumn(element, column);
         }
+
+        internal void SetMarkedFields(List<Tuple<int, int>> lastMoveFields)
+        {
+            for (int y = 0; y < this.Rows; y++)
+            {
+                for (int x = 0; x < this.Columns; x++)
+                {
+                    ChessBoardField field = GetField(y, x);
+
+                    field.Marked = lastMoveFields.Contains(Tuple.Create(y, x));
+                }
+            }
+        }
     }
 }
