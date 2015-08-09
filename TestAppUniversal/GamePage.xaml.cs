@@ -73,7 +73,11 @@ namespace TestAppUniversal
             {
                 var result = await fics.StartFollowingPlayer(leftGame.WhitePlayer);
 
-                result = result ?? await fics.StartFollowingPlayer(leftGame.BlackPlayer);
+                if (result == null)
+                {
+                    await fics.StopFollowingPlayer();
+                    result = await fics.StartFollowingPlayer(leftGame.BlackPlayer);
+                }
                 if (result != null)
                 {
                     OnGameStarted(result);

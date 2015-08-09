@@ -1023,5 +1023,9 @@ INDIANREAPER(2215)[459] kibitzes: slip
         // TODO: Parse unknown messages
         const string Seekiing = @"
 GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)";
+
+        const string AddingTime = @"
+Game 236: GnuCheese added 300 seconds to Rookie's clock.
+";
     }
 }

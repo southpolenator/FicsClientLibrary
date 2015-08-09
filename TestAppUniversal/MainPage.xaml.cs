@@ -36,8 +36,11 @@ namespace TestAppUniversal
                     dynamic gameText = e.ClickedItem;
                     Game g = gameText.Game;
 
-                    Frame rootFrame = Window.Current.Content as Frame;
-                    rootFrame.Navigate(typeof(GamePage), g);
+                    if (!g.Private)
+                    {
+                        Frame rootFrame = Window.Current.Content as Frame;
+                        rootFrame.Navigate(typeof(GamePage), g);
+                    }
                 };
                 GamesList.Items.Clear();
                 ChildGamesPanel.Children.Add(listView);
@@ -144,6 +147,8 @@ namespace TestAppUniversal
             });
             text.GameType = typeGame.Key;
 
+            int selected = GamesList.SelectedIndex;
+
             for (int i = 0; i < GamesList.Items.Count; i++)
             {
                 dynamic t = GamesList.Items[i];
@@ -151,6 +156,10 @@ namespace TestAppUniversal
                 if (t.GameType == text.GameType)
                 {
                     GamesList.Items[i] = text;
+                    if (selected == i)
+                    {
+                        GamesList.SelectedIndex = selected;
+                    }
                     return;
                 }
             }
@@ -181,38 +190,23 @@ namespace TestAppUniversal
                     List<dynamic> gameTexts = new List<dynamic>();
                     ListView listView = gameTypeGameLists[gameType];
 
-                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        listView.Items.Clear();
-                    });
-
                     foreach (var game in games.Where(g => g.Type == gameType).OrderByDescending(g => g.WhitePlayer.Rating + g.BlackPlayer.Rating))
                     {
                         dynamic text = new ToStringExpandoObject();
 
                         text.ToString = new ToStringFunc(() =>
                         {
+                            if (game.Private)
+                                return string.Format("Private --- {4}: {0} ({1})  VS  {2} ({3})", game.WhitePlayer.Username, game.WhitePlayer.RatingString, game.BlackPlayer.Username, game.BlackPlayer.RatingString, game.Rated ? "Rated" : "Unrated");
                             return string.Format("{4}: {0} ({1})  VS  {2} ({3})", game.WhitePlayer.Username, game.WhitePlayer.RatingString, game.BlackPlayer.Username, game.BlackPlayer.RatingString, game.Rated ? "Rated" : "Unrated");
                         });
                         text.Game = game;
                         gameTexts.Add(text);
-
-                        if (gameTexts.Count >= 10)
-                        {
-                            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                            {
-                                foreach (dynamic t in gameTexts)
-                                    listView.Items.Add(t);
-                            });
-
-                            gameTexts.Clear();
-                        }
                     }
 
                     await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        foreach (dynamic text in gameTexts)
-                            listView.Items.Add(text);
+                        listView.ItemsSource = gameTexts;
                     });
                 }
 
@@ -230,6 +224,12 @@ namespace TestAppUniversal
             catch (Exception ex)
             {
             }
+
+            var t = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                RefreshGames();
+            });
         }
     }
 }

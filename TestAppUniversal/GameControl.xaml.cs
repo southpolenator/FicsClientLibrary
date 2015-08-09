@@ -105,7 +105,9 @@ namespace TestAppUniversal
         public void InitializeGameInfo(GameInfo info)
         {
             WhitePlayer.Text = info.WhitePlayer.ToString();
+            WhitePlayer.Foreground = originalTextColor;
             BlackPlayer.Text = info.BlackPlayer.ToString();
+            BlackPlayer.Foreground = originalTextColor;
             DrawPieces(info.Type != GameType.Crazyhouse && info.Type != GameType.Bughouse);
         }
 
