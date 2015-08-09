@@ -145,20 +145,12 @@ namespace TestAppUniversal
             }
 
             if (gameState.WhitePieces != null)
-            {
                 foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
-                {
                     SetChessPieceCount(ChessPieceColor.White, pieceType, gameState.WhitePieces.Count(cp => cp == pieceType));
-                }
-            }
 
             if (gameState.BlackPieces != null)
-            {
                 foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
-                {
                     SetChessPieceCount(ChessPieceColor.Black, pieceType, gameState.BlackPieces.Count(cp => cp == pieceType));
-                }
-            }
         }
 
         public void OnGameEnded(GameEndedInfo info)
