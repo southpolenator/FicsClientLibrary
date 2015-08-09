@@ -18,6 +18,7 @@ namespace TestAppUniversal
     public sealed partial class MainPage : Page
     {
         private FicsClient fics;
+        private Dictionary<GameType, ListView> gameTypeGameLists = new Dictionary<GameType, ListView>();
 
         public MainPage()
         {
@@ -25,8 +26,52 @@ namespace TestAppUniversal
             NavigationCacheMode = NavigationCacheMode.Required; // Don't reload, but cache page when navigating
             App.Current.FicsClientReady += OnFicsClientReady;
 
+            foreach (GameType gameType in Enum.GetValues(typeof(GameType)).OfType<GameType>().OrderBy(o => o.ToString()))
+            {
+                ListView listView = new ListView();
+                listView.Visibility = Visibility.Collapsed;
+                listView.IsItemClickEnabled = true;
+                listView.ItemClick += (o, e) =>
+                {
+                    dynamic gameText = e.ClickedItem;
+                    Game g = gameText.Game;
 
+                    Frame rootFrame = Window.Current.Content as Frame;
+                    rootFrame.Navigate(typeof(GamePage), g);
+                };
+                GamesList.Items.Clear();
+                ChildGamesPanel.Children.Add(listView);
+                gameTypeGameLists.Add(gameType, listView);
+            }
+
+            foreach (var typeGame in gameTypeGameLists.OrderBy(kvp => kvp.Key.ToString()))
+            {
+                UpdateGamesListItem(typeGame);
+            }
+
+            GamesList.IsItemClickEnabled = true;
+            GamesList.ItemClick += (o, e) =>
+            {
+                foreach (var typeGame in gameTypeGameLists)
+                {
+                    typeGame.Value.Visibility = Visibility.Collapsed;
+                }
+
+                dynamic text = e.ClickedItem;
+
+                gameTypeGameLists[(GameType)text.GameType].Visibility = Visibility.Visible;
+            };
+
+
+#if DEBUG
+            GameControl GameControl = new GameControl();
+
+            GameControl.VerticalAlignment = VerticalAlignment.Bottom;
+            GameControl.HorizontalAlignment = HorizontalAlignment.Center;
             GameControl.BlackShouldBeDown = false;
+            GameControl.Width = 600;
+            GameControl.Height = 600;
+            Grid.Children.Insert(0, GameControl);
 
             GameInfo gameInfo = new GameInfo();
 
@@ -86,6 +131,31 @@ namespace TestAppUniversal
             gameState.LastMoveVerbose = "Q/d1-a4";
 
             GameControl.OnGameStateChanged(gameState);
+#endif
+        }
+
+        private void UpdateGamesListItem(KeyValuePair<GameType, ListView> typeGame)
+        {
+            dynamic text = new ToStringExpandoObject();
+
+            text.ToString = new ToStringFunc(() =>
+            {
+                return string.Format("{0} ({1})", typeGame.Key, typeGame.Value.Items.Count);
+            });
+            text.GameType = typeGame.Key;
+
+            for (int i = 0; i < GamesList.Items.Count; i++)
+            {
+                dynamic t = GamesList.Items[i];
+
+                if (t.GameType == text.GameType)
+                {
+                    GamesList.Items[i] = text;
+                    return;
+                }
+            }
+
+            GamesList.Items.Add(text);
         }
 
         private void OnFicsClientReady(FicsClient client)
@@ -106,33 +176,18 @@ namespace TestAppUniversal
 
                 var games = await fics.ListGames();
 
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                foreach (GameType gameType in Enum.GetValues(typeof(GameType)))
                 {
-                    Dictionary<GameType, ListView> typeGames = new Dictionary<GameType, ListView>();
+                    List<dynamic> gameTexts = new List<dynamic>();
+                    ListView listView = gameTypeGameLists[gameType];
 
-                    ChildGamesPanel.Children.Clear();
-                    GamesList.Items.Clear();
-                    foreach (var game in games.OrderByDescending(g => g.WhitePlayer.Rating + g.BlackPlayer.Rating))
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        ListView listView;
+                        listView.Items.Clear();
+                    });
 
-                        if (!typeGames.TryGetValue(game.Type, out listView))
-                        {
-                            listView = new ListView();
-                            listView.Visibility = Visibility.Collapsed;
-                            listView.IsItemClickEnabled = true;
-                            listView.ItemClick += (o, e) =>
-                            {
-                                dynamic gameText = e.ClickedItem;
-                                Game g = gameText.Game;
-
-                                Frame rootFrame = Window.Current.Content as Frame;
-                                rootFrame.Navigate(typeof(GamePage), g);
-                            };
-                            ChildGamesPanel.Children.Add(listView);
-                            typeGames.Add(game.Type, listView);
-                        }
-
+                    foreach (var game in games.Where(g => g.Type == gameType).OrderByDescending(g => g.WhitePlayer.Rating + g.BlackPlayer.Rating))
+                    {
                         dynamic text = new ToStringExpandoObject();
 
                         text.ToString = new ToStringFunc(() =>
@@ -140,34 +195,33 @@ namespace TestAppUniversal
                             return string.Format("{4}: {0} ({1})  VS  {2} ({3})", game.WhitePlayer.Username, game.WhitePlayer.RatingString, game.BlackPlayer.Username, game.BlackPlayer.RatingString, game.Rated ? "Rated" : "Unrated");
                         });
                         text.Game = game;
-                        listView.Items.Add(text);
-                    }
+                        gameTexts.Add(text);
 
-                    foreach (var typeGame in typeGames.OrderBy(kvp => kvp.Key.ToString()))
-                    {
-                        dynamic text = new ToStringExpandoObject();
-
-                        text.ToString = new ToStringFunc(() =>
+                        if (gameTexts.Count >= 10)
                         {
-                            return string.Format("{0} ({1})", typeGame.Key, typeGame.Value.Items.Count);
-                        });
-                        text.GameType = typeGame.Key;
+                            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                foreach (dynamic t in gameTexts)
+                                    listView.Items.Add(t);
+                            });
 
-                        GamesList.Items.Add(text);
-                    }
-
-                    GamesList.IsItemClickEnabled = true;
-                    GamesList.ItemClick += (o, e) =>
-                    {
-                        foreach (var typeGame in typeGames)
-                        {
-                            typeGame.Value.Visibility = Visibility.Collapsed;
+                            gameTexts.Clear();
                         }
+                    }
 
-                        dynamic text = e.ClickedItem;
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        foreach (dynamic text in gameTexts)
+                            listView.Items.Add(text);
+                    });
+                }
 
-                        typeGames[(GameType)text.GameType].Visibility = Visibility.Visible;
-                    };
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    foreach (var typeGame in gameTypeGameLists)
+                    {
+                        UpdateGamesListItem(typeGame);
+                    }
 
                     GamesPanel.Visibility = Visibility.Visible;
                     ProgressPanel.Visibility = Visibility.Collapsed;
