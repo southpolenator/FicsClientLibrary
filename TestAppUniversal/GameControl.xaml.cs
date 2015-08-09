@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -33,16 +34,9 @@ namespace TestAppUniversal
             this.InitializeComponent();
             originalTextColor = WhitePlayer.Foreground;
             DrawPieces(true);
-            SetWhiteQueenCount(0);
-            SetWhiteRookCount(0);
-            SetWhiteKnightCount(0);
-            SetWhiteBishopCount(0);
-            SetWhitePawnCount(0);
-            SetBlackQueenCount(0);
-            SetBlackRookCount(0);
-            SetBlackKnightCount(0);
-            SetBlackBishopCount(0);
-            SetBlackPawnCount(0);
+            foreach (ChessPieceColor pieceColor in Enum.GetValues(typeof(ChessPieceColor)))
+                foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
+                    SetChessPieceCount(pieceColor, pieceType, 0);
         }
 
     public bool IsWhiteMove
@@ -116,32 +110,20 @@ namespace TestAppUniversal
 
         private void DrawPieces(bool inverted)
         {
-            if (!inverted)
-            {
-                ChessPieceGraphics.DrawPiece(WhitePlayerQueen, ChessPieceWithColor.WhiteQueen);
-                ChessPieceGraphics.DrawPiece(WhitePlayerRook, ChessPieceWithColor.WhiteRook);
-                ChessPieceGraphics.DrawPiece(WhitePlayerKnight, ChessPieceWithColor.WhiteKnight);
-                ChessPieceGraphics.DrawPiece(WhitePlayerBishop, ChessPieceWithColor.WhiteBishop);
-                ChessPieceGraphics.DrawPiece(WhitePlayerPawn, ChessPieceWithColor.WhitePawn);
-                ChessPieceGraphics.DrawPiece(BlackPlayerQueen, ChessPieceWithColor.BlackQueen);
-                ChessPieceGraphics.DrawPiece(BlackPlayerRook, ChessPieceWithColor.BlackRook);
-                ChessPieceGraphics.DrawPiece(BlackPlayerKnight, ChessPieceWithColor.BlackKnight);
-                ChessPieceGraphics.DrawPiece(BlackPlayerBishop, ChessPieceWithColor.BlackBishop);
-                ChessPieceGraphics.DrawPiece(BlackPlayerPawn, ChessPieceWithColor.BlackPawn);
-            }
-            else
-            {
-                ChessPieceGraphics.DrawPiece(WhitePlayerQueen, ChessPieceWithColor.BlackQueen);
-                ChessPieceGraphics.DrawPiece(WhitePlayerRook, ChessPieceWithColor.BlackRook);
-                ChessPieceGraphics.DrawPiece(WhitePlayerKnight, ChessPieceWithColor.BlackKnight);
-                ChessPieceGraphics.DrawPiece(WhitePlayerBishop, ChessPieceWithColor.BlackBishop);
-                ChessPieceGraphics.DrawPiece(WhitePlayerPawn, ChessPieceWithColor.BlackPawn);
-                ChessPieceGraphics.DrawPiece(BlackPlayerQueen, ChessPieceWithColor.WhiteQueen);
-                ChessPieceGraphics.DrawPiece(BlackPlayerRook, ChessPieceWithColor.WhiteRook);
-                ChessPieceGraphics.DrawPiece(BlackPlayerKnight, ChessPieceWithColor.WhiteKnight);
-                ChessPieceGraphics.DrawPiece(BlackPlayerBishop, ChessPieceWithColor.WhiteBishop);
-                ChessPieceGraphics.DrawPiece(BlackPlayerPawn, ChessPieceWithColor.WhitePawn);
-            }
+            foreach (ChessPieceColor pieceColor in Enum.GetValues(typeof(ChessPieceColor)))
+                foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
+                {
+                    ChessPieceWithColor chessPiece = new ChessPieceWithColor()
+                    {
+                        Color = !inverted ? pieceColor : (pieceColor == ChessPieceColor.Black ? ChessPieceColor.White : ChessPieceColor.Black),
+                        Type = pieceType,
+                    };
+                    string canvasPropertyName = string.Format("{0}Player{1}", pieceColor, pieceType);
+                    var canvasProperty = GetType().GetTypeInfo().GetDeclaredProperty(canvasPropertyName);
+
+                    if (canvasProperty != null)
+                        ChessPieceGraphics.DrawPiece((Canvas)canvasProperty.GetValue(this), chessPiece);
+                }
         }
 
         public void OnGameStateChanged(GameState gameState)
@@ -164,20 +146,18 @@ namespace TestAppUniversal
 
             if (gameState.WhitePieces != null)
             {
-                SetWhiteQueenCount(gameState.WhitePieces.Count(cp => cp == ChessPieceType.Queen));
-                SetWhiteRookCount(gameState.WhitePieces.Count(cp => cp == ChessPieceType.Rook));
-                SetWhiteKnightCount(gameState.WhitePieces.Count(cp => cp == ChessPieceType.Knight));
-                SetWhiteBishopCount(gameState.WhitePieces.Count(cp => cp == ChessPieceType.Bishop));
-                SetWhitePawnCount(gameState.WhitePieces.Count(cp => cp == ChessPieceType.Pawn));
+                foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
+                {
+                    SetChessPieceCount(ChessPieceColor.White, pieceType, gameState.WhitePieces.Count(cp => cp == pieceType));
+                }
             }
 
             if (gameState.BlackPieces != null)
             {
-                SetBlackQueenCount(gameState.BlackPieces.Count(cp => cp == ChessPieceType.Queen));
-                SetBlackRookCount(gameState.BlackPieces.Count(cp => cp == ChessPieceType.Rook));
-                SetBlackKnightCount(gameState.BlackPieces.Count(cp => cp == ChessPieceType.Knight));
-                SetBlackBishopCount(gameState.BlackPieces.Count(cp => cp == ChessPieceType.Bishop));
-                SetBlackPawnCount(gameState.BlackPieces.Count(cp => cp == ChessPieceType.Pawn));
+                foreach (ChessPieceType pieceType in Enum.GetValues(typeof(ChessPieceType)))
+                {
+                    SetChessPieceCount(ChessPieceColor.Black, pieceType, gameState.BlackPieces.Count(cp => cp == pieceType));
+                }
             }
         }
 
@@ -231,54 +211,15 @@ namespace TestAppUniversal
             }
         }
 
-        private void SetWhiteQueenCount(int count)
+        private void SetChessPieceCount(ChessPieceColor color, ChessPieceType type, int count)
         {
-            SetChessPieceCount(WhitePlayerQueen, WhitePlayerQueenCount, count);
-        }
+            string canvasPropertyName = string.Format("{0}Player{1}", color, type);
+            string textCountPropertyName = string.Format("{0}Player{1}Count", color, type);
+            var canvasProperty = GetType().GetTypeInfo().GetDeclaredProperty(canvasPropertyName);
+            var textCountcanvasProperty = GetType().GetTypeInfo().GetDeclaredProperty(textCountPropertyName);
 
-        private void SetWhiteRookCount(int count)
-        {
-            SetChessPieceCount(WhitePlayerRook, WhitePlayerRookCount, count);
-        }
-
-        private void SetWhiteKnightCount(int count)
-        {
-            SetChessPieceCount(WhitePlayerKnight, WhitePlayerKnightCount, count);
-        }
-
-        private void SetWhiteBishopCount(int count)
-        {
-            SetChessPieceCount(WhitePlayerBishop, WhitePlayerBishopCount, count);
-        }
-
-        private void SetWhitePawnCount(int count)
-        {
-            SetChessPieceCount(WhitePlayerPawn, WhitePlayerPawnCount, count);
-        }
-
-        private void SetBlackQueenCount(int count)
-        {
-            SetChessPieceCount(BlackPlayerQueen, BlackPlayerQueenCount, count);
-        }
-
-        private void SetBlackRookCount(int count)
-        {
-            SetChessPieceCount(BlackPlayerRook, BlackPlayerRookCount, count);
-        }
-
-        private void SetBlackKnightCount(int count)
-        {
-            SetChessPieceCount(BlackPlayerKnight, BlackPlayerKnightCount, count);
-        }
-
-        private void SetBlackBishopCount(int count)
-        {
-            SetChessPieceCount(BlackPlayerBishop, BlackPlayerBishopCount, count);
-        }
-
-        private void SetBlackPawnCount(int count)
-        {
-            SetChessPieceCount(BlackPlayerPawn, BlackPlayerPawnCount, count);
+            if (canvasProperty != null && textCountcanvasProperty != null)
+                SetChessPieceCount((Canvas)canvasProperty.GetValue(this), (TextBlock)textCountcanvasProperty.GetValue(this), count);
         }
 
         private static void SetChessPieceCount(Canvas canvas, TextBlock textCount, int count)
