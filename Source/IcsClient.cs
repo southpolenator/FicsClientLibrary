@@ -128,7 +128,7 @@
         /// <param name="received">The received.</param>
         private void ProcessMessages(string received)
         {
-            string[] messages = received.Split(new string[] { "\n" + telnet.Prompt }, StringSplitOptions.RemoveEmptyEntries);
+            string[] messages = received.Split(new string[] { telnet.Prompt }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string m in messages)
             {

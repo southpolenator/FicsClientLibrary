@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -52,6 +53,14 @@
         /// </summary>
         /// <param name="announcement">The announcement message.</param>
         public delegate void AnnouncementDelegate(string announcement);
+
+        /// <summary>
+        /// Delegate when new whisper/kibitz message arrives.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        /// <param name="gameId">The game identifier.</param>
+        /// <param name="message">The message.</param>
+        public delegate void InGameMessageDelegate(Player player, int gameId, string message);
 
         /// <summary>
         /// Delegate when followed player started a new game.
@@ -155,6 +164,16 @@
         /// Occurs when new announcement message is received.
         /// </summary>
         public event AnnouncementDelegate Announcement;
+
+        /// <summary>
+        /// Occurs when new whisper message arrives.
+        /// </summary>
+        public event InGameMessageDelegate Whisper;
+
+        /// <summary>
+        /// Occurs when new kibitz message arrives.
+        /// </summary>
+        public event InGameMessageDelegate Kibitz;
 
         /// <summary>
         /// Occurs when player, whom you are following, started a new game.
@@ -1018,7 +1037,7 @@
                 return true;
             }
 
-            if (message.StartsWith("\nRemoving game ") && message.EndsWith(" from observation list."))
+            if (message.StartsWith("\nRemoving game ") && message.EndsWith(" from observation list.\n"))
             {
                 const int start = 15, end = 23;
                 int gameId = int.Parse(message.Substring(start, message.Length - end - start));
@@ -1073,7 +1092,7 @@
 
                 if (username != null)
                 {
-                    string restOfLine = line.Substring(position);
+                    string restOfLine = message.Substring(position + 1);
 
                     // Direct message
                     const string tellsYou = " tells you: ";
@@ -1083,7 +1102,7 @@
 
                         if (MessageReceived != null)
                         {
-                            MessageReceived(username, messageText);
+                            MessageReceived(username, FixMessage(messageText));
                         }
 
                         return true;
@@ -1109,7 +1128,7 @@
                                 {
                                     int channel = int.Parse(restOfLine.Substring(position, endOfChannelNumber - position));
 
-                                    ChannelMessageReceived(channel, username, s.Substring(3));
+                                    ChannelMessageReceived(channel, username, FixMessage(s.Substring(3)));
                                 }
 
                                 return true;
@@ -1126,7 +1145,7 @@
 
                         if (ShoutMessageReceived != null)
                         {
-                            ShoutMessageReceived(username, messageText);
+                            ShoutMessageReceived(username, FixMessage(messageText));
                         }
 
                         return true;
@@ -1141,10 +1160,50 @@
 
                         if (ChessShoutMessageReceived != null)
                         {
-                            ChessShoutMessageReceived(username, messageText);
+                            ChessShoutMessageReceived(username, FixMessage(messageText));
                         }
 
                         return true;
+                    }
+
+                    Regex ratingGameRegex = new Regex(@"^\((\d+)\)\[(\d+)\]", RegexOptions.Singleline);
+                    Match match = ratingGameRegex.Match(restOfLine);
+
+                    if (match.Success)
+                    {
+                        Player player = new Player();
+                        int gameId = int.Parse(match.Groups[2].Value);
+
+                        position = match.Length;
+                        player.Username = username;
+                        player.AccountStatus = accountStatus;
+                        player.Rating = int.Parse(match.Groups[1].Value);
+
+                        // Whisper message
+                        const string whispers = " whispers: ";
+
+                        if (restOfLine.Length >= position + whispers.Length && restOfLine.Substring(position, whispers.Length) == whispers)
+                        {
+                            string messageText = restOfLine.Substring(position + whispers.Length);
+
+                            if (Whisper != null)
+                            {
+                                Whisper(player, gameId, FixMessage(messageText));
+                            }
+                        }
+
+                        // Kibitz message
+                        const string kibitzes = " kibitzes: ";
+
+                        if (restOfLine.Length >= position + kibitzes.Length && restOfLine.Substring(position, kibitzes.Length) == kibitzes)
+                        {
+                            string messageText = restOfLine.Substring(position + kibitzes.Length);
+
+                            if (Kibitz != null)
+                            {
+                                Kibitz(player, gameId, FixMessage(messageText));
+                            }
+                        }
                     }
                 }
                 else // username == null
@@ -1157,7 +1216,7 @@
                     {
                         if (Announcement != null)
                         {
-                            Announcement(trimmedMessage);
+                            Announcement(FixMessage(trimmedMessage));
                         }
 
                         return true;
@@ -1167,6 +1226,12 @@
 
             return false;
         }
+
+        private static string FixMessage(string message)
+        {
+            return message.Replace("\n\\   ", "");
+        }
+
         #endregion
 
         #region Parsing

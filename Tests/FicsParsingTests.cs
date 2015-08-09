@@ -51,7 +51,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGameStoppedObserving()
         {
-            string RemovingGameMessage = "\nRemoving game 129 from observation list.";
+            string RemovingGameMessage = "\nRemoving game 129 from observation list.\n";
             FicsClient client = new FicsClient();
             int gameId = 0;
 
@@ -66,7 +66,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGames()
         {
-            const string GamesString = @"
+            string GamesString = FixNewLines(@"
   1 (Setup    0 A              0 B         ) [ Bu  0   0] W:  1
   6 (Setup    0 sabretoothi    0 sabretooth) [ uu  0   0] W:  1
  17 (Exam.    0 puzzlebot      0 GuestVSHP ) [ uu  0   0] B:  1
@@ -524,7 +524,7 @@
 452 2116 Haithamyous 2156 darkiest   [ sr 15   5]  14:36 - 14:22 (36-36) W:  8
 
   453 games displayed.
-";
+");
             var games = FicsClient.ParseGames(GamesString);
 
             Assert.IsNotNull(games);
@@ -534,7 +534,7 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGames2()
         {
-            const string GamesString = @"
+            string GamesString = FixNewLines(@"
   1 (Exam.    0 Bobby_Fisch    0 L_Miagmasu) [ uu  0   0] B:  5
   6 (Exam.    0 GuestGTLF      0 puzzlebot ) [ uu  0   0] W:  1
 125 (Exam.    0 GuestZJGP      0 puzzlebot ) [ uu  0   0] W:  1
@@ -885,7 +885,7 @@
 306 2847 stoccafisso 2896 Thiamath   [ sr 15   0]  11:56 - 12:53 (35-35) B: 19
 
   348 games displayed.
-";
+");
             var games = FicsClient.ParseGames(GamesString);
 
             Assert.IsNotNull(games);
@@ -895,13 +895,13 @@
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseAnnouncement()
         {
-            string Announcement = @"
+            string Announcement = FixNewLines(@"
 
     **ANNOUNCEMENT** from relay: FICS is relaying the Russian Championship 
 \   Superfinal Men 2015 - Round 1, the Russian Championship Superfinal Women 
 \   2015 - Round 1 and the SS Manhem Chess Week IM/GM 2015 - Round 2. To find 
 \   more about Relay type ""tell relay help""
-";
+");
             FicsClient client = new FicsClient();
             string announcement = null;
 
@@ -910,20 +910,20 @@
                 announcement = message;
             };
             client.IsKnownMessage(ref Announcement);
-            Assert.AreEqual(announcement, Announcement.Trim());
+            Assert.AreEqual(announcement, @"**ANNOUNCEMENT** from relay: FICS is relaying the Russian Championship Superfinal Men 2015 - Round 1, the Russian Championship Superfinal Women 2015 - Round 1 and the SS Manhem Chess Week IM/GM 2015 - Round 2. To find more about Relay type ""tell relay help""");
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsFollowingObservingGame()
         {
-            string FollowingObservingGame = @"
+            string FollowingObservingGame = FixNewLines(@"
 Nopawn, whom you are following, has started a game with Boran.
 You are now observing game 66.
 Game 66: Boran (1880) Nopawn (1994) rated lightning 1 0
 
 <g1> 66 p=0 t=lightning r=1 u=0,0 it=60,0 i=60,0 pt=0 rt=1880,1994 ts=1,1 m=2 n=1
 
-<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 66 Boran Nopawn 0 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0";
+<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 66 Boran Nopawn 0 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0");
             FicsClient client = new FicsClient();
             ObserveGameResult game = null;
 
@@ -940,7 +940,7 @@ Game 66: Boran (1880) Nopawn (1994) rated lightning 1 0
         [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsFollowingObservingGame2()
         {
-            string FollowingObservingGame = @"
+            string FollowingObservingGame = FixNewLines(@"
 Voittamaton, whom you are following, has started a game with zitterbart.
 You are now observing game 183.
 Game 183: zitterbart (1768) Voittamaton (1770) rated crazyhouse 1 0
@@ -948,7 +948,7 @@ Game 183: zitterbart (1768) Voittamaton (1770) rated crazyhouse 1 0
 <g1> 183 p=0 t=crazyhouse r=1 u=0,0 it=60,0 i=60,0 pt=0 rt=1768,1770 ts=1,1 m=2 n=1
 
 <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 183 zitterbart Voittamaton 0 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0
-<b1> game 183 white [] black []";
+<b1> game 183 white [] black []");
             FicsClient client = new FicsClient();
             ObserveGameResult game = null;
 
@@ -962,14 +962,65 @@ Game 183: zitterbart (1768) Voittamaton (1770) rated crazyhouse 1 0
             Assert.IsNotNull(game);
         }
 
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseWhisper()
+        {
+            string Whisper = FixNewLines(@"
+LurKing(C)(2442)[327] whispers: ply=19; eval=+0.20; nps=7.1M; time=8.53; 
+\   egtb=0");
+            FicsClient client = new FicsClient();
+            string message = null;
+            Player player = null;
+            int gameId = 0;
+
+            client.Whisper += (p, g, m) =>
+            {
+                player = p;
+                gameId = g;
+                message = m;
+            };
+            client.IsKnownMessage(ref Whisper);
+            Assert.AreEqual(message, "ply=19; eval=+0.20; nps=7.1M; time=8.53; egtb=0");
+            Assert.AreEqual(player.Username, "LurKing");
+            Assert.AreEqual(player.AccountStatus, AccountStatus.ComputerAccount);
+            Assert.AreEqual(player.Rating, 2442);
+            Assert.AreEqual(gameId, 327);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseKibitz()
+        {
+            string Kibitz = FixNewLines(@"
+INDIANREAPER(2215)[459] kibitzes: slip
+");
+            FicsClient client = new FicsClient();
+            string message = null;
+            Player player = null;
+            int gameId = 0;
+
+            client.Kibitz += (p, g, m) =>
+            {
+                player = p;
+                gameId = g;
+                message = m;
+            };
+            client.IsKnownMessage(ref Kibitz);
+            Assert.AreEqual(message, "slip\n");
+            Assert.AreEqual(player.Username, "INDIANREAPER");
+            Assert.AreEqual(player.AccountStatus, AccountStatus.RegularAccount);
+            Assert.AreEqual(player.Rating, 2215);
+            Assert.AreEqual(gameId, 459);
+        }
+
+        private static string FixNewLines(string text)
+        {
+            return text.Replace("\r\n", "\n");
+        }
+
 
 
 
         // TODO: Parse unknown messages
-        const string Whispers = @"
-LurKing(C)(2442)[327] whispers: ply=19; eval=+0.20; nps=7.1M; time=8.53; 
-\   egtb=0";
-
         const string Seekiing = @"
 GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)";
     }

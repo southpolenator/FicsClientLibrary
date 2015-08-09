@@ -187,7 +187,7 @@ namespace TestAppUniversal
                             lastMoveFields.Add(ConvertNotationToPosition(tokens[1]));
                         lastMoveFields.Add(ConvertNotationToPosition(tokens[2]));
                     }
-                    else
+                    else if (gameState.LastMoveVerbose != "none")
                     {
                         Debug.Assert(false, gameState.LastMoveVerbose);
                     }

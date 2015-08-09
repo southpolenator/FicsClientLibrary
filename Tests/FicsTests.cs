@@ -112,8 +112,8 @@
         public void FicsObserveGame()
         {
             var games = Wait(client.ListGames());
-            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
-            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
+            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse && !g.Examined && !g.InSetup);
+            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse && !g.Examined && !g.InSetup);
             game = game ?? games[new Random().Next(games.Count)];
             var observeGameResult = Wait(client.StartObservingGame(game));
 
@@ -131,12 +131,12 @@
             Wait(client.StopObservingGame(game));
         }
 
-        [TestMethod, Timeout(DefaultTestTimeout)]
+        [TestMethod, Timeout(DefaultTestTimeout * 100)]
         public void FicsFollowPlayerPlayingGame()
         {
             var games = Wait(client.ListGames());
-            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse);
-            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse);
+            Game game = games.FirstOrDefault(g => g.Type == GameType.Bughouse && !g.Examined && !g.InSetup);
+            game = game ?? games.FirstOrDefault(g => g.Type == GameType.Crazyhouse && !g.Examined && !g.InSetup);
             game = game ?? games[new Random().Next(games.Count)];
             var observeGameResult = Wait(client.StartFollowingPlayer(game.WhitePlayer));
 
