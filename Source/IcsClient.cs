@@ -140,7 +140,7 @@
                     // Emmit unprocessed messages
                     if (UnknownMessageReceived != null)
                     {
-                        UnknownMessageReceived(message);
+                        Task.Run(() => { UnknownMessageReceived(message); });
                     }
                 }
             }

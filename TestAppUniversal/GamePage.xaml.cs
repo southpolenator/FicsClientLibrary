@@ -85,47 +85,44 @@ namespace TestAppUniversal
             }
         }
 
-        private void OnGameStarted(ObserveGameResult result)
+        private async void OnGameStarted(ObserveGameResult result)
         {
-            Task.Run(async () =>
-            {
-                if (result.GameInfo.GameId != leftGame.Id)
-                    leftGame = await fics.GetGame(result.GameInfo.GameId);
+            if (result.GameInfo.GameId != leftGame.Id)
+                leftGame = await fics.GetGame(result.GameInfo.GameId);
 
-                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                LeftGame.InitializeGameInfo(result.GameInfo);
+            });
+
+            OnGameStateChanged(result.GameState);
+
+            // Check if we have one more game to observe at the same time
+            if (result.GameInfo.PartnersGameId > 0)
+            {
+                rightGame = await fics.GetGame(result.GameInfo.PartnersGameId);
+                var resultRight = await fics.StartObservingGame(rightGame);
+
+                if (resultRight.GameInfo.PartnersGameId != leftGame.Id)
                 {
-                    LeftGame.InitializeGameInfo(result.GameInfo);
+                    // TODO: Partners game finished (almost zero probability of this to happen)
+                }
+
+                var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    RightGame.Visibility = Visibility.Visible;
+                    RightGame.InitializeGameInfo(resultRight.GameInfo);
                 });
 
-                OnGameStateChanged(result.GameState);
-
-                // Check if we have one more game to observe at the same time
-                if (result.GameInfo.PartnersGameId > 0)
+                OnGameStateChanged(resultRight.GameState);
+            }
+            else
+            {
+                var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    rightGame = await fics.GetGame(result.GameInfo.PartnersGameId);
-                    var resultRight = await fics.StartObservingGame(rightGame);
-
-                    if (resultRight.GameInfo.PartnersGameId != leftGame.Id)
-                    {
-                        // TODO: Partners game finished (almost zero probability of this to happen)
-                    }
-
-                    var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        RightGame.Visibility = Visibility.Visible;
-                        RightGame.InitializeGameInfo(resultRight.GameInfo);
-                    });
-
-                    OnGameStateChanged(resultRight.GameState);
-                }
-                else
-                {
-                    var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        RightGame.Visibility = Visibility.Collapsed;
-                    });
-                }
-            });
+                    RightGame.Visibility = Visibility.Collapsed;
+                });
+            }
         }
 
         private void OnGameStateChanged(GameState gameState)

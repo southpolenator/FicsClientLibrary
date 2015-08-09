@@ -965,7 +965,7 @@
 
                     GameState gameState = ParseGameState(gameLine, piecesLine);
 
-                    GameStateChange(gameState);
+                    Task.Run(() => { GameStateChange(gameState); });
                 }
 
                 return true;
@@ -981,7 +981,7 @@
 
                     GameState gameState = ParseGameState(null, piecesLine);
 
-                    GameStateChange(gameState);
+                    Task.Run(() => { GameStateChange(gameState); });
                 }
 
                 return true;
@@ -1031,7 +1031,7 @@
 
                 if (GameEnded != null)
                 {
-                    GameEnded(info);
+                    Task.Run(() => { GameEnded(info); });
                 }
 
                 return true;
@@ -1044,7 +1044,7 @@
 
                 if (GameStoppedObserving != null)
                 {
-                    GameStoppedObserving(gameId);
+                    Task.Run(() => { GameStoppedObserving(gameId); });
                 }
 
                 return true;
@@ -1067,7 +1067,7 @@
 
                     if (FollowedPlayerStartedGame != null)
                     {
-                        FollowedPlayerStartedGame(game);
+                        Task.Run(() => { FollowedPlayerStartedGame(game); });
                     }
 
                     return true;
@@ -1102,7 +1102,7 @@
 
                         if (MessageReceived != null)
                         {
-                            MessageReceived(username, FixMessage(messageText));
+                            Task.Run(() => { MessageReceived(username, FixMessage(messageText)); });
                         }
 
                         return true;
@@ -1128,7 +1128,7 @@
                                 {
                                     int channel = int.Parse(restOfLine.Substring(position, endOfChannelNumber - position));
 
-                                    ChannelMessageReceived(channel, username, FixMessage(s.Substring(3)));
+                                    Task.Run(() => { ChannelMessageReceived(channel, username, FixMessage(s.Substring(3))); });
                                 }
 
                                 return true;
@@ -1145,7 +1145,7 @@
 
                         if (ShoutMessageReceived != null)
                         {
-                            ShoutMessageReceived(username, FixMessage(messageText));
+                            Task.Run(() => { ShoutMessageReceived(username, FixMessage(messageText)); });
                         }
 
                         return true;
@@ -1160,7 +1160,7 @@
 
                         if (ChessShoutMessageReceived != null)
                         {
-                            ChessShoutMessageReceived(username, FixMessage(messageText));
+                            Task.Run(() => { ChessShoutMessageReceived(username, FixMessage(messageText)); });
                         }
 
                         return true;
@@ -1188,7 +1188,7 @@
 
                             if (Whisper != null)
                             {
-                                Whisper(player, gameId, FixMessage(messageText));
+                                Task.Run(() => { Whisper(player, gameId, FixMessage(messageText)); });
                             }
                         }
 
@@ -1201,7 +1201,7 @@
 
                             if (Kibitz != null)
                             {
-                                Kibitz(player, gameId, FixMessage(messageText));
+                                Task.Run(() => { Kibitz(player, gameId, FixMessage(messageText)); });
                             }
                         }
                     }
@@ -1216,7 +1216,7 @@
                     {
                         if (Announcement != null)
                         {
-                            Announcement(FixMessage(trimmedMessage));
+                            Task.Run(() => { Announcement(FixMessage(trimmedMessage)); });
                         }
 
                         return true;
