@@ -45,9 +45,15 @@ namespace TestAppUniversal
             base.OnNavigatedFrom(e);
             if (fics != null)
             {
-                var t = fics.StopObservingGame(leftGame);
                 fics.GameStateChange -= OnGameStateChanged;
                 fics.GameEnded -= OnGameEnded;
+                fics.FollowedPlayerStartedGame -= OnGameStarted;
+                var t = fics.StopFollowingPlayer();
+                var t2 = fics.StopObservingGame(leftGame);
+                if (rightGame != null)
+                {
+                    var t3 = fics.StopObservingGame(rightGame);
+                }
             }
         }
 
@@ -57,6 +63,7 @@ namespace TestAppUniversal
             fics = client;
             fics.GameStateChange += OnGameStateChanged;
             fics.GameEnded += OnGameEnded;
+            fics.FollowedPlayerStartedGame += OnGameStarted;
             Task.Run(() => { StartGame(); });
         }
 
@@ -64,44 +71,54 @@ namespace TestAppUniversal
         {
             try
             {
-                var result = await fics.StartObservingGame(leftGame);
+                var result = await fics.StartFollowingPlayer(leftGame.WhitePlayer);
 
-                if (result.GameInfo.BlackPlayer.Username != leftGame.BlackPlayer.Username
-                    || result.GameInfo.WhitePlayer.Username != leftGame.WhitePlayer.Username)
+                result = result ?? await fics.StartFollowingPlayer(leftGame.BlackPlayer);
+                if (result != null)
                 {
-                    // TODO: Stop observing wrong game
-                }
-
-                var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-                    LeftGame.InitializeGameInfo(result.GameInfo);
-                });
-
-                OnGameStateChanged(result.GameState);
-
-                // Check if we have one more game to observe at the same time
-                if (result.GameInfo.PartnersGameId > 0)
-                {
-                    rightGame = await fics.GetGame(result.GameInfo.PartnersGameId);
-                    var resultRight = await fics.StartObservingGame(rightGame);
-
-                    if (resultRight.GameInfo.PartnersGameId != leftGame.Id)
-                    {
-                        // TODO: Partners game finished (almost zero probability of this to happen)
-                    }
-
-                    var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        RightGame.Visibility = Visibility.Visible;
-                        RightGame.InitializeGameInfo(resultRight.GameInfo);
-                    });
-
-                    OnGameStateChanged(resultRight.GameState);
+                    OnGameStarted(result);
                 }
             }
             catch (Exception ex)
             {
                 // TODO: Notify user that game is not playing
+            }
+        }
+
+        private async void OnGameStarted(ObserveGameResult result)
+        {
+            var t = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                LeftGame.InitializeGameInfo(result.GameInfo);
+            });
+
+            OnGameStateChanged(result.GameState);
+
+            // Check if we have one more game to observe at the same time
+            if (result.GameInfo.PartnersGameId > 0)
+            {
+                rightGame = await fics.GetGame(result.GameInfo.PartnersGameId);
+                var resultRight = await fics.StartObservingGame(rightGame);
+
+                if (resultRight.GameInfo.PartnersGameId != leftGame.Id)
+                {
+                    // TODO: Partners game finished (almost zero probability of this to happen)
+                }
+
+                var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    RightGame.Visibility = Visibility.Visible;
+                    RightGame.InitializeGameInfo(resultRight.GameInfo);
+                });
+
+                OnGameStateChanged(resultRight.GameState);
+            }
+            else
+            {
+                var t2 = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    RightGame.Visibility = Visibility.Collapsed;
+                });
             }
         }
 
@@ -140,8 +157,6 @@ namespace TestAppUniversal
                     RightGame.OnGameEnded(info);
                 });
             }
-
-            // TODO: Start observing new game if there is one
         }
     }
 }

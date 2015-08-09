@@ -40,7 +40,7 @@ namespace TestAppUniversal
                     SetChessPieceCount(pieceColor, pieceType, 0);
         }
 
-    public bool IsWhiteMove
+        public bool IsWhiteMove
         {
             get { return WhitePlayerSymbol.Opacity == 1; }
         }

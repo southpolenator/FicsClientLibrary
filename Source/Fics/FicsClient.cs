@@ -46,6 +46,18 @@
         /// <param name="username">The username.</param>
         /// <param name="message">The message.</param>
         public delegate void ChannelMessageReceivedDelegate(int channel, string username, string message);
+
+        /// <summary>
+        /// Delegate when new announcement message arrives.
+        /// </summary>
+        /// <param name="announcement">The announcement message.</param>
+        public delegate void AnnouncementDelegate(string announcement);
+
+        /// <summary>
+        /// Delegate when followed player started a new game.
+        /// </summary>
+        /// <param name="game">The game.</param>
+        public delegate void FollowedPlayerStartedGameDelegate(ObserveGameResult game);
         #endregion
 
         #region Constants
@@ -66,12 +78,12 @@
         /// <summary>
         /// The server variables cached values
         /// </summary>
-        private FicsServerVariables variables = new FicsServerVariables();
+        internal FicsServerVariables variables = new FicsServerVariables();
 
         /// <summary>
         /// The server interface cached variables
         /// </summary>
-        private FicsServerInterfaceVariables ivariables = new FicsServerInterfaceVariables();
+        internal FicsServerInterfaceVariables ivariables = new FicsServerInterfaceVariables();
         #endregion
 
         /// <summary>
@@ -138,6 +150,16 @@
         /// Occurs when new channel message is received.
         /// </summary>
         public event ChannelMessageReceivedDelegate ChannelMessageReceived;
+
+        /// <summary>
+        /// Occurs when new announcement message is received.
+        /// </summary>
+        public event AnnouncementDelegate Announcement;
+
+        /// <summary>
+        /// Occurs when player, whom you are following, started a new game.
+        /// </summary>
+        public event FollowedPlayerStartedGameDelegate FollowedPlayerStartedGame;
         #endregion
 
         #region Server lists
@@ -866,6 +888,7 @@
             return TryParseCommandBlock(ref message)
                 || TryParseGameStateChange(message)
                 || TryParseGameEnded(message)
+                || TryParseFollowedPlayerNewGame(message)
                 || TryParseTextMessage(message);
         }
 
@@ -983,9 +1006,6 @@
                 // Points
                 Debug.Assert(message[position] == ' ');
                 position++;
-
-Debug.WriteLine(message.Substring(1));
-Debug.WriteLine(message.Substring(position));
                 string[] points = message.Substring(position).Split("-".ToCharArray());
                 info.WhitePlayerPoints = double.Parse(points[0]);
                 info.BlackPlayerPoints = double.Parse(points[1]);
@@ -1009,6 +1029,30 @@ Debug.WriteLine(message.Substring(position));
                 }
 
                 return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryParseFollowedPlayerNewGame(string message)
+        {
+            StringReader reader = new StringReader(message);
+            string line = reader.ReadLine();
+
+            if (string.IsNullOrEmpty(line))
+            {
+                line = reader.ReadLine();
+                if (line.Contains(", whom you are following, has started a game with "))
+                {
+                    ObserveGameResult game = ParseObserveGame(reader, ServerInterfaceVariables.DetailedGameInfo, ServerVariables.ShowProvisionalRatings);
+
+                    if (FollowedPlayerStartedGame != null)
+                    {
+                        FollowedPlayerStartedGame(game);
+                    }
+
+                    return true;
+                }
             }
 
             return false;
@@ -1098,6 +1142,22 @@ Debug.WriteLine(message.Substring(position));
                         if (ChessShoutMessageReceived != null)
                         {
                             ChessShoutMessageReceived(username, messageText);
+                        }
+
+                        return true;
+                    }
+                }
+                else // username == null
+                {
+                    // Announcement message
+                    const string AnnouncementStart = "**ANNOUNCEMENT**";
+                    string trimmedMessage = message.Trim();
+
+                    if (trimmedMessage.StartsWith(AnnouncementStart))
+                    {
+                        if (Announcement != null)
+                        {
+                            Announcement(trimmedMessage);
                         }
 
                         return true;
@@ -1630,7 +1690,6 @@ Debug.WriteLine(message.Substring(position));
                 state.BlackClock = TimeSpan.FromMilliseconds(double.Parse(tokens[25]));
                 state.Move = int.Parse(tokens[26]);
                 state.LastMoveVerbose = tokens[27];
-Debug.WriteLine(string.Format("Last move: {0}", state.LastMoveVerbose));
                 Debug.Assert(tokens[28].StartsWith("(") && tokens[28].EndsWith(")"));
                 state.LastMoveTime = ParseTime(tokens[28].Substring(1, tokens[28].Length - 2));
                 state.LastMove = tokens[29];

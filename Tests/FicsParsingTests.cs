@@ -8,6 +8,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
 
@@ -891,19 +892,85 @@
             Assert.AreEqual(games.Count, 348);
         }
 
-
-
-
-        // TODO: Parse unknown messages
-        const string Announcement = @"
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseAnnouncement()
+        {
+            string Announcement = @"
 
     **ANNOUNCEMENT** from relay: FICS is relaying the Russian Championship 
 \   Superfinal Men 2015 - Round 1, the Russian Championship Superfinal Women 
 \   2015 - Round 1 and the SS Manhem Chess Week IM/GM 2015 - Round 2. To find 
 \   more about Relay type ""tell relay help""
 ";
+            FicsClient client = new FicsClient();
+            string announcement = null;
+
+            client.Announcement += (message) =>
+            {
+                announcement = message;
+            };
+            client.IsKnownMessage(ref Announcement);
+            Assert.AreEqual(announcement, Announcement.Trim());
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsFollowingObservingGame()
+        {
+            string FollowingObservingGame = @"
+Nopawn, whom you are following, has started a game with Boran.
+You are now observing game 66.
+Game 66: Boran (1880) Nopawn (1994) rated lightning 1 0
+
+<g1> 66 p=0 t=lightning r=1 u=0,0 it=60,0 i=60,0 pt=0 rt=1880,1994 ts=1,1 m=2 n=1
+
+<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 66 Boran Nopawn 0 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0";
+            FicsClient client = new FicsClient();
+            ObserveGameResult game = null;
+
+            client.variables.Initialize(new Dictionary<string, string>() { { "provshow", "1" } });
+            client.ivariables.Initialize(new Dictionary<string, string>() { { "gameinfo", "1" } });
+            client.FollowedPlayerStartedGame += (g) =>
+            {
+                game = g;
+            };
+            client.IsKnownMessage(ref FollowingObservingGame);
+            Assert.IsNotNull(game);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsFollowingObservingGame2()
+        {
+            string FollowingObservingGame = @"
+Voittamaton, whom you are following, has started a game with zitterbart.
+You are now observing game 183.
+Game 183: zitterbart (1768) Voittamaton (1770) rated crazyhouse 1 0
+
+<g1> 183 p=0 t=crazyhouse r=1 u=0,0 it=60,0 i=60,0 pt=0 rt=1768,1770 ts=1,1 m=2 n=1
+
+<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 183 zitterbart Voittamaton 0 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0
+<b1> game 183 white [] black []";
+            FicsClient client = new FicsClient();
+            ObserveGameResult game = null;
+
+            client.variables.Initialize(new Dictionary<string, string>() { { "provshow", "1" } });
+            client.ivariables.Initialize(new Dictionary<string, string>() { { "gameinfo", "1" } });
+            client.FollowedPlayerStartedGame += (g) =>
+            {
+                game = g;
+            };
+            client.IsKnownMessage(ref FollowingObservingGame);
+            Assert.IsNotNull(game);
+        }
+
+
+
+
+        // TODO: Parse unknown messages
         const string Whispers = @"
 LurKing(C)(2442)[327] whispers: ply=19; eval=+0.20; nps=7.1M; time=8.53; 
 \   egtb=0";
+
+        const string Seekiing = @"
+GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)";
     }
 }
