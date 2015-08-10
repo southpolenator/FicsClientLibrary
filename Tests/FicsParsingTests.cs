@@ -1025,7 +1025,7 @@ GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
             {
                 info = i;
             };
-            client.IsKnownMessage(ref Seeking);
+            TestIsKnownMessage(client, ref Seeking);
             Assert.IsNotNull(info);
             Assert.AreEqual(info.Id, 34);
             Assert.AreEqual(info.Player.Username, "GuestDJXR");
@@ -1060,6 +1060,7 @@ GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
             client.GameStateChange += (a) => { messageWaiting.Set(); };
             client.GameStoppedObserving += (a) => { messageWaiting.Set(); };
             client.MessageReceived += (a, b) => { messageWaiting.Set(); };
+            client.Seeking += (a) => { messageWaiting.Set(); };
             client.ShoutMessageReceived += (a, b) => { messageWaiting.Set(); };
             client.Whisper += (a, b, c) => { messageWaiting.Set(); };
 

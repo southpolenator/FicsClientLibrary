@@ -183,7 +183,7 @@
             Wait(client.SendMessage(secondClient.Username, messageText));
             messageWaiting.Wait();
             Assert.AreEqual(username, client.Username);
-            Assert.AreEqual(message, messageText);
+            Assert.AreEqual(message.Trim(), messageText);
 
             // Block (censor) user from sending message
             secondClient.CensoredList.Add(client.Username);
