@@ -1190,6 +1190,8 @@
                             {
                                 Task.Run(() => { Whisper(player, gameId, FixMessage(messageText)); });
                             }
+
+                            return true;
                         }
 
                         // Kibitz message
@@ -1203,6 +1205,8 @@
                             {
                                 Task.Run(() => { Kibitz(player, gameId, FixMessage(messageText)); });
                             }
+
+                            return true;
                         }
                     }
                 }

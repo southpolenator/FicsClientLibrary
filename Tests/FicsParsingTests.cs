@@ -1027,50 +1027,17 @@ INDIANREAPER(2215)[459] kibitzes: slip
         {
             ManualResetEventSlim messageWaiting = new ManualResetEventSlim();
 
-            client.Kibitz += (a, b, c) =>
-            {
-                messageWaiting.Set();
-            };
-            client.Announcement += (m) =>
-            {
-                messageWaiting.Set();
-            };
-            client.ChannelMessageReceived += (a, b, c) =>
-            {
-                messageWaiting.Set();
-            };
-            client.ChessShoutMessageReceived += (a, b) =>
-            {
-                messageWaiting.Set();
-            };
-            client.FollowedPlayerStartedGame += (a) =>
-            {
-                messageWaiting.Set();
-            };
-            client.GameEnded += (a) =>
-            {
-                messageWaiting.Set();
-            };
-            client.GameStateChange += (a) =>
-            {
-                messageWaiting.Set();
-            };
-            client.GameStoppedObserving += (a) =>
-            {
-                messageWaiting.Set();
-            };
-            client.MessageReceived += (a, b) =>
-            {
-                messageWaiting.Set();
-            };
-            client.ShoutMessageReceived += (a, b) =>
-            {
-                messageWaiting.Set();
-            };
-            client.Whisper += (a, b, c) =>
-            {
-                messageWaiting.Set();
-            };
+            client.Kibitz += (a, b, c) => { messageWaiting.Set(); };
+            client.Announcement += (m) => { messageWaiting.Set(); };
+            client.ChannelMessageReceived += (a, b, c) => { messageWaiting.Set(); };
+            client.ChessShoutMessageReceived += (a, b) => { messageWaiting.Set(); };
+            client.FollowedPlayerStartedGame += (a) => { messageWaiting.Set(); };
+            client.GameEnded += (a) => { messageWaiting.Set(); };
+            client.GameStateChange += (a) => { messageWaiting.Set(); };
+            client.GameStoppedObserving += (a) => { messageWaiting.Set(); };
+            client.MessageReceived += (a, b) => { messageWaiting.Set(); };
+            client.ShoutMessageReceived += (a, b) => { messageWaiting.Set(); };
+            client.Whisper += (a, b, c) => { messageWaiting.Set(); };
 
             bool result = client.IsKnownMessage(ref message);
 
