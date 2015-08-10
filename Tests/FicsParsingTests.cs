@@ -11,6 +11,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
 
     [TestClass]
     public class FicsParsingTests : TestsBase
@@ -38,7 +39,7 @@
             {
                 gameEndedInfo = info;
             };
-            client.IsKnownMessage(ref GameEndedMessage);
+            TestIsKnownMessage(client, ref GameEndedMessage);
             Assert.IsNotNull(gameEndedInfo);
             Assert.AreEqual(gameEndedInfo.GameId, 457);
             Assert.AreEqual(gameEndedInfo.WhitePlayerUsername, "szesze");
@@ -59,7 +60,7 @@
             {
                 gameId = id;
             };
-            client.IsKnownMessage(ref RemovingGameMessage);
+            TestIsKnownMessage(client, ref RemovingGameMessage);
             Assert.AreEqual(gameId, 129);
         }
 
@@ -909,7 +910,7 @@
             {
                 announcement = message;
             };
-            client.IsKnownMessage(ref Announcement);
+            TestIsKnownMessage(client, ref Announcement);
             Assert.AreEqual(announcement, @"**ANNOUNCEMENT** from relay: FICS is relaying the Russian Championship Superfinal Men 2015 - Round 1, the Russian Championship Superfinal Women 2015 - Round 1 and the SS Manhem Chess Week IM/GM 2015 - Round 2. To find more about Relay type ""tell relay help""");
         }
 
@@ -933,7 +934,7 @@ Game 66: Boran (1880) Nopawn (1994) rated lightning 1 0
             {
                 game = g;
             };
-            client.IsKnownMessage(ref FollowingObservingGame);
+            TestIsKnownMessage(client, ref FollowingObservingGame);
             Assert.IsNotNull(game);
         }
 
@@ -958,7 +959,7 @@ Game 183: zitterbart (1768) Voittamaton (1770) rated crazyhouse 1 0
             {
                 game = g;
             };
-            client.IsKnownMessage(ref FollowingObservingGame);
+            TestIsKnownMessage(client, ref FollowingObservingGame);
             Assert.IsNotNull(game);
         }
 
@@ -979,7 +980,7 @@ LurKing(C)(2442)[327] whispers: ply=19; eval=+0.20; nps=7.1M; time=8.53;
                 gameId = g;
                 message = m;
             };
-            client.IsKnownMessage(ref Whisper);
+            TestIsKnownMessage(client, ref Whisper);
             Assert.AreEqual(message, "ply=19; eval=+0.20; nps=7.1M; time=8.53; egtb=0");
             Assert.AreEqual(player.Username, "LurKing");
             Assert.AreEqual(player.AccountStatus, AccountStatus.ComputerAccount);
@@ -1004,7 +1005,7 @@ INDIANREAPER(2215)[459] kibitzes: slip
                 gameId = g;
                 message = m;
             };
-            client.IsKnownMessage(ref Kibitz);
+            TestIsKnownMessage(client, ref Kibitz);
             Assert.AreEqual(message, "slip\n");
             Assert.AreEqual(player.Username, "INDIANREAPER");
             Assert.AreEqual(player.AccountStatus, AccountStatus.RegularAccount);
@@ -1015,6 +1016,66 @@ INDIANREAPER(2215)[459] kibitzes: slip
         private static string FixNewLines(string text)
         {
             return text.Replace("\r\n", "\n");
+        }
+
+        private static void TestIsKnownMessage(FicsClient client, string message)
+        {
+            TestIsKnownMessage(client, ref message);
+        }
+
+        private static void TestIsKnownMessage(FicsClient client, ref string message)
+        {
+            ManualResetEventSlim messageWaiting = new ManualResetEventSlim();
+
+            client.Kibitz += (a, b, c) =>
+            {
+                messageWaiting.Set();
+            };
+            client.Announcement += (m) =>
+            {
+                messageWaiting.Set();
+            };
+            client.ChannelMessageReceived += (a, b, c) =>
+            {
+                messageWaiting.Set();
+            };
+            client.ChessShoutMessageReceived += (a, b) =>
+            {
+                messageWaiting.Set();
+            };
+            client.FollowedPlayerStartedGame += (a) =>
+            {
+                messageWaiting.Set();
+            };
+            client.GameEnded += (a) =>
+            {
+                messageWaiting.Set();
+            };
+            client.GameStateChange += (a) =>
+            {
+                messageWaiting.Set();
+            };
+            client.GameStoppedObserving += (a) =>
+            {
+                messageWaiting.Set();
+            };
+            client.MessageReceived += (a, b) =>
+            {
+                messageWaiting.Set();
+            };
+            client.ShoutMessageReceived += (a, b) =>
+            {
+                messageWaiting.Set();
+            };
+            client.Whisper += (a, b, c) =>
+            {
+                messageWaiting.Set();
+            };
+
+            bool result = client.IsKnownMessage(ref message);
+
+            Assert.IsTrue(result);
+            messageWaiting.Wait();
         }
 
 
