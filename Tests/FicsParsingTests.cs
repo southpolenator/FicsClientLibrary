@@ -1012,6 +1012,30 @@ INDIANREAPER(2215)[459] kibitzes: slip
             Assert.AreEqual(gameId, 459);
         }
 
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseSeeking()
+        {
+            string Seeking = FixNewLines(@"
+GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
+            FicsClient client = new FicsClient();
+            SeekInfo info = null;
+
+            client.Seeking += (i) =>
+            {
+                info = i;
+            };
+            client.IsKnownMessage(ref Seeking);
+            Assert.IsNotNull(info);
+            Assert.AreEqual(info.Id, 34);
+            Assert.AreEqual(info.Player.Username, "GuestDJXR");
+            Assert.AreEqual(info.Player.AccountStatus, AccountStatus.RegularAccount);
+            Assert.AreEqual(info.Player.Rating, -2);
+            Assert.AreEqual(info.ClockStart, TimeSpan.FromMinutes(15));
+            Assert.AreEqual(info.TimeIncrement, TimeSpan.FromSeconds(5));
+            Assert.AreEqual(info.GameType, GameType.Standard);
+            Assert.AreEqual(info.Rated, false);
+        }
+
         private static string FixNewLines(string text)
         {
             return text.Replace("\r\n", "\n");
@@ -1021,9 +1045,6 @@ INDIANREAPER(2215)[459] kibitzes: slip
 
 
         // TODO: Parse unknown messages
-        const string Seekiing = @"
-GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)";
-
         const string AddingTime = @"
 Game 236: GnuCheese added 300 seconds to Rookie's clock.
 ";

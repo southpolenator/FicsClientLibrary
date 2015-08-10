@@ -63,6 +63,12 @@
         public delegate void InGameMessageDelegate(Player player, int gameId, string message);
 
         /// <summary>
+        /// Delegate when new seeking message arrives.
+        /// </summary>
+        /// <param name="seekInfo">The seek information.</param>
+        public delegate void SeekingDelegate(SeekInfo seekInfo);
+
+        /// <summary>
         /// Delegate when followed player started a new game.
         /// </summary>
         /// <param name="game">The game.</param>
@@ -174,6 +180,11 @@
         /// Occurs when new kibitz message arrives.
         /// </summary>
         public event InGameMessageDelegate Kibitz;
+
+        /// <summary>
+        /// Occurs when new seeking message arrives.
+        /// </summary>
+        public event SeekingDelegate Seeking;
 
         /// <summary>
         /// Occurs when player, whom you are following, started a new game.
@@ -1166,7 +1177,7 @@
                         return true;
                     }
 
-                    Regex ratingGameRegex = new Regex(@"^\((\d+)\)\[(\d+)\]", RegexOptions.Singleline);
+                    Regex ratingGameRegex = new Regex(@"^\((\d+|----|\+\+\+\+)\)\[(\d+)\]", RegexOptions.Singleline);
                     Match match = ratingGameRegex.Match(restOfLine);
 
                     if (match.Success)
@@ -1177,7 +1188,7 @@
                         position = match.Length;
                         player.Username = username;
                         player.AccountStatus = accountStatus;
-                        player.Rating = int.Parse(match.Groups[1].Value);
+                        player.Rating = ParseRating(match.Groups[1].Value, false);
 
                         // Whisper message
                         const string whispers = " whispers: ";
@@ -1204,6 +1215,38 @@
                                 Task.Run(() => { Kibitz(player, gameId, FixMessage(messageText)); });
                             }
                         }
+                    }
+
+                    // Seeking message
+                    Regex seekingRegex = new Regex(@"^ \((\d+|----|\+\+\+\+)\) seeking (\d+) (\d+) (rated|unrated) (blitz|lightning|untimed|standard|wild|atomic|crazyhouse|bughouse|losers|suicide|nonstandard) \(""play (\d+)"" to respond\)", RegexOptions.Singleline);
+
+                    match = seekingRegex.Match(restOfLine);
+                    if (match.Success)
+                    {
+                        Player player = new Player();
+                        SeekInfo seekInfo = new SeekInfo();
+                        int clockStartMinutes = int.Parse(match.Groups[2].Value);
+                        int timeIncrementSeconds = int.Parse(match.Groups[3].Value);
+                        string rated = match.Groups[4].Value;
+                        string gameType = match.Groups[5].Value;
+
+                        position = match.Length;
+                        player.Username = username;
+                        player.AccountStatus = accountStatus;
+                        player.Rating = ParseRating(match.Groups[1].Value, false);
+                        seekInfo.Id = int.Parse(match.Groups[6].Value);
+                        seekInfo.Player = player;
+                        seekInfo.ClockStart = TimeSpan.FromMinutes(clockStartMinutes);
+                        seekInfo.TimeIncrement = TimeSpan.FromSeconds(timeIncrementSeconds);
+                        seekInfo.GameType = ParseEnum<GameType>(gameType);
+                        seekInfo.Rated = rated == "rated";
+
+                        if (Seeking != null)
+                        {
+                            Task.Run(() => { Seeking(seekInfo); });
+                        }
+
+                        return true;
                     }
                 }
                 else // username == null

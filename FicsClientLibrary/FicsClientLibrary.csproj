@@ -132,6 +132,9 @@
     <Compile Include="..\Source\Fics\PlayerStatus.cs">
       <Link>Fics\PlayerStatus.cs</Link>
     </Compile>
+    <Compile Include="..\Source\Fics\SeekInfo.cs">
+      <Link>Fics\SeekInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Source\Fics\ServerCommandCodeAttribute.cs">
       <Link>Fics\ServerCommandCodeAttribute.cs</Link>
     </Compile>
