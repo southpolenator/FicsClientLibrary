@@ -915,6 +915,71 @@
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseMoveList()
+        {
+            const string MoveList = @"
+Movelist for game 214:
+
+SKAcz (2100) vs. HighContrast (2100) --- Tue Aug 11, 05:37 EDT 2015
+Rated bughouse match, initial time: 2 minutes, increment: 0 seconds.
+
+Move  SKAcz                   HighContrast       
+----  ---------------------   ---------------------
+  1.  Nh3     (0:01.838)      Nc6     (0:00.100)   
+  2.  d4      (0:01.348)      e6      (0:01.039)   
+  3.  Ng5     (0:01.188)      Nh6     (0:00.779)   
+  4.  Ne4     (0:01.498)      Nf5     (0:01.388)   
+  5.  Ng5     (0:03.191)      Qe7     (0:01.355)   
+  6.  Nxf7    (0:01.284)      Qxf7    (0:00.978)   
+  7.  N@g5    (0:00.609)      Qe7     (0:00.454)   
+  8.  Nc3     (0:19.950)      B@f6    (0:01.011)   
+  9.  N@d5    (0:01.054)      exd5    (0:01.097)   
+ 10.  Nxd5    (0:00.100)      Bxg5    (0:00.557)   
+ 11.  Nxe7    (0:05.204)      Bfxe7   (0:00.531)   
+ 12.  Bxg5    (0:01.653)      Bxg5    (0:00.735)   
+ 13.  e3      (0:01.427)      Bxe3    (0:02.155)   
+ 14.  fxe3    (0:01.564)      P@f2+   (0:00.875)   
+ 15.  Ke2     (0:01.125)      N@g1+   (0:01.800)   
+ 16.  Kd2     (0:01.922)   
+      {Still in progress} *
+
+";
+            var moveList = FicsClient.ParseMoveList(FixNewLines(MoveList));
+
+            Assert.IsNotNull(moveList);
+            Assert.AreEqual(moveList.WhiteMoves.Count, 16);
+            Assert.AreEqual(moveList.BlackMoves.Count, 15);
+            Assert.AreEqual(moveList.WhiteMoves[0].Move, "Nh3");
+            Assert.AreEqual(moveList.WhiteMoves[0].Time, new TimeSpan(0, 0, 0, 1, 838));
+            Assert.AreEqual(moveList.BlackMoves[0].Move, "Nc6");
+            Assert.AreEqual(moveList.BlackMoves[0].Time, new TimeSpan(0, 0, 0, 0, 100));
+            Assert.AreEqual(moveList.WhiteMove, false);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseMoveList2()
+        {
+            const string MoveList = @"
+Movelist for game 1:
+
+Alekhine (UNR) vs. LectureBot (UNR) --- Tue Aug 11, 06:28 EDT 2015
+Unrated untimed match, initial time: 0 minutes, increment: 0 seconds.
+
+Move  Alekhine                LectureBot         
+----  ---------------------   ---------------------
+  1.  ...     (0:00.000)   
+      {Still in progress} *
+
+";
+            var moveList = FicsClient.ParseMoveList(FixNewLines(MoveList));
+
+            Assert.IsNotNull(moveList);
+            Assert.AreEqual(moveList.WhiteMoves.Count, 0);
+            Assert.AreEqual(moveList.BlackMoves.Count, 0);
+            Assert.AreEqual(moveList.WhiteMove, true);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseAnnouncement()
         {
             string Announcement = FixNewLines(@"

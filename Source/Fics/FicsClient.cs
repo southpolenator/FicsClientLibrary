@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -625,43 +626,38 @@
             }
         }
 
-        internal static ObserveGameResult ParseObserveGame(StringReader reader, bool hasDetailedGameInfo, bool hasProvisionalRatings)
+        /// <summary>
+        /// Gets the move list.
+        /// </summary>
+        /// <param name="game">The game.</param>
+        /// <returns>Move list</returns>
+        public async Task<ChessMoveList> GetMoveList(Game game)
         {
-            ObserveGameResult result = new ObserveGameResult();
-            string line = reader.ReadLine();
+            return await GetMoveList(game.Id);
+        }
 
-            if (!line.StartsWith("You are now observing game "))
+        /// <summary>
+        /// Gets the move list.
+        /// </summary>
+        /// <param name="gameId">The game id.</param>
+        /// <returns>Move list</returns>
+        public async Task<ChessMoveList> GetMoveList(int gameId)
+        {
+            string output = await Execute(FicsCommand.MoveList, gameId);
+
+            try
             {
-                throw new Exception("Parsing wrong output for ObserveGame");
+                if (!output.StartsWith("\nMovelist for game "))
+                {
+                    throw new Exception(output);
+                }
+
+                return ParseMoveList(output);
             }
-
-            int gameIdEnd = line.IndexOf('.');
-            int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
-
-            // Parse game info
-            string shortGameInfo = reader.ReadLine();
-            string detailedGameInfo = null;
-
-            Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
-            line = reader.ReadLine();
-            Debug.Assert(string.IsNullOrEmpty(line));
-
-            if (hasDetailedGameInfo)
+            catch (Exception ex)
             {
-                detailedGameInfo = reader.ReadLine();
-                line = reader.ReadLine();
-                Debug.Assert(string.IsNullOrEmpty(line));
+                throw new AggregateException("Parsing exception. Command:\n'" + output + "'\n", ex);
             }
-
-            // Take game info
-            result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, hasProvisionalRatings);
-
-            // Parse game state (style 12)
-            string style12gameLine = reader.ReadLine();
-            string style12piecesLine = reader.ReadLine();
-
-            result.GameState = ParseGameState(style12gameLine, style12piecesLine);
-            return result;
         }
 
         /// <summary>
@@ -1313,6 +1309,160 @@
             return games;
         }
 
+        internal static ObserveGameResult ParseObserveGame(StringReader reader, bool hasDetailedGameInfo, bool hasProvisionalRatings)
+        {
+            ObserveGameResult result = new ObserveGameResult();
+            string line = reader.ReadLine();
+
+            if (!line.StartsWith("You are now observing game "))
+            {
+                throw new Exception("Parsing wrong output for ObserveGame");
+            }
+
+            int gameIdEnd = line.IndexOf('.');
+            int gameId = int.Parse(line.Substring(27, gameIdEnd - 27));
+
+            // Parse game info
+            string shortGameInfo = reader.ReadLine();
+            string detailedGameInfo = null;
+
+            Debug.Assert(shortGameInfo.StartsWith("Game " + gameId + ":"));
+            line = reader.ReadLine();
+            Debug.Assert(string.IsNullOrEmpty(line));
+
+            if (hasDetailedGameInfo)
+            {
+                detailedGameInfo = reader.ReadLine();
+                line = reader.ReadLine();
+                Debug.Assert(string.IsNullOrEmpty(line));
+            }
+
+            // Take game info
+            result.GameInfo = ParseGameInfo(shortGameInfo, detailedGameInfo, hasProvisionalRatings);
+
+            // Parse game state (style 12)
+            string style12gameLine = reader.ReadLine();
+            string style12piecesLine = reader.ReadLine();
+
+            result.GameState = ParseGameState(style12gameLine, style12piecesLine);
+            return result;
+        }
+        internal static DateTime ParseDateTime(string dateTimeString)
+        {
+            return DateTimeOffset.ParseExact(dateTimeString.Replace(" EDT", " -04:00"), "ddd MMM dd, hh:mm zzzz yyyy", CultureInfo.InvariantCulture).UtcDateTime;
+        }
+
+        internal static ChessMoveList ParseMoveList(string output)
+        {
+            ChessMoveList moveList = new ChessMoveList();
+            StringReader reader = new StringReader(output);
+            string line = reader.ReadLine();
+
+            // Game id
+            Debug.Assert(string.IsNullOrEmpty(line));
+            line = reader.ReadLine();
+            Debug.Assert(line.StartsWith("Movelist for game ") && line.EndsWith(":"));
+            moveList.GameId = int.Parse(line.Substring(18, line.Length - 19));
+            line = reader.ReadLine();
+            Debug.Assert(string.IsNullOrEmpty(line));
+            line = reader.ReadLine();
+
+            // DateTime
+            string[] tokens = line.Split(new string[] { " --- " }, StringSplitOptions.None);
+            Debug.Assert(tokens.Length == 2);
+            moveList.GameStarted = ParseDateTime(tokens[1]);
+
+            // White player username
+            tokens = tokens[0].Split(new string[] { " vs. " }, StringSplitOptions.None);
+            Debug.Assert(tokens.Length == 2);
+            int position = 0;
+            AccountStatus accountStatus;
+            moveList.WhitePlayer = new Player();
+            moveList.WhitePlayer.Username = ParsePlayerAccountWithStatus(tokens[0], ref position, out accountStatus);
+            moveList.WhitePlayer.AccountStatus = accountStatus;
+
+            // White player rating
+            SkipWhiteSpaces(tokens[0], ref position);
+            Debug.Assert(tokens[0][position] == '(');
+            position++;
+            moveList.WhitePlayer.Rating = ParseRating(tokens[0], ref position, false);
+
+            // Black player username
+            position = 0;
+            moveList.BlackPlayer = new Player();
+            moveList.BlackPlayer.Username = ParsePlayerAccountWithStatus(tokens[1], ref position, out accountStatus);
+            moveList.BlackPlayer.AccountStatus = accountStatus;
+
+            // White player rating
+            SkipWhiteSpaces(tokens[1], ref position);
+            Debug.Assert(tokens[1][position] == '(');
+            position++;
+            moveList.BlackPlayer.Rating = ParseRating(tokens[1], ref position, false);
+
+            // TODO: Parse game info
+            line = reader.ReadLine();
+
+            // Parse moves header
+            line = reader.ReadLine();
+            Debug.Assert(string.IsNullOrEmpty(line));
+            line = reader.ReadLine();
+            tokens = line.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            Debug.Assert(tokens.Length == 3);
+            Debug.Assert(tokens[0] == "Move");
+            Debug.Assert(tokens[1] == moveList.WhitePlayer.Username);
+            Debug.Assert(tokens[2] == moveList.BlackPlayer.Username);
+            line = reader.ReadLine();
+            tokens = line.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            Debug.Assert(tokens.Length == 3);
+            Debug.Assert(tokens[0].Count(c => c == '-') > 3);
+            Debug.Assert(tokens[1].Count(c => c == '-') > 3);
+            Debug.Assert(tokens[2].Count(c => c == '-') > 3);
+
+            // Parse moves
+            int currentMove = 1;
+            line = reader.ReadLine();
+            moveList.WhiteMoves = new List<ChessMove>();
+            moveList.BlackMoves = new List<ChessMove>();
+            while (!string.IsNullOrEmpty(line) && !line.Trim().StartsWith("{"))
+            {
+                tokens = line.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+                Debug.Assert(tokens.Length == 5 || tokens.Length == 3);
+
+                // Parse move number
+                Debug.Assert(tokens[0].EndsWith("."));
+                Debug.Assert(int.Parse(tokens[0].Substring(0, tokens[0].Length - 1)) == currentMove);
+
+                // Parse white move
+                ChessMove whiteMove = new ChessMove();
+
+                if (tokens[1] == "...")
+                {
+                    break;
+                }
+
+                whiteMove.Move = tokens[1];
+                Debug.Assert(tokens[2].StartsWith("(") && tokens[2].EndsWith(")"));
+                whiteMove.Time = ParseTime(tokens[2].Substring(1, tokens[2].Length - 2));
+                moveList.WhiteMoves.Add(whiteMove);
+
+                // Parse black move
+                if (tokens.Length == 5)
+                {
+                    ChessMove blackMove = new ChessMove();
+
+                    blackMove.Move = tokens[3];
+                    Debug.Assert(tokens[4].StartsWith("(") && tokens[4].EndsWith(")"));
+                    blackMove.Time = ParseTime(tokens[4].Substring(1, tokens[4].Length - 2));
+                    moveList.BlackMoves.Add(blackMove);
+                }
+
+                line = reader.ReadLine();
+                currentMove++;
+            }
+
+            return moveList;
+        }
+
         internal static Game ParseGame(string line)
         {
             Game game = new Game();
@@ -1736,6 +1886,12 @@
             {
                 Debug.Assert(line.Substring(position, 4) == "----");
                 position += 4;
+                rating = -1;
+            }
+            else if (line[position] == 'U')
+            {
+                Debug.Assert(line.Substring(position, 3) == "UNR");
+                position += 3;
                 rating = -1;
             }
             else if (line[position] == '+')

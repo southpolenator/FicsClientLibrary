@@ -57,6 +57,12 @@
     <Compile Include="..\Source\Fics\BughouseListingResult.cs">
       <Link>Fics\BughouseListingResult.cs</Link>
     </Compile>
+    <Compile Include="..\Source\Fics\ChessMove.cs">
+      <Link>Fics\ChessMove.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Fics\ChessMoveList.cs">
+      <Link>Fics\ChessMoveList.cs</Link>
+    </Compile>
     <Compile Include="..\Source\Fics\ChessPieceType.cs">
       <Link>Fics\ChessPieceType.cs</Link>
     </Compile>

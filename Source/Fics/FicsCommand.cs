@@ -215,6 +215,9 @@
         [ServerCommandName("ivariables"), ServerCommandCode(58)]
         ListServerInterfaceVariables,
 
+        [ServerCommandName("moves"), ServerCommandCode(77)]
+        MoveList,
+
         [ServerCommandName("observe"), ServerCommandCode(80)]
         ObserveGame,
 
