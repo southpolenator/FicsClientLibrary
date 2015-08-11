@@ -50,6 +50,27 @@
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseGameAborted()
+        {
+            const string GameAborted = "\n{Game 215 (MeleeStorm vs. Krepkiy) Game aborted on move 1} *";
+            FicsClient client = new FicsClient();
+            GameEndedInfo gameEndedInfo = null;
+
+            client.GameEnded += (info) =>
+            {
+                gameEndedInfo = info;
+            };
+            TestIsKnownMessage(client, GameAborted);
+            Assert.IsNotNull(gameEndedInfo);
+            Assert.AreEqual(gameEndedInfo.GameId, 215);
+            Assert.AreEqual(gameEndedInfo.WhitePlayerUsername, "MeleeStorm");
+            Assert.AreEqual(gameEndedInfo.BlackPlayerUsername, "Krepkiy");
+            Assert.AreEqual(gameEndedInfo.Message, "Game aborted on move 1");
+            Assert.AreEqual(gameEndedInfo.WhitePlayerPoints, 0);
+            Assert.AreEqual(gameEndedInfo.BlackPlayerPoints, 0);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGameStoppedObserving()
         {
             string RemovingGameMessage = "\nRemoving game 129 from observation list.\n";

@@ -1036,9 +1036,17 @@
                 // Points
                 Debug.Assert(message[position] == ' ');
                 position++;
-                string[] points = message.Substring(position).Split("-".ToCharArray());
-                info.WhitePlayerPoints = double.Parse(points[0]);
-                info.BlackPlayerPoints = double.Parse(points[1]);
+                string[] points = message.Substring(position).Trim().Split("-".ToCharArray());
+                if (points.Length == 1 && points[0] == "*")
+                {
+                    info.WhitePlayerPoints = 0;
+                    info.BlackPlayerPoints = 0;
+                }
+                else
+                {
+                    info.WhitePlayerPoints = double.Parse(points[0]);
+                    info.BlackPlayerPoints = double.Parse(points[1]);
+                }
 
                 if (GameEnded != null)
                 {

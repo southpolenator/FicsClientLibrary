@@ -17,6 +17,7 @@ namespace GameCrawler
     {
         public ObservingGame PartnersGame { get; set; }
         public Game Game { get; set; }
+        public GameEndedInfo Result { get; set; }
         public List<GameMove> WhiteMovesList { get; set; }
         public List<GameMove> BlackMovesList { get; set; }
     }
@@ -27,7 +28,7 @@ namespace GameCrawler
         {
             try
             {
-                CrawlGames();
+                CrawlGames(GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse);
             }
             catch (Exception ex)
             {
@@ -37,7 +38,7 @@ namespace GameCrawler
             Console.ReadLine();
         }
 
-        private static async void CrawlGames()
+        private static async void CrawlGames(GamesListingOptions gameListingOptions)
         {
             FicsClient client = new FicsClient();
             Dictionary<int, ObservingGame> observingGames = new Dictionary<int, ObservingGame>();
@@ -61,61 +62,120 @@ namespace GameCrawler
 
             client.GameStateChange += (state) =>
             {
+                ObservingGame game;
+
+                lock (observingGames)
+                {
+                    if (!observingGames.TryGetValue(state.GameId, out game))
+                        return;
+                }
+
                 if (state.LastMove != null)
                 {
-                    var game = observingGames[state.GameId];
                     var move = new GameMove()
                     {
                         Move = state.LastMove,
                         Time = state.LastMoveTime,
                     };
 
-                    if (state.WhiteMove)
+                    List<GameMove> movesList = state.WhiteMove ? game.BlackMovesList : game.WhiteMovesList;
+
+                    lock (movesList)
                     {
-                        game.BlackMovesList.Add(move);
-                    }
-                    else
-                    {
-                        game.WhiteMovesList.Add(move);
+                        while (movesList.Count < state.Move)
+                        {
+                            movesList.Add(null);
+                        }
+
+                        movesList[state.Move - 1] = move;
                     }
                 }
             };
 
-            client.GameEnded += (game) =>
+            client.GameEnded += (result) =>
             {
-                // TODO: Save game
+                lock (observingGames)
+                {
+                    ObservingGame game;
+
+                    if (observingGames.TryGetValue(result.GameId, out game))
+                    {
+                        game.Result = result;
+                        Console.WriteLine("Game ended {0}", game.Game);
+                        observingGames.Remove(result.GameId);
+
+                        // TODO: Save game
+                    }
+                }
             };
 
-            client.GameStoppedObserving += (gameId) =>
-            {
-                observingGames.Remove(gameId);
-            };
+            //client.GameStoppedObserving += (gameId) =>
+            //{
+            //    lock (observingGames)
+            //    {
+            //        ObservingGame game;
+
+            //        if (observingGames.TryGetValue(gameId, out game))
+            //        {
+            //            Console.WriteLine("Removing game {0}", game.Game);
+            //            observingGames.Remove(gameId);
+            //        }
+            //    }
+            //};
 
             while (true)
             {
-                var bughouse = await client.ListBughouse(BughouseListingOptions.Games);
-                var games = bughouse.Games;
+                var games = await client.ListGames(gameListingOptions);
 
+                Console.WriteLine(games.Count);
                 foreach (var game in games)
                 {
-                    if (!observingGames.ContainsKey(game.First.Id))
-                    {
-                        var observingGame = new ObservingGame();
-                        observingGames.Add(game.First.Id, observingGame);
-                        var result = await client.StartObservingGame(game.First);
+                    bool containsKey;
 
-                        // TODO: Collect moves
-                        // await client.Send("moves {0}", game.First.Id);
-                        if (result.GameInfo.PartnersGameId != game.Second.Id)
-                        {
-                            await client.StopObservingGame(game.First);
-                            observingGames.Remove(game.First.Id);
-                            continue;
-                        }
+                    lock (observingGames)
+                    {
+                        containsKey = observingGames.ContainsKey(game.Id);
                     }
 
-                    // TODO: Observe partners game
+                    if (!containsKey)
+                    {
+                        // TODO: If we started observing different game, stop observing it
+
+                        // Add game to the list
+                        var observingGame = new ObservingGame();
+                        observingGame.BlackMovesList = new List<GameMove>();
+                        observingGame.WhiteMovesList = new List<GameMove>();
+                        observingGame.Game = game;
+                        lock (observingGames)
+                        {
+                            observingGames.Add(game.Id, observingGame);
+                        }
+
+                        // Start observing game
+                        var result = await client.StartObservingGame(game);
+                        Console.WriteLine("Starting game {0}", game);
+
+                        // TODO: Collect and update moves list (with lock)
+                        await client.Send("moves {0}", game.Id);
+
+                        // Connect partners game
+                        if (result.GameInfo.PartnersGameId > 0)
+                        {
+                            ObservingGame partnersGame;
+
+                            lock (observingGames)
+                            {
+                                if (observingGames.TryGetValue(result.GameInfo.PartnersGameId, out partnersGame))
+                                {
+                                    partnersGame.PartnersGame = observingGame;
+                                    observingGame.PartnersGame = partnersGame;
+                                }
+                            }
+                        }
+                    }
                 }
+
+                await Task.Delay(TimeSpan.FromSeconds(10));
             }
         }
     }
