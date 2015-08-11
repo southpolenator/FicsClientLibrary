@@ -957,6 +957,48 @@ Move  SKAcz                   HighContrast
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FiscParseMoveList2()
+        {
+            const string MoveList = @"
+Movelist for game 364:
+
+hellokitty (1811) vs. leilatov (1911) --- Tue Aug 11, 14:34 EDT 2015
+Rated crazyhouse match, initial time: 2 minutes, increment: 0 seconds.
+
+Move  hellokitty              leilatov           
+----  ---------------------   ---------------------
+  1.  d4      (0:00.000)      e6      (0:00.000)   
+  2.  Nc3     (0:02.248)      Nf6     (0:03.767)   
+  3.  e4      (0:01.474)      h6      (0:00.839)   
+  4.  Nf3     (0:04.250)      Bb4     (0:00.863)   
+  5.  Bd3     (0:00.561)      d5      (0:04.510)   
+  6.  exd5    (0:09.266)      Nxd5    (0:02.613)   
+  7.  O-O     (0:02.051)      Bxc3    (0:01.566)   
+  8.  bxc3    (0:01.411)      Nxc3    (0:01.494)   
+  9.  Qe1     (0:00.811)      P@e4    (0:06.389)   
+ 10.  Bxe4    (0:05.274)      N@e2+   (0:21.388)   
+ 11.  Kh1     (0:04.971)      Nxe4    (0:17.724)   
+ 12.  Qxe2    (0:03.059)      B@d5    (0:02.836)   
+ 13.  N@h5    (0:05.868)      Rg8     (0:04.299)   
+ 14.  P@h7    (0:02.125)      Ke7     (0:12.266)   
+ 15.  hxg8=Q  (0:04.426)      Qxg8    (0:00.365)   
+ 16.  B@e5    (0:10.739)   
+      {Still in progress} *
+
+";
+            var moveList = FicsClient.ParseMoveList(FixNewLines(MoveList));
+
+            Assert.IsNotNull(moveList);
+            Assert.AreEqual(moveList.WhiteMoves.Count, 16);
+            Assert.AreEqual(moveList.BlackMoves.Count, 15);
+            Assert.AreEqual(moveList.WhiteMoves[0].Move, "d4");
+            Assert.AreEqual(moveList.WhiteMoves[0].Time, new TimeSpan(0, 0, 0, 0, 0));
+            Assert.AreEqual(moveList.BlackMoves[0].Move, "e6");
+            Assert.AreEqual(moveList.BlackMoves[0].Time, new TimeSpan(0, 0, 0, 0, 0));
+            Assert.AreEqual(moveList.WhiteMove, false);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseMoveList2()
         {
             const string MoveList = @"

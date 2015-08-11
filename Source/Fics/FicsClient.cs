@@ -1349,7 +1349,7 @@
         }
         internal static DateTime ParseDateTime(string dateTimeString)
         {
-            return DateTimeOffset.ParseExact(dateTimeString.Replace(" EDT", " -04:00"), "ddd MMM dd, hh:mm zzzz yyyy", CultureInfo.InvariantCulture).UtcDateTime;
+            return DateTimeOffset.ParseExact(dateTimeString.Replace(" EDT", " -04:00"), "ddd MMM dd, HH:mm zzzz yyyy", CultureInfo.InvariantCulture).UtcDateTime;
         }
 
         internal static ChessMoveList ParseMoveList(string output)

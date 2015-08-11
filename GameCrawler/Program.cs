@@ -74,15 +74,16 @@ namespace GameCrawler
                     };
 
                     List<ChessMove> movesList = state.WhiteMove ? game.BlackMovesList : game.WhiteMovesList;
+                    int moveNumber = !state.WhiteMove ? state.Move : state.Move - 1;
 
                     lock (movesList)
                     {
-                        while (movesList.Count < state.Move)
+                        while (movesList.Count < moveNumber)
                         {
                             movesList.Add(null);
                         }
 
-                        movesList[state.Move - 1] = move;
+                        movesList[moveNumber - 1] = move;
                     }
                 }
             };
@@ -99,7 +100,10 @@ namespace GameCrawler
                         Console.WriteLine("Game ended {0}\nWhite moves: {1}\nBlack moves: {2}", game.Game, game.WhiteMovesList.Count, game.BlackMovesList.Count);
                         observingGames.Remove(result.GameId);
 
-                        // TODO: Save game
+                        if (result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
+                        {
+                            // TODO: Save game
+                        }
                     }
                 }
             };
@@ -111,6 +115,9 @@ namespace GameCrawler
                 Console.WriteLine(games.Count);
                 foreach (var game in games)
                 {
+                    if (game.Examined || game.InSetup)
+                        continue;
+
                     bool containsKey;
 
                     lock (observingGames)
@@ -122,8 +129,6 @@ namespace GameCrawler
                     {
                         try
                         {
-                            // TODO: If we started observing different game, stop observing it
-
                             // Add game to the list
                             var observingGame = new ObservingGame();
                             observingGame.BlackMovesList = new List<ChessMove>();
@@ -136,6 +141,16 @@ namespace GameCrawler
 
                             // Start observing game
                             var result = await client.StartObservingGame(game);
+
+                            // If we started observing different game, stop observing it
+                            if (!result.GameInfo.WhitePlayer.Username.StartsWith(game.WhitePlayer.Username)
+                                || !result.GameInfo.BlackPlayer.Username.StartsWith(game.BlackPlayer.Username))
+                            {
+                                Console.WriteLine("Canceling game {0}", game);
+                                await client.StopObservingGame(game);
+                            }
+
+
                             Console.WriteLine("Starting game {0}", game);
 
                             // Collect and update moves list
@@ -186,6 +201,7 @@ namespace GameCrawler
                             }
                             catch (Exception)
                             {
+                                // We want to swallow this exception
                             }
                         }
                     }
