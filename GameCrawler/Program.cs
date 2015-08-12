@@ -1,21 +1,9 @@
-﻿using Internet.Chess.Server.Fics;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameCrawler
+﻿namespace GameCrawler
 {
-    class ObservingGame
-    {
-        public ObservingGame PartnersGame { get; set; }
-        public Game Game { get; set; }
-        public GameEndedInfo Result { get; set; }
-        public List<ChessMove> WhiteMovesList { get; set; }
-        public List<ChessMove> BlackMovesList { get; set; }
-    }
+    using Internet.Chess.Server.Fics;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     class Program
     {
@@ -23,7 +11,9 @@ namespace GameCrawler
         {
             try
             {
-                CrawlGames(GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse);
+                ILogger logger = new ConsoleLogger();
+
+                CrawlGames(logger, GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse);
             }
             catch (Exception ex)
             {
@@ -33,7 +23,7 @@ namespace GameCrawler
             Console.ReadLine();
         }
 
-        private static async void CrawlGames(GamesListingOptions gameListingOptions)
+        private static async void CrawlGames(ILogger logger, GamesListingOptions gameListingOptions)
         {
             FicsClient client = new FicsClient();
             Dictionary<int, ObservingGame> observingGames = new Dictionary<int, ObservingGame>();
@@ -44,7 +34,7 @@ namespace GameCrawler
             client.ServerVariables.MoveBell = false;
             client.ServerVariables.Style = 12;
             client.ServerVariables.ShowProvisionalRatings = true;
-            client.ServerVariables.Interface = "TestAppUniversal";
+            client.ServerVariables.Interface = "GameCrawler";
             client.ServerInterfaceVariables.PreciseTimes = true;
             client.ServerInterfaceVariables.DetailedGameInfo = true;
             client.ServerInterfaceVariables.PreMove = true;
@@ -52,7 +42,7 @@ namespace GameCrawler
 
             client.UnknownMessageReceived += (message) =>
             {
-                Console.WriteLine(message);
+                logger.LogUnknownMessage(message);
             };
 
             client.GameStateChange += (state) =>
@@ -100,9 +90,10 @@ namespace GameCrawler
                         Console.WriteLine("Game ended {0}\nWhite moves: {1}\nBlack moves: {2}", game.Game, game.WhiteMovesList.Count, game.BlackMovesList.Count);
                         observingGames.Remove(result.GameId);
 
+                        // Check if game was aborted and save otherwise
                         if (result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
                         {
-                            // TODO: Save game
+                            logger.SaveGame(game);
                         }
                     }
                 }
@@ -189,7 +180,7 @@ namespace GameCrawler
                         }
                         catch (Exception ex)
                         {
-                            Console.Error.WriteLine("Exception: {0}", ex);
+                            logger.LogException(ex);
                             lock (observingGames)
                             {
                                 observingGames.Remove(game.Id);
