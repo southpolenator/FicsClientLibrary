@@ -7,26 +7,37 @@
 
     class Program
     {
+        private static Dictionary<int, ObservingGame> observingGames = new Dictionary<int, ObservingGame>();
+
         static void Main(string[] args)
         {
             try
             {
                 ILogger logger = new ConsoleLogger();
 
-                CrawlGames(logger, GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse);
+                while (true)
+                {
+                    Log("Starting new crawler");
+                    CrawlGames(logger, GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse).Wait();
+                }
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.ToString());
             }
 
+            Log("Ende");
             Console.ReadLine();
         }
 
-        private static async void CrawlGames(ILogger logger, GamesListingOptions gameListingOptions)
+        private static void Log(string format, params object[] parameters)
+        {
+            Console.WriteLine(@"{0:HH\:mm\:ss.fff} {1}", DateTime.Now, string.Format(format.Replace("\n", "\n             "), parameters));
+        }
+
+        private static async Task CrawlGames(ILogger logger, GamesListingOptions gameListingOptions)
         {
             FicsClient client = new FicsClient();
-            Dictionary<int, ObservingGame> observingGames = new Dictionary<int, ObservingGame>();
 
             await client.LoginGuest();
             client.ServerVariables.ShowPromptTime = false;
@@ -80,22 +91,49 @@
 
             client.GameEnded += (result) =>
             {
+                ObservingGame game;
+
                 lock (observingGames)
                 {
-                    ObservingGame game;
-
                     if (observingGames.TryGetValue(result.GameId, out game))
                     {
                         game.Result = result;
-                        Console.WriteLine("Game ended {0}\nWhite moves: {1}\nBlack moves: {2}", game.Game, game.WhiteMovesList.Count, game.BlackMovesList.Count);
+                        Log("Game ended {0}\nWhite moves: {1}\nBlack moves: {2}", game.Game, game.WhiteMovesList.Count, game.BlackMovesList.Count);
                         observingGames.Remove(result.GameId);
+                    }
+                }
 
-                        // Check if game was aborted and save otherwise
-                        if (result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
+                // Check if game was aborted and save otherwise
+                if (game != null && result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
+                {
+                    bool save = true;
+
+                    if (game.PartnersGame != null)
+                    {
+                        if (game.Game.WhitePlayer.Username.CompareTo(game.PartnersGame.Game.WhitePlayer.Username) < 0)
                         {
-                            logger.SaveGame(game);
+                            lock (game)
+                            lock (game.PartnersGame)
+                            {
+                                game.Finished = true;
+                                if (!game.PartnersGame.Finished)
+                                    save = false;
+                            }
+                        }
+                        else
+                        {
+                            lock (game.PartnersGame)
+                            lock (game)
+                            {
+                                game.Finished = true;
+                                if (!game.PartnersGame.Finished)
+                                    save = false;
+                            }
                         }
                     }
+
+                    if (save)
+                        logger.SaveGame(game);
                 }
             };
 
@@ -103,7 +141,7 @@
             {
                 var games = await client.ListGames(gameListingOptions);
 
-                Console.WriteLine(games.Count);
+                Log("Active games: {0}", games.Count);
                 foreach (var game in games)
                 {
                     if (game.Examined || game.InSetup)
@@ -137,16 +175,17 @@
                             if (!result.GameInfo.WhitePlayer.Username.StartsWith(game.WhitePlayer.Username)
                                 || !result.GameInfo.BlackPlayer.Username.StartsWith(game.BlackPlayer.Username))
                             {
-                                Console.WriteLine("Canceling game {0}", game);
+                                Log("Canceling game {0}", game);
                                 await client.StopObservingGame(game);
                             }
 
 
-                            Console.WriteLine("Starting game {0}", game);
+                            Log("Starting game {0}", game);
 
                             // Collect and update moves list
                             var moveList = await client.GetMoveList(game);
 
+                            observingGame.GameStarted = moveList.GameStarted;
                             lock (observingGame.WhiteMovesList)
                             {
                                 while (observingGame.WhiteMovesList.Count < moveList.WhiteMoves.Count)

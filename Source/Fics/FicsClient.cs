@@ -349,6 +349,8 @@
 
             try
             {
+                if (!output.StartsWith("\n"))
+                    throw new Exception(output);
                 return ParseGames(output);
             }
             catch (Exception ex)
