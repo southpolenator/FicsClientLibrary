@@ -40,6 +40,9 @@ namespace GameCrawler.DB
 
         public TimeSpan? TimeIncrement { get; set; }
 
+        [StringLength(100)]
+        public string Result { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Game> AllPartnerGames { get; set; }
 

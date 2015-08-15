@@ -21,6 +21,8 @@ namespace GameCrawler.DB
 
         public TimeSpan? MoveTime { get; set; }
 
+        public int? MoveNumber { get; set; }
+
         public virtual Game Game { get; set; }
     }
 }

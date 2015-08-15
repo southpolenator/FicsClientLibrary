@@ -8,6 +8,8 @@
     class Program
     {
         private static Dictionary<int, ObservingGame> observingGames = new Dictionary<int, ObservingGame>();
+        private const string ficsUsername = "guest";
+        private const string ficsPassword = "";
 
         static void Main(string[] args)
         {
@@ -17,8 +19,15 @@
 
                 while (true)
                 {
-                    Log("Starting new crawler");
-                    CrawlGames(logger, GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse).Wait();
+                    try
+                    {
+                        Log("Starting new crawler");
+                        CrawlGames(logger, GamesListingOptions.Bughouse | GamesListingOptions.Crazyhouse).Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogException(ex);
+                    }
                 }
             }
             catch (Exception ex)
@@ -39,7 +48,7 @@
         {
             FicsClient client = new FicsClient();
 
-            await client.LoginGuest();
+            await client.Login(ficsUsername, ficsPassword);
             client.ServerVariables.ShowPromptTime = false;
             client.ServerVariables.Seek = false;
             client.ServerVariables.MoveBell = false;

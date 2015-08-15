@@ -79,28 +79,35 @@ namespace GameCrawler
                 TimeIncrement = game.Game.TimeIncrement,
                 WhitePlayer = game.Game.WhitePlayer.Username,
                 WhitePlayerRating = game.Game.WhitePlayer.Rating,
+                Result = game.Result.Message,
             };
             model.Games.Add(dbGame);
 
-            foreach (var move in game.WhiteMovesList)
+            for (int i = 0; i < game.WhiteMovesList.Count; i++)
             {
+                var move = game.WhiteMovesList[i];
+
                 model.GameMoves.Add(new DB.GameMove()
                 {
                     Game = dbGame,
                     Move = move.Move,
                     MoveTime = move.Time,
                     WhiteMove = true,
+                    MoveNumber = i+1,
                 });
             }
 
-            foreach (var move in game.BlackMovesList)
+            for (int i = 0; i < game.BlackMovesList.Count; i++)
             {
+                var move = game.BlackMovesList[i];
+
                 model.GameMoves.Add(new DB.GameMove()
                 {
                     Game = dbGame,
                     Move = move.Move,
                     MoveTime = move.Time,
                     WhiteMove = false,
+                    MoveNumber = i + 1,
                 });
             }
 
