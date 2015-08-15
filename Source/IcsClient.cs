@@ -7,7 +7,7 @@
     /// <summary>
     /// Internet chess server client
     /// </summary>
-    public class IcsClient
+    public class IcsClient : IDisposable
     {
         /// <summary>
         /// Delegate for processing unknown messages from the server.
@@ -149,6 +149,11 @@
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            telnet.Dispose();
         }
     }
 }

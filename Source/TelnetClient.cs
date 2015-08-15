@@ -12,7 +12,7 @@
     /// <summary>
     /// Telnet client that communicates with server over socket connection.
     /// </summary>
-    public class TelnetClient
+    public class TelnetClient : IDisposable
     {
         /// <summary>
         /// The guest account
@@ -183,6 +183,21 @@
             finally
             {
                 writeSemaphore.Release();
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    socket.Dispose();
+                    socket = null;
+                }
+            }
+            catch (Exception)
+            {
             }
         }
     }
