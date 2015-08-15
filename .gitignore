@@ -3,3 +3,4 @@ obj
 project.lock.json
 /.vs/FicsClientLibrary/v14/.suo
 /TestResults
+/packages

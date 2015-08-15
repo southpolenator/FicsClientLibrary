@@ -41,6 +41,7 @@
         {
             telnet = new TelnetClient(server, port, prompt, newLine);
             messageReadingTask = new Task(MessageReadingTask, cancellationToken.Token, TaskCreationOptions.LongRunning);
+            MessageSplitter = prompt;
         }
 
         /// <summary>
@@ -52,6 +53,10 @@
         /// Gets the username of logged in user.
         /// </summary>
         public string Username { get { return telnet.Username; } }
+
+        protected string MessageSplitter { get; set; }
+
+        protected string Prompt { get { return telnet.Prompt; } }
 
         /// <summary>
         /// Logins the specified user.
@@ -128,7 +133,7 @@
         /// <param name="received">The received.</param>
         private void ProcessMessages(string received)
         {
-            string[] messages = received.Split(new string[] { telnet.Prompt }, StringSplitOptions.RemoveEmptyEntries);
+            string[] messages = received.Split(new string[] { MessageSplitter }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string m in messages)
             {

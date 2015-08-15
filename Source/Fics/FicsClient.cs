@@ -907,7 +907,12 @@
             base.LoginFinished();
             Send("iset block true").Wait();
             ivariables.SendCommandsAsBlock = true;
-            var v1 = GetServerVariables(Username);
+            var v1 = Task.Run(async () =>
+            {
+                MessageSplitter = "\n" + Prompt;
+                await GetServerVariables(Username);
+                MessageSplitter = "\n" + Prompt;
+            });
             var v2 = GetServerInterfaceVariables(Username);
         }
 
