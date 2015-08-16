@@ -1165,6 +1165,28 @@ GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
             Assert.AreEqual(info.Rated, false);
         }
 
+        [TestMethod, Timeout(DefaultTestTimeout * 100)]
+        public void FicsParseCShout()
+        {
+            string CShout = FixNewLines(@"
+LectureNova(TD) c-shouts: I am a new lecture program accepting lecture 
+\   submissions! For more information, please 'finger LectureNova'");
+            FicsClient client = new FicsClient();
+            string message = null;
+            string user = null;
+
+            client.ChessShoutMessageReceived += (u, m) =>
+            {
+                user = u;
+                message = m;
+            };
+            TestIsKnownMessage(client, CShout);
+            Assert.IsNotNull(user);
+            Assert.IsNotNull(message);
+            Assert.AreEqual(user, "LectureNova");
+            Assert.AreEqual(message, "I am a new lecture program accepting lecture submissions! For more information, please 'finger LectureNova'");
+        }
+
         private static string FixNewLines(string text)
         {
             return text.Replace("\r\n", "\n");

@@ -1187,7 +1187,7 @@
                     }
 
                     // Chess Shout messages
-                    const string cshouts = " cshouts: ";
+                    const string cshouts = " c-shouts: ";
 
                     if (restOfLine.StartsWith(cshouts))
                     {
