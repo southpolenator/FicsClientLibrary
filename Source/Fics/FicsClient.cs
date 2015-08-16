@@ -1072,7 +1072,7 @@
                 return true;
             }
 
-            if (message.StartsWith("\nRemoving game ") && message.EndsWith(" from observation list.\n"))
+            if (message.StartsWith("\nRemoving game ") && (message.EndsWith(" from observation list.\n") || message.EndsWith(" from observation list.")))
             {
                 const int start = 15, end = 23;
                 int gameId = int.Parse(message.Substring(start, message.Length - end - start));

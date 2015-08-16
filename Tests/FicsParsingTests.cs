@@ -86,6 +86,21 @@
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseGameStoppedObserving2()
+        {
+            string RemovingGameMessage = "\nRemoving game 129 from observation list.";
+            FicsClient client = new FicsClient();
+            int gameId = 0;
+
+            client.GameStoppedObserving += (id) =>
+            {
+                gameId = id;
+            };
+            TestIsKnownMessage(client, ref RemovingGameMessage);
+            Assert.AreEqual(gameId, 129);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGames()
         {
             string GamesString = FixNewLines(@"
@@ -1165,7 +1180,7 @@ GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
             Assert.AreEqual(info.Rated, false);
         }
 
-        [TestMethod, Timeout(DefaultTestTimeout * 100)]
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseCShout()
         {
             string CShout = FixNewLines(@"
