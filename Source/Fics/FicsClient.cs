@@ -1047,8 +1047,21 @@
                 }
                 else
                 {
-                    info.WhitePlayerPoints = double.Parse(points[0]);
-                    info.BlackPlayerPoints = double.Parse(points[1]);
+                    if (points[0] == "0")
+                    {
+                        info.WhitePlayerPoints = 0;
+                        info.BlackPlayerPoints = 1;
+                    }
+                    else if (points[0] == "1")
+                    {
+                        info.WhitePlayerPoints = 1;
+                        info.BlackPlayerPoints = 0;
+                    }
+                    else
+                    {
+                        info.WhitePlayerPoints = 0.5;
+                        info.BlackPlayerPoints = 0.5;
+                    }
                 }
 
                 if (GameEnded != null)
