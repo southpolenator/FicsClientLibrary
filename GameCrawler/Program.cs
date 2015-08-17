@@ -21,6 +21,11 @@
                 else
                     logger = new ConsoleLogger();
 
+                AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+                {
+                    logger.LogException((Exception)e.ExceptionObject);
+                };
+
                 while (true)
                 {
                     try

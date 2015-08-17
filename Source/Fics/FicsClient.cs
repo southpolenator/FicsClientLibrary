@@ -1049,16 +1049,22 @@
                 {
                     if (points[0] == "0")
                     {
+                        Debug.Assert(points[0] == "0");
+                        Debug.Assert(points[1] == "1");
                         info.WhitePlayerPoints = 0;
                         info.BlackPlayerPoints = 1;
                     }
                     else if (points[0] == "1")
                     {
+                        Debug.Assert(points[0] == "1");
+                        Debug.Assert(points[1] == "0");
                         info.WhitePlayerPoints = 1;
                         info.BlackPlayerPoints = 0;
                     }
                     else
                     {
+                        Debug.Assert(points[0] == "1/2");
+                        Debug.Assert(points[1] == "1/2");
                         info.WhitePlayerPoints = 0.5;
                         info.BlackPlayerPoints = 0.5;
                     }
