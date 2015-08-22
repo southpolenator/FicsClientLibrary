@@ -349,8 +349,16 @@
 
             try
             {
+                if (output.StartsWith("No matching games were found"))
+                {
+                    return new List<Game>();
+                }
+
                 if (!output.StartsWith("\n"))
+                {
                     throw new Exception(output);
+                }
+
                 return ParseGames(output);
             }
             catch (Exception ex)

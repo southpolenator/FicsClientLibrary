@@ -84,7 +84,7 @@
                             return;
                     }
 
-                    if (state.LastMove != null)
+                    if (state.LastMove != null && state.LastMove != "none")
                     {
                         var move = new ChessMove()
                         {
@@ -121,8 +121,8 @@
                         }
                     }
 
-                // Check if game was aborted and save otherwise
-                if (game != null && result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
+                    // Check if game was aborted and save otherwise
+                    if (game != null && result.WhitePlayerPoints + result.BlackPlayerPoints > 0)
                     {
                         bool save = true;
 

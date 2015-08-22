@@ -1,6 +1,7 @@
 ﻿namespace Internet.Chess.Server
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -122,7 +123,17 @@
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                ProcessMessages(telnet.Read());
+                string messages = telnet.Read();
+
+                try
+                {
+                    ProcessMessages(messages);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    Debug.Assert(false, ex.ToString());
+                }
             }
         }
 
