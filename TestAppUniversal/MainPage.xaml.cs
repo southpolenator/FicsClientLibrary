@@ -22,6 +22,8 @@ namespace TestAppUniversal
 
         public MainPage()
         {
+            firstGamesLoaded = false;
+
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Required; // Don't reload, but cache page when navigating
             App.Current.FicsClientReady += OnFicsClientReady;
@@ -42,8 +44,8 @@ namespace TestAppUniversal
                         rootFrame.Navigate(typeof(GamePage), g);
                     }
                 };
-                GamesList.Items.Clear();
-                ChildGamesPanel.Children.Add(listView);
+                OnlineGamesList.Items.Clear();
+                OnlineChildGamesPanel.Children.Add(listView);
                 gameTypeGameLists.Add(gameType, listView);
             }
 
@@ -52,8 +54,8 @@ namespace TestAppUniversal
                 UpdateGamesListItem(typeGame);
             }
 
-            GamesList.IsItemClickEnabled = true;
-            GamesList.ItemClick += (o, e) =>
+            OnlineGamesList.IsItemClickEnabled = true;
+            OnlineGamesList.ItemClick += (o, e) =>
             {
                 foreach (var typeGame in gameTypeGameLists)
                 {
@@ -65,8 +67,9 @@ namespace TestAppUniversal
                 gameTypeGameLists[(GameType)text.GameType].Visibility = Visibility.Visible;
             };
 
+            OnlineGames = true;
 
-#if DEBUG
+#if xxDEBUG
             GameControl GameControl = new GameControl();
 
             GameControl.VerticalAlignment = VerticalAlignment.Bottom;
@@ -137,6 +140,32 @@ namespace TestAppUniversal
 #endif
         }
 
+        private bool onlineGames;
+        private bool firstGamesLoaded;
+
+        private bool OnlineGames
+        {
+            get
+            {
+                return onlineGames;
+            }
+
+            set
+            {
+                onlineGames = value;
+                OnlineGamesPanel.Visibility = value && firstGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
+                OnlineProgressPanel.Visibility = value && !firstGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
+                if (value)
+                {
+                    SwitchButton.Label = "Load games from storage";
+                }
+                else
+                {
+                    SwitchButton.Label = "Observe online games";
+                }
+            }
+        }
+
         private void UpdateGamesListItem(KeyValuePair<GameType, ListView> typeGame)
         {
             dynamic text = new ToStringExpandoObject();
@@ -147,24 +176,24 @@ namespace TestAppUniversal
             });
             text.GameType = typeGame.Key;
 
-            int selected = GamesList.SelectedIndex;
+            int selected = OnlineGamesList.SelectedIndex;
 
-            for (int i = 0; i < GamesList.Items.Count; i++)
+            for (int i = 0; i < OnlineGamesList.Items.Count; i++)
             {
-                dynamic t = GamesList.Items[i];
+                dynamic t = OnlineGamesList.Items[i];
 
                 if (t.GameType == text.GameType)
                 {
-                    GamesList.Items[i] = text;
+                    OnlineGamesList.Items[i] = text;
                     if (selected == i)
                     {
-                        GamesList.SelectedIndex = selected;
+                        OnlineGamesList.SelectedIndex = selected;
                     }
                     return;
                 }
             }
 
-            GamesList.Items.Add(text);
+            OnlineGamesList.Items.Add(text);
         }
 
         private void OnFicsClientReady(FicsClient client)
@@ -180,7 +209,7 @@ namespace TestAppUniversal
             {
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    ProgressText.Text = "Loading games";
+                    OnlineProgressText.Text = "Loading games";
                 });
 
                 var games = await fics.ListGames();
@@ -217,8 +246,9 @@ namespace TestAppUniversal
                         UpdateGamesListItem(typeGame);
                     }
 
-                    GamesPanel.Visibility = Visibility.Visible;
-                    ProgressPanel.Visibility = Visibility.Collapsed;
+                    OnlineGamesPanel.Visibility = Visibility.Visible;
+                    OnlineProgressPanel.Visibility = Visibility.Collapsed;
+                    firstGamesLoaded = true;
                 });
             }
             catch (Exception ex)
@@ -230,6 +260,11 @@ namespace TestAppUniversal
                 await Task.Delay(5000);
                 RefreshGames();
             });
+        }
+
+        private void SwitchButton_Click(object sender, RoutedEventArgs e)
+        {
+            OnlineGames = !OnlineGames;
         }
     }
 }

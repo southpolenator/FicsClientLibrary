@@ -6,16 +6,24 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.Content>
+                <Grid/>
+            </CommandBar.Content>
+            <AppBarButton Name="SwitchButton" Icon="Switch" Label="Load games from storage" Click="SwitchButton_Click" />
+        </CommandBar>
+    </Page.BottomAppBar>
 
     <Grid x:Name="Grid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel x:Name="GamesPanel" Orientation="Horizontal" Visibility="Collapsed">
-            <ListView x:Name="GamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
-            <StackPanel x:Name="ChildGamesPanel" Orientation="Horizontal">
+        <StackPanel x:Name="OnlineGamesPanel" Orientation="Horizontal" Visibility="Collapsed">
+            <ListView x:Name="OnlineGamesList" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+            <StackPanel x:Name="OnlineChildGamesPanel" Orientation="Horizontal">
             </StackPanel>
         </StackPanel>
-        <StackPanel x:Name="ProgressPanel" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock x:Name="ProgressText" Text="Connecting to the server" HorizontalAlignment="Center" />
-            <ProgressRing x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="10" IsActive="True"/>
+        <StackPanel x:Name="OnlineProgressPanel" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="OnlineProgressText" Text="Connecting to the server" HorizontalAlignment="Center" />
+            <ProgressRing x:Name="OnlineLoadingProgress" HorizontalAlignment="Center" Margin="10" IsActive="True"/>
         </StackPanel>
     </Grid>
 </Page>
