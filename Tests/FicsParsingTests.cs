@@ -86,6 +86,21 @@
         }
 
         [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseGameStoppedObserving2()
+        {
+            string RemovingGameMessage = "\nRemoving game 129 from observation list.";
+            FicsClient client = new FicsClient();
+            int gameId = 0;
+
+            client.GameStoppedObserving += (id) =>
+            {
+                gameId = id;
+            };
+            TestIsKnownMessage(client, ref RemovingGameMessage);
+            Assert.AreEqual(gameId, 129);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
         public void FicsParseGames()
         {
             string GamesString = FixNewLines(@"
@@ -1163,6 +1178,28 @@ GuestDJXR (++++) seeking 15 5 unrated standard (""play 34"" to respond)");
             Assert.AreEqual(info.TimeIncrement, TimeSpan.FromSeconds(5));
             Assert.AreEqual(info.GameType, GameType.Standard);
             Assert.AreEqual(info.Rated, false);
+        }
+
+        [TestMethod, Timeout(DefaultTestTimeout)]
+        public void FicsParseCShout()
+        {
+            string CShout = FixNewLines(@"
+LectureNova(TD) c-shouts: I am a new lecture program accepting lecture 
+\   submissions! For more information, please 'finger LectureNova'");
+            FicsClient client = new FicsClient();
+            string message = null;
+            string user = null;
+
+            client.ChessShoutMessageReceived += (u, m) =>
+            {
+                user = u;
+                message = m;
+            };
+            TestIsKnownMessage(client, CShout);
+            Assert.IsNotNull(user);
+            Assert.IsNotNull(message);
+            Assert.AreEqual(user, "LectureNova");
+            Assert.AreEqual(message, "I am a new lecture program accepting lecture submissions! For more information, please 'finger LectureNova'");
         }
 
         private static string FixNewLines(string text)

@@ -349,8 +349,16 @@
 
             try
             {
+                if (output.StartsWith("No matching games were found"))
+                {
+                    return new List<Game>();
+                }
+
                 if (!output.StartsWith("\n"))
+                {
                     throw new Exception(output);
+                }
+
                 return ParseGames(output);
             }
             catch (Exception ex)
@@ -1047,8 +1055,27 @@
                 }
                 else
                 {
-                    info.WhitePlayerPoints = double.Parse(points[0]);
-                    info.BlackPlayerPoints = double.Parse(points[1]);
+                    if (points[0] == "0")
+                    {
+                        Debug.Assert(points[0] == "0");
+                        Debug.Assert(points[1] == "1");
+                        info.WhitePlayerPoints = 0;
+                        info.BlackPlayerPoints = 1;
+                    }
+                    else if (points[0] == "1")
+                    {
+                        Debug.Assert(points[0] == "1");
+                        Debug.Assert(points[1] == "0");
+                        info.WhitePlayerPoints = 1;
+                        info.BlackPlayerPoints = 0;
+                    }
+                    else
+                    {
+                        Debug.Assert(points[0] == "1/2");
+                        Debug.Assert(points[1] == "1/2");
+                        info.WhitePlayerPoints = 0.5;
+                        info.BlackPlayerPoints = 0.5;
+                    }
                 }
 
                 if (GameEnded != null)
@@ -1059,7 +1086,7 @@
                 return true;
             }
 
-            if (message.StartsWith("\nRemoving game ") && message.EndsWith(" from observation list.\n"))
+            if (message.StartsWith("\nRemoving game ") && (message.EndsWith(" from observation list.\n") || message.EndsWith(" from observation list.")))
             {
                 const int start = 15, end = 23;
                 int gameId = int.Parse(message.Substring(start, message.Length - end - start));
@@ -1174,7 +1201,7 @@
                     }
 
                     // Chess Shout messages
-                    const string cshouts = " cshouts: ";
+                    const string cshouts = " c-shouts: ";
 
                     if (restOfLine.StartsWith(cshouts))
                     {
