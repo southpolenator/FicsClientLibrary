@@ -25,5 +25,13 @@
             <TextBlock x:Name="OnlineProgressText" Text="Connecting to the server" HorizontalAlignment="Center" />
             <ProgressRing x:Name="OnlineLoadingProgress" HorizontalAlignment="Center" Margin="10" IsActive="True"/>
         </StackPanel>
+        <StackPanel x:Name="StorageGameIdPanel" Orientation="Vertical" >
+            <TextBox x:Name="StorageGameIdTextBox" Header="Game ID:" InputScope="NumericPin" HorizontalAlignment="Center" VerticalAlignment="Top" KeyDown="StorageGameIdTextBox_KeyDown" />
+            <Button x:Name="StorageGamePlay" Content="Play game" Click="StorageGamePlay_Click" HorizontalAlignment="Center" />
+        </StackPanel>
+        <StackPanel x:Name="StorageProgressPanel" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="StorageProgressText" Text="Connecting to the server" HorizontalAlignment="Center" />
+            <ProgressRing x:Name="StorageLoadingProgress" HorizontalAlignment="Center" Margin="10" IsActive="True"/>
+        </StackPanel>
     </Grid>
 </Page>

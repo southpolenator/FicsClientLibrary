@@ -22,7 +22,7 @@ namespace TestAppUniversal
 
         public MainPage()
         {
-            firstGamesLoaded = false;
+            firstOnelineGamesLoaded = false;
 
             InitializeComponent();
             NavigationCacheMode = NavigationCacheMode.Required; // Don't reload, but cache page when navigating
@@ -141,7 +141,7 @@ namespace TestAppUniversal
         }
 
         private bool onlineGames;
-        private bool firstGamesLoaded;
+        private bool firstOnelineGamesLoaded;
 
         private bool OnlineGames
         {
@@ -153,8 +153,10 @@ namespace TestAppUniversal
             set
             {
                 onlineGames = value;
-                OnlineGamesPanel.Visibility = value && firstGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
-                OnlineProgressPanel.Visibility = value && !firstGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
+                OnlineGamesPanel.Visibility = value && firstOnelineGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
+                OnlineProgressPanel.Visibility = value && !firstOnelineGamesLoaded ? Visibility.Visible : Visibility.Collapsed;
+                StorageGameIdPanel.Visibility = !value ? Visibility.Visible : Visibility.Collapsed;
+                StorageProgressPanel.Visibility = !value ? Visibility.Visible : Visibility.Collapsed;
                 if (value)
                 {
                     SwitchButton.Label = "Load games from storage";
@@ -246,9 +248,13 @@ namespace TestAppUniversal
                         UpdateGamesListItem(typeGame);
                     }
 
-                    OnlineGamesPanel.Visibility = Visibility.Visible;
-                    OnlineProgressPanel.Visibility = Visibility.Collapsed;
-                    firstGamesLoaded = true;
+                    firstOnelineGamesLoaded = true;
+
+                    if (OnlineGames)
+                    {
+                        OnlineGamesPanel.Visibility = Visibility.Visible;
+                        OnlineProgressPanel.Visibility = Visibility.Collapsed;
+                    }
                 });
             }
             catch (Exception ex)
@@ -265,6 +271,22 @@ namespace TestAppUniversal
         private void SwitchButton_Click(object sender, RoutedEventArgs e)
         {
             OnlineGames = !OnlineGames;
+        }
+
+        private void StorageGameIdTextBox_KeyDown(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                StorageGamePlay_Click(null, null);
+            }
+        }
+
+        private void StorageGamePlay_Click(object sender, RoutedEventArgs e)
+        {
+            if (StorageGameIdTextBox.Text.Length > 0)
+            {
+                StorageGamePlay.Content = StorageGameIdTextBox.Text;
+            }
         }
     }
 }
