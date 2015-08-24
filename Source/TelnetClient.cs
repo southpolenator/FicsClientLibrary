@@ -1,6 +1,9 @@
 ﻿namespace Internet.Chess.Server
 {
     using System;
+#if WINDOWS_PLAIN
+    using System.Net.Sockets;
+#endif
     using System.Runtime.InteropServices.WindowsRuntime;
     using System.Text;
     using System.Threading;
@@ -19,10 +22,17 @@
         /// </summary>
         public const string GuestUsername = "guest";
 
+#if WINDOWS_PLAIN
+        /// <summary>
+        /// The TCP client connection to the telnet server
+        /// </summary>
+        private TcpClient client;
+#else
         /// <summary>
         /// The socket connection to the telnet server
         /// </summary>
         private StreamSocket socket;
+#endif
 
         /// <summary>
         /// The semaphore used for writing to the socket
@@ -84,8 +94,12 @@
         /// <returns>Welcome message from the server</returns>
         public async Task<string> Login(string username, string password)
         {
+#if WINDOWS_PLAIN
+            client = new TcpClient(Server, ServerPort);
+#else
             socket = new StreamSocket();
             socket.ConnectAsync(new HostName(Server), ServerPort.ToString()).AsTask().Wait();
+#endif
 
             var prompt = this.Prompt;
 
@@ -130,6 +144,65 @@
             return await Login(GuestUsername, "");
         }
 
+#if WINDOWS_PLAIN
+        /// <summary>
+        /// Reads message from the server.
+        /// </summary>
+        /// <remarks>This function is NOT thread safe.</remarks>
+        /// <returns>Message read from the server</returns>
+        public string Read()
+        {
+            var stream = this.client.GetStream();
+            byte[] buffer = new byte[1024];
+            int length = 0;
+            string result;
+
+            while (true)
+            {
+                do
+                {
+                    if (length == buffer.Length)
+                    {
+                        Array.Resize(ref buffer, buffer.Length * 2);
+                    }
+
+                    int asked = buffer.Length - length;
+                    int read = stream.Read(buffer, length, asked);
+
+                    length += read;
+                }
+                while (stream.DataAvailable);
+                result = new string(this.Encoding.GetChars(buffer, 0, length));
+                if (string.IsNullOrEmpty(this.Prompt) || result.EndsWith(this.Prompt))
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Writes the specified message to the server.
+        /// </summary>
+        /// <remarks>This function is thread safe.</remarks>
+        /// <param name="message">The message.</param>
+        public async Task Write(string message)
+        {
+            await writeSemaphore.WaitAsync();
+
+            try
+            {
+                byte[] buffer = this.Encoding.GetBytes((message + "\n").ToCharArray());
+
+                client.GetStream().Write(buffer, 0, buffer.Length);
+            }
+            finally
+            {
+                writeSemaphore.Release();
+            }
+        }
+#else
         /// <summary>
         /// Reads message from the server.
         /// </summary>
@@ -185,16 +258,25 @@
                 writeSemaphore.Release();
             }
         }
+#endif
 
         public void Dispose()
         {
             try
             {
+#if WINDOWS_PLAIN
+                if (client != null)
+                {
+                    client.Dispose();
+                    client = null;
+                }
+#else
                 if (socket != null)
                 {
                     socket.Dispose();
                     socket = null;
                 }
+#endif
             }
             catch (Exception)
             {
