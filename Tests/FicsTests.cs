@@ -151,6 +151,7 @@
                 Wait(client.StopObservingGame(observePartnerGameResult.GameInfo.GameId));
             }
 
+            Wait(client.StopObservingGame(game));
             Wait(client.StopFollowingPlayer());
         }
 
