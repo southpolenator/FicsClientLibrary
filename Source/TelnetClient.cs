@@ -144,7 +144,6 @@
             return await Login(GuestUsername, "");
         }
 
-#if WINDOWS_PLAIN
         /// <summary>
         /// Reads message from the server.
         /// </summary>
@@ -152,7 +151,9 @@
         /// <returns>Message read from the server</returns>
         public string Read()
         {
+#if WINDOWS_PLAIN
             var stream = this.client.GetStream();
+#endif
             string result = "";
             byte[] buffer = new byte[10240];
             int position = 0;
@@ -165,9 +166,17 @@
                 }
 
                 int size = buffer.Length - position;
+#if WINDOWS_PLAIN
                 int read = stream.Read(buffer, position, size);
 
                 position += read;
+#else
+                IBuffer inputBuffer = buffer.AsBuffer(position, size);
+                IBuffer read = socket.InputStream.ReadAsync(inputBuffer, (uint)size, InputStreamOptions.Partial).AsTask().Result;
+
+                read.CopyTo(inputBuffer);
+                position += (int)read.Length;
+#endif
                 result = new string(Encoding.GetChars(buffer, 0, position));
                 if (string.IsNullOrEmpty(Prompt) || result.EndsWith(Prompt))
                 {
@@ -192,71 +201,19 @@
             {
                 byte[] buffer = this.Encoding.GetBytes((message + "\n").ToCharArray());
 
+#if WINDOWS_PLAIN
                 await client.GetStream().WriteAsync(buffer, 0, buffer.Length);
                 await client.GetStream().FlushAsync();
-            }
-            finally
-            {
-                writeSemaphore.Release();
-            }
-        }
 #else
-        /// <summary>
-        /// Reads message from the server.
-        /// </summary>
-        /// <remarks>This function is NOT thread safe.</remarks>
-        /// <returns>Message read from the server</returns>
-        public string Read()
-        {
-            string result = "";
-            byte[] buffer = new byte[10240];
-            int position = 0;
-
-            while (true)
-            {
-                if (buffer.Length == position)
-                {
-                    Array.Resize(ref buffer, buffer.Length * 2);
-                }
-
-                int size = buffer.Length - position;
-                IBuffer inputBuffer = buffer.AsBuffer(position, size);
-                IBuffer read = socket.InputStream.ReadAsync(inputBuffer, (uint)size, InputStreamOptions.Partial).AsTask().Result;
-
-                read.CopyTo(inputBuffer);
-                position += (int)read.Length;
-                result = new string(Encoding.GetChars(buffer, 0, position));
-                if (string.IsNullOrEmpty(Prompt) || result.EndsWith(Prompt))
-                {
-                    break;
-                }
-            }
-
-            result = result.Replace(NewLine, "\n");
-            return result;
-        }
-
-        /// <summary>
-        /// Writes the specified message to the server.
-        /// </summary>
-        /// <remarks>This function is thread safe.</remarks>
-        /// <param name="message">The message.</param>
-        public async Task Write(string message)
-        {
-            byte[] buffer = Encoding.GetBytes((message + NewLine).ToCharArray());
-
-            await writeSemaphore.WaitAsync();
-            try
-            {
                 await socket.OutputStream.WriteAsync(buffer.AsBuffer());
                 await socket.OutputStream.FlushAsync();
+#endif
             }
             finally
             {
                 writeSemaphore.Release();
             }
         }
-#endif
 
         public void Dispose()
         {
