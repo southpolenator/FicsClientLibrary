@@ -153,32 +153,29 @@
         public string Read()
         {
             var stream = this.client.GetStream();
-            byte[] buffer = new byte[1024];
-            int length = 0;
-            string result;
+            string result = "";
+            byte[] buffer = new byte[10240];
+            int position = 0;
 
             while (true)
             {
-                do
+                if (buffer.Length == position)
                 {
-                    if (length == buffer.Length)
-                    {
-                        Array.Resize(ref buffer, buffer.Length * 2);
-                    }
-
-                    int asked = buffer.Length - length;
-                    int read = stream.Read(buffer, length, asked);
-
-                    length += read;
+                    Array.Resize(ref buffer, buffer.Length * 2);
                 }
-                while (stream.DataAvailable);
-                result = new string(this.Encoding.GetChars(buffer, 0, length));
-                if (string.IsNullOrEmpty(this.Prompt) || result.EndsWith(this.Prompt))
+
+                int size = buffer.Length - position;
+                int read = stream.Read(buffer, position, size);
+
+                position += read;
+                result = new string(Encoding.GetChars(buffer, 0, position));
+                if (string.IsNullOrEmpty(Prompt) || result.EndsWith(Prompt))
                 {
                     break;
                 }
             }
 
+            result = result.Replace(NewLine, "\n");
             return result;
         }
 
@@ -195,7 +192,8 @@
             {
                 byte[] buffer = this.Encoding.GetBytes((message + "\n").ToCharArray());
 
-                client.GetStream().Write(buffer, 0, buffer.Length);
+                await client.GetStream().WriteAsync(buffer, 0, buffer.Length);
+                await client.GetStream().FlushAsync();
             }
             finally
             {
