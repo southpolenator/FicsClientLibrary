@@ -16,6 +16,12 @@
         /// <param name="message">The message.</param>
         public delegate void UnknownMessageReceivedDelegate(string message);
 
+
+        /// <summary>
+        /// Delegate for processing connection lost events.
+        /// </summary>
+        public delegate void ConnectionLostDelegate();
+
         /// <summary>
         /// The background message reading and dispatching task
         /// </summary>
@@ -43,12 +49,20 @@
             telnet = new TelnetClient(server, port, prompt, newLine);
             messageReadingTask = new Task(MessageReadingTask, cancellationToken.Token, TaskCreationOptions.LongRunning);
             MessageSplitter = prompt;
+            ConnectionWorking = true;
         }
 
         /// <summary>
         /// Occurs when unknown message is received from server.
         /// </summary>
         public event UnknownMessageReceivedDelegate UnknownMessageReceived;
+
+        /// <summary>
+        /// Occurs when telnet connection to server is lost.
+        /// </summary>
+        public event ConnectionLostDelegate ConnectionLost;
+
+        public bool ConnectionWorking { get; private set; }
 
         /// <summary>
         /// Gets the username of logged in user.
@@ -121,20 +135,39 @@
         /// </summary>
         private void MessageReadingTask()
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                string messages = telnet.Read();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    string messages = telnet.Read();
 
-                try
-                {
-                    ProcessMessages(messages);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                    Debug.Assert(false, ex.ToString());
+                    try
+                    {
+                        ProcessMessages(messages);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                        Debug.Assert(false, ex.ToString());
+                    }
                 }
             }
+            catch (Exception)
+            {
+                ConnectionTerminated();
+            }
+        }
+
+        protected virtual void ConnectionTerminated()
+        {
+            ConnectionWorking = false;
+            Task.Run(() =>
+                {
+                    if (ConnectionLost != null)
+                    {
+                        ConnectionLost();
+                    }
+                });
         }
 
         /// <summary>

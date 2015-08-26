@@ -155,7 +155,7 @@
                     }
                 };
 
-                while (true)
+                while (client.ConnectionWorking)
                 {
                     var games = await client.ListGames(gameListingOptions);
 

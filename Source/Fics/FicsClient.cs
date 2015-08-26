@@ -841,6 +841,11 @@
         {
             lock (executingCommands)
             {
+                if (!ConnectionWorking)
+                {
+                    throw new Exception("Connection terminated");
+                }
+
                 int commandNumber = executingCommands.Count;
 
                 for (int i = 0; i < executingCommands.Count; i++)
@@ -922,6 +927,23 @@
                 MessageSplitter = "\n" + Prompt;
             });
             var v2 = GetServerInterfaceVariables(Username);
+        }
+
+        protected override void ConnectionTerminated()
+        {
+            base.ConnectionTerminated();
+
+            lock (executingCommands)
+            {
+                foreach (FicsCommandState command in executingCommands)
+                {
+                    if (command != null)
+                    {
+                        command.Result = "<Conneection terminated>";
+                        command.IsExecuting = false;
+                    }
+                }
+            }
         }
 
         internal override bool IsKnownMessage(ref string message)
