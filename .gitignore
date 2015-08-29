@@ -4,3 +4,4 @@ project.lock.json
 /.vs/FicsClientLibrary/v14/.suo
 /TestResults
 /packages
+/CrawledGamesWebService/csx/Debug
