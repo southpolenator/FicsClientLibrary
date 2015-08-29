@@ -51,22 +51,20 @@ namespace GameCrawler
         {
             Execute((model) =>
             {
+                var dbGame = CreateGame(game);
+
                 if (game.PartnersGame != null)
                 {
-                    var dbGame1 = AddGame(model, game);
-                    var dbGame2 = AddGame(model, game.PartnersGame);
+                    var dbPartnersGame = CreateGame(game.PartnersGame);
 
-                    dbGame1.PartnersGame = dbGame2;
-                    //dbGame2.Game2 = dbGame1;
+                    dbGame.PartnersGame = dbPartnersGame;
                 }
-                else
-                {
-                    AddGame(model, game);
-                }
+
+                model.Games.Add(dbGame);
             });
         }
 
-        private DB.Game AddGame(DB.Model model, ObservingGame game)
+        private DB.Game CreateGame(ObservingGame game)
         {
             DB.Game dbGame = new DB.Game()
             {
@@ -81,13 +79,12 @@ namespace GameCrawler
                 WhitePlayerRating = game.Game.WhitePlayer.Rating,
                 Result = game.Result.Message,
             };
-            model.Games.Add(dbGame);
 
             for (int i = 0; i < game.WhiteMovesList.Count; i++)
             {
                 var move = game.WhiteMovesList[i];
 
-                model.GameMoves.Add(new DB.GameMove()
+                dbGame.GameMoves.Add(new DB.GameMove()
                 {
                     Game = dbGame,
                     Move = move.Move,
@@ -101,7 +98,7 @@ namespace GameCrawler
             {
                 var move = game.BlackMovesList[i];
 
-                model.GameMoves.Add(new DB.GameMove()
+                dbGame.GameMoves.Add(new DB.GameMove()
                 {
                     Game = dbGame,
                     Move = move.Move,
@@ -149,7 +146,10 @@ namespace GameCrawler
                     models.RemoveAt(models.Count - 1);
                 }
                 else
+                {
                     model = DB.Model.SqlAzure(serverName, databaseName, username, password);
+                    model.Configuration.AutoDetectChangesEnabled = false;
+                }
 
                 return model;
             }
