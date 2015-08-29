@@ -12,6 +12,7 @@
     <AssemblyName>CrawledGamesWebService</AssemblyName>
     <StartDevelopmentStorage>True</StartDevelopmentStorage>
     <Name>CrawledGamesWebService</Name>
+    <PackageEnableRemoteDebugger>False</PackageEnableRemoteDebugger>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CrawledGamesWebRoleContent" />
+    <Folder Include="CrawledGamesWebRoleContent\bin" />
   </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="CrawledGamesWebRoleContent\diagnostics.wadcfgx" />
@@ -50,6 +52,14 @@
       <RoleType>Web</RoleType>
       <RoleName>CrawledGamesWebRole</RoleName>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CrawledGamesWebRoleContent\bin\install.cmd">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="CrawledGamesWebRoleContent\bin\NDP452-KB2901954-Web.exe">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
