@@ -14,7 +14,7 @@ namespace CrawledGamesWebRole.Models
 
         public Player BlackPlayer { get; set; }
 
-        public int? PartnerGameId { get; set; }
+        public Game PartnersGame { get; set; }
 
         public int GameType { get; set; }
 

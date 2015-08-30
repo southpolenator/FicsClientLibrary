@@ -6,9 +6,35 @@ using System.Data.SqlClient;
 
 namespace CrawledGamesWebRole.Controllers
 {
-    [RoutePrefix("api/Games")]
+    [RoutePrefix("api/games")]
     public class GamesController : ApiController
     {
+        private static Configuration dbConfiguration = new Configuration();
+
+        [Route("game")]
+        public Game GetGame(int id)
+        {
+            var db = GetDb();
+            var games = db.Games.Include("GameMoves").Include("PartnersGame").Where(g => g.Id == id);
+
+            return ConvertGame(games.FirstOrDefault(), findPartnersGame: true);
+        }
+
+        [Route("top")]
+        public Game[] GetTopGames(int count = 100, int skipFirst = 0)
+        {
+            var db = GetDb();
+            var games = db.Games.OrderByDescending(g => g.BlackPlayerRating + g.WhitePlayerRating).Skip(skipFirst).Take(count).ToArray();
+            var result = new Game[games.Length];
+
+            for (int i = 0; i < games.Length; i++)
+            {
+                result[i] = ConvertGame(games[i]);
+            }
+
+            return result;
+        }
+
         private static GameMove[] ConvertMoves(DB.GameMove[] dbMoves)
         {
             var moves = new GameMove[dbMoves.Length];
@@ -22,20 +48,28 @@ namespace CrawledGamesWebRole.Controllers
             return moves;
         }
 
-        [Route("Game")]
-        public Game GetGame(int id)
+        private static Game ConvertGame(DB.Game dbGame, bool findPartnersGame = false)
         {
-            DB.Model db = DB.Model.SqlAzure("<server>", "<db>", "<username>", "<password>");
-
-            var games = db.Games.SqlQuery("SELECT * FROM Game WHERE Id = @id", new SqlParameter("@id", id)).ToListAsync().Result;
-
-            if (games.Count > 0)
+            if (dbGame != null)
             {
-                var dbGame = games[0];
-                var dbWhiteMoves = dbGame.GameMoves.Where(m => m.WhiteMove.Value).ToArray();
-                var dbBlackMoves = dbGame.GameMoves.Where(m => !m.WhiteMove.Value).ToArray();
-                var whiteMoves = ConvertMoves(dbWhiteMoves);
-                var blackMoves = ConvertMoves(dbBlackMoves);
+                GameMove[] whiteMoves = null;
+                GameMove[] blackMoves = null;
+
+                if (dbGame.GameMoves != null)
+                {
+                    var dbWhiteMoves = dbGame.GameMoves.Where(m => m.WhiteMove.Value).OrderBy(m => m.MoveNumber).ToArray();
+                    var dbBlackMoves = dbGame.GameMoves.Where(m => !m.WhiteMove.Value).OrderBy(m => m.MoveNumber).ToArray();
+
+                    whiteMoves = ConvertMoves(dbWhiteMoves);
+                    blackMoves = ConvertMoves(dbBlackMoves);
+                }
+
+                if (findPartnersGame && dbGame.PartnersGame == null)
+                {
+                    var db = GetDb();
+
+                    dbGame.PartnersGame = db.Games.Include("GameMoves").Where(g => g.PartnerGameId == dbGame.Id).FirstOrDefault();
+                }
 
                 return new Game()
                 {
@@ -48,7 +82,7 @@ namespace CrawledGamesWebRole.Controllers
                     GameStarted = dbGame.GameStarted.Value,
                     GameType = dbGame.GameType.Value,
                     Id = dbGame.Id,
-                    PartnerGameId = dbGame.PartnerGameId,
+                    PartnersGame = ConvertGame(dbGame.PartnersGame),
                     Rated = dbGame.Rated.Value,
                     Result = dbGame.Result,
                     TimeIncrement = dbGame.TimeIncrement.Value,
@@ -63,6 +97,14 @@ namespace CrawledGamesWebRole.Controllers
             }
 
             return null;
+        }
+
+        private static DB.Model GetDb()
+        {
+            var db = DB.Model.SqlAzure(dbConfiguration.DbServer, dbConfiguration.DbName, dbConfiguration.DbUsername, dbConfiguration.DbPassword);
+            db.Configuration.LazyLoadingEnabled = false;
+
+            return db;
         }
     }
 }
