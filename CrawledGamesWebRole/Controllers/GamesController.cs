@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Http;
 using CrawledGamesWebRole.Models;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace CrawledGamesWebRole.Controllers
 {
@@ -33,6 +34,26 @@ namespace CrawledGamesWebRole.Controllers
             }
 
             return result;
+        }
+
+        [Route("total_count")]
+        int GetTotalCount()
+        {
+            var db = GetDb();
+
+            return db.Games.Count();
+        }
+
+        [Route("counts")]
+        public Dictionary<string, int> GetCounts()
+        {
+            var db = GetDb();
+            Dictionary<string, int> counts = new Dictionary<string, int>();
+
+            counts.Add("total", db.Games.Count());
+            counts.Add("crazyhouse", db.Games.Where(g => g.GameType == 7).Count());
+            counts.Add("bughouse", db.Games.Where(g => g.PartnersGame != null).Count());
+            return counts;
         }
 
         private static GameMove[] ConvertMoves(DB.GameMove[] dbMoves)
